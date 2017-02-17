@@ -1,0 +1,21 @@
+{
+  "name": "newrelic-cordova-plugin",
+  "version": "5.0.0",
+  "description": "New Relic Cordova Plugin for iOS and Android",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "cordova",
+    "newrelic",
+    "monitoring",
+    "ios",
+    "android"
+  ],
+  "author": "New Relic",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "shelljs": "^0.7.6"
+  }
+}
