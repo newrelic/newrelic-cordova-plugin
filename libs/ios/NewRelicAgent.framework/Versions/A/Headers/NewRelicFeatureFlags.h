@@ -56,6 +56,7 @@ typedef NS_OPTIONS(unsigned long long, NRMAFeatureFlags){
     NRFeatureFlag_NSURLSessionInstrumentation           = 1 << 4,
     NRFeatureFlag_HttpResponseBodyCapture               = 1 << 5,
     NRFeatureFlag_GestureInstrumentation                = 1 << 6,
+    NRFeatureFlag_WebViewInstrumentation                = 1 << 7,
     NRFeatureFlag_DefaultInteractions                   = 1 << 12,
     NRFeatureFlag_ExperimentalNetworkingInstrumentation = 1 << 13, //disabled by default
     NRFeatureFlag_AllFeatures                           = ~0ULL //in 32-bit land the alignment is 4bytes
