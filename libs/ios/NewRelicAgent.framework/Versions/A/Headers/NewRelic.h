@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 5.11.0
+// Using New Relic Agent Version: 5.12.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -642,7 +642,7 @@ extern "C" {
 #pragma mark - Recording custom events
 
 /*!
- Records a event.
+ Records a event. Now deprecated: use -recordCustomEvent:attributes: going forward
  @param name a name for the event. This will be stored in the 'category' attribute of Mobile events in New Relic Insights.
  @param attributes A NSDictionary of attributes associated with the event. Attributes should have NSString keys and NSString or NSNumber values, this include boolean support with NSNumbers. (@YES/@NO)
  @return YES if successfully added event, NO if failed with error in log.
@@ -651,8 +651,20 @@ extern "C" {
    If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
  */
 + (BOOL) recordEvent:(NSString*)name
-          attributes:(NSDictionary*)attributes;
+          attributes:(NSDictionary*)attributes __attribute__((deprecated));
 
+/*!
+ Records a event.
+ @param name the new eventType attributed to the event.
+ @param attributes A NSDictionary of attributes associated with the event. Attributes should have NSString keys and NSString or NSNumber values, this include boolean support with NSNumbers. (@YES/@NO)
+ @return YES if successfully added event, NO if failed with error in log.
+
+ @note Events are transmitted at the end of the application session. Each event will include all global attributes defined at the end of the session.
+   If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
+ */
+
++ (BOOL) recordCustomEvent:(NSString*)eventType
+                attributes:(NSDictionary*)attributes;
 
 #pragma mark - Configuring event collection
 
