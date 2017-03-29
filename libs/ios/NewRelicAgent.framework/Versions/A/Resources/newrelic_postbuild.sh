@@ -74,7 +74,7 @@ fi
 #save and set IFS to only trigger on \n\b
 SAVEIFS=$IFS
 IFS=$(echo -en "\n\b")
-for dSYM in `ls -d ${DWARF_DSYM_FOLDER_PATH}/*.dSYM`
+for dSYM in `find ${DWARF_DSYM_FOLDER_PATH} -name '*.dSYM'`
 do
   API_KEY=$1
   echo processing $dSYM
