@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 5.12.2
+// Using New Relic Agent Version: 5.12.3
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -46,7 +46,7 @@ extern "C" {
  *
  */
 
-+ (void) crashNow:(NSString*)message;
++ (void) crashNow:(NSString* __nullable)message;
 
 /*!
  * Throws a demo run-time exception named "NewRelicDemoException" to test 
@@ -91,7 +91,7 @@ extern "C" {
 
  @param versionString The string to display as this application's version
  */
-+ (void)setApplicationVersion:(NSString *)versionString;
++ (void)setApplicationVersion:(NSString *_Nonnull)versionString;
 
 
 /*!
@@ -101,7 +101,7 @@ extern "C" {
  Override the reported version by calling this method *before* calling startWithApplicationToken:.
  */
 
-+ (void) setApplicationBuild:(NSString *)buildNumber;
++ (void) setApplicationBuild:(NSString *_Nonnull)buildNumber;
 
 /*!
  *  set the application platform with which the app was built.
@@ -116,7 +116,7 @@ extern "C" {
  The SessionId changes each time your app comes to the foreground on the device.
  This value will be present in all events recorded in New Relic Insights.
  */
-+ (NSString*) currentSessionId;
++ (NSString* _Null_unspecified) currentSessionId;
 
 
 /*!
@@ -127,7 +127,7 @@ extern "C" {
 
  Note that each app within New Relic has a unique app token, be sure to use the correct one.
  */
-+ (void)startWithApplicationToken:(NSString*)appToken;
++ (void)startWithApplicationToken:(NSString*_Nonnull)appToken;
 
 
 /*!
@@ -140,7 +140,7 @@ extern "C" {
 
  @param disableSSL If TRUE, data will be sent to New Relic unencrypted
  */
-+ (void)startWithApplicationToken:(NSString*)appToken withoutSecurity:(BOOL)disableSSL;
++ (void)startWithApplicationToken:(NSString*_Nonnull)appToken withoutSecurity:(BOOL)disableSSL;
 
 
 #pragma mark - Custom instrumentation
@@ -155,7 +155,7 @@ extern "C" {
 
  Note that all public NewRelic notice... and record... API methods will stop the timer objects you pass in to them.
  */
-+ (NRTimer *)createAndStartTimer;
++ (NRTimer * _Null_unspecified)createAndStartTimer;
 
 
 /************************/
@@ -180,7 +180,8 @@ extern "C" {
  ******************************************************************************/
 
 
-+ (NSString*) startInteractionFromMethodName:(NSString*)selectorName object:(id)object __attribute__((deprecated));
++ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName
+                                      object:(id _Null_unspecified)object __attribute__((deprecated));
 #define NR_INTERACTION_START [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self]
 
 
@@ -203,7 +204,7 @@ extern "C" {
  *******************************************************************************/
 
 
-+ (NSString*) startInteractionFromMethodName:(NSString*)selectorName object:(id)object customizedName:(NSString*)interactionName __attribute__((deprecated));
++ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName object:(id _Null_unspecified)object customizedName:(NSString* _Null_unspecified)interactionName __attribute__((deprecated));
 #define NR_INTERACTION_START_WITH_NAME(name) [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self customizedName:name]
 
 
@@ -224,9 +225,9 @@ extern "C" {
  *  If interactionName is nil, a warning will be logged and nil will be returned.
  *  All other parameters are ignored. 
  ******************************************************************************/
-+ (NSString*) startInteractionFromMethodName:(NSString*)selectorName
-                                 object:(id)object
-                         customizedName:(NSString*)interactionName
++ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName
+                                 object:(id _Null_unspecified)object
+                         customizedName:(NSString* _Null_unspecified)interactionName
                   cancelRunningTrace:(BOOL)cancel __attribute__((deprecated));
 
 #define NR_INTERACTION_START_WITH_NAME_CANCEL(name,cancel) [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self customizedName:name cancelRunningTrace:cancel]
@@ -255,7 +256,7 @@ extern "C" {
  *     - NR_START_NAMED_INTERACTION(NSString* name) is a helper
  *       macro that will handle most cases.
  ******************************************************************************/
-+ (NSString*) startInteractionWithName:(NSString*)interactionName;
++ (NSString* _Null_unspecified) startInteractionWithName:(NSString* _Null_unspecified)interactionName;
 
 #define NR_START_NAMED_INTERACTION(name) [NewRelic startInteractionWithName:name]
 /*******************************************************************************
@@ -275,7 +276,7 @@ extern "C" {
  *      NR_INTERACTION_STOP(NSString* interactionIdentifier) is a helper macro for stopCurrentInteraction.
  *
  ******************************************************************************/
-+ (void) stopCurrentInteraction:(NSString*)interactionIdentifier;
++ (void) stopCurrentInteraction:(NSString* _Null_unspecified)interactionIdentifier;
 #define NR_INTERACTION_STOP(interactionIdentifier) [NewRelic stopCurrentInteraction:interactionIdentifier]
 
 /************************/
@@ -319,9 +320,9 @@ extern "C" {
 
  ******************************************************************************/
 
-+ (void) startTracingMethod:(SEL)selector
-                     object:(id)object
-                      timer:(NRTimer*)timer
++ (void) startTracingMethod:(SEL _Null_unspecified)selector
+                     object:(id _Null_unspecified)object
+                      timer:(NRTimer* _Null_unspecified)timer
                    category:(enum NRTraceType)category;
 
 #define NR_TRACE_METHOD_START(traceCategory)  NRTimer *__nr__trace__timer = [[NRTimer alloc] init]; [NewRelic startTracingMethod:_cmd object:self timer:__nr__trace__timer category:traceCategory];
@@ -352,7 +353,7 @@ extern "C" {
  *
  ******************************************************************************/
 
-+ (void) endTracingMethodWithTimer:(NRTimer*)timer;
++ (void) endTracingMethodWithTimer:(NRTimer* _Null_unspecified)timer;
 
 #define NR_TRACE_METHOD_STOP   [NewRelic endTracingMethodWithTimer:__nr__trace__timer]; __nr__trace__timer = nil;
 #define NR_NONARC_TRACE_METHOD_STOP   [NewRelic endTracingMethodWithTimer:__nr__trace__timer]; [__nr__trace__timer release];__nr__trace__timer = nil;
@@ -420,8 +421,8 @@ extern "C" {
  *
  ******************************************************************************/
 
-+ (void) recordMetricWithName:(NSString *)name
-                     category:(NSString *)category;
++ (void) recordMetricWithName:(NSString * _Nonnull)name
+                     category:(NSString * _Nonnull)category;
 
 /*******************************************************************************
  *
@@ -448,9 +449,9 @@ extern "C" {
  ******************************************************************************/
 
 
-+ (void) recordMetricWithName:(NSString *)name
-                     category:(NSString *)category
-                        value:(NSNumber *)value;
++ (void) recordMetricWithName:(NSString * _Nonnull)name
+                     category:(NSString * _Nonnull)category
+                        value:(NSNumber * _Nonnull)value;
 
 // adds a unit for the value
 /*
@@ -500,10 +501,10 @@ extern "C" {
  ******************************************************************************/
 
 
-+ (void) recordMetricWithName:(NSString *)name
-                     category:(NSString *)category
-                        value:(NSNumber *)value
-                   valueUnits:(NRMetricUnit*)valueUnits;
++ (void) recordMetricWithName:(NSString * _Nonnull)name
+                     category:(NSString * _Nonnull)category
+                        value:(NSNumber * _Nonnull)value
+                   valueUnits:(NRMetricUnit* _Nullable)valueUnits;
 
 // adds count units default is just "sample"
 // The count is the number of times the particular metric is recorded
@@ -549,11 +550,11 @@ extern "C" {
  *
  ******************************************************************************/
 
-+ (void) recordMetricWithName:(NSString *)name
-                     category:(NSString *)category
-                        value:(NSNumber *)value
-                   valueUnits:(NRMetricUnit *)valueUnits
-                   countUnits:(NRMetricUnit *)countUnits;
++ (void) recordMetricWithName:(NSString * _Nonnull)name
+                     category:(NSString * _Nonnull)category
+                        value:(NSNumber * _Nonnull)value
+                   valueUnits:(NRMetricUnit * _Nullable)valueUnits
+                   countUnits:(NRMetricUnit * _Nullable)countUnits;
 
 
 
@@ -595,24 +596,24 @@ extern "C" {
  * server error in the New Relic UI.
  *******************************************************************************/
 
-+ (void)noticeNetworkRequestForURL:(NSURL*)url
-                        httpMethod:(NSString*)httpMethod
-                         withTimer:(NRTimer *)timer
-                   responseHeaders:(NSDictionary *)headers
++ (void)noticeNetworkRequestForURL:(NSURL* _Null_unspecified)url
+                        httpMethod:(NSString* _Null_unspecified)httpMethod
+                         withTimer:(NRTimer* _Null_unspecified)timer
+                   responseHeaders:(NSDictionary* _Null_unspecified)headers
                         statusCode:(NSInteger)httpStatusCode
                          bytesSent:(NSUInteger)bytesSent
                      bytesReceived:(NSUInteger)bytesReceived
-                      responseData:(NSData *)responseData
-                         andParams:(NSDictionary *)params;
+                      responseData:(NSData * _Null_unspecified)responseData
+                         andParams:(NSDictionary * _Nullable)params;
 
-+ (void)noticeNetworkRequestForURL:(NSURL*)url
-                         withTimer:(NRTimer *)timer
-                   responseHeaders:(NSDictionary *)headers
++ (void)noticeNetworkRequestForURL:(NSURL* _Null_unspecified)url
+                         withTimer:(NRTimer* _Null_unspecified)timer
+                   responseHeaders:(NSDictionary* _Null_unspecified)headers
                         statusCode:(NSInteger)httpStatusCode
                          bytesSent:(NSUInteger)bytesSent
                      bytesReceived:(NSUInteger)bytesReceived
-                      responseData:(NSData *)responseData
-                         andParams:(NSDictionary *)params __attribute__((deprecated));
+                      responseData:(NSData* _Null_unspecified)responseData
+                         andParams:(NSDictionary * _Nullable)params __attribute__((deprecated));
 
 
 
@@ -627,14 +628,14 @@ extern "C" {
  * NSURLConnection failure codes:
  * http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html#//apple_ref/doc/uid/TP40003793-CH3g-SW40
  *******************************************************************************/
-+ (void)noticeNetworkFailureForURL:(NSURL *)url
-                        httpMethod:(NSString*)httpMethod
-                         withTimer:(NRTimer *)timer
++ (void)noticeNetworkFailureForURL:(NSURL* _Null_unspecified)url
+                        httpMethod:(NSString* _Null_unspecified)httpMethod
+                         withTimer:(NRTimer* _Null_unspecified)timer
                     andFailureCode:(NSInteger)iOSFailureCode;
 
 
-+ (void)noticeNetworkFailureForURL:(NSURL *)url
-                         withTimer:(NRTimer *)timer
++ (void)noticeNetworkFailureForURL:(NSURL* _Null_unspecified)url
+                         withTimer:(NRTimer* _Null_unspecified)timer
                     andFailureCode:(NSInteger)iOSFailureCode __attribute__((deprecated));
 
 
@@ -650,12 +651,12 @@ extern "C" {
  @note Events are transmitted at the end of the application session. Each event will include all global attributes defined at the end of the session.
    If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
  */
-+ (BOOL) recordEvent:(NSString*)name
-          attributes:(NSDictionary*)attributes __attribute__((deprecated));
++ (BOOL) recordEvent:(NSString* _Nonnull)name
+          attributes:(NSDictionary* _Nullable)attributes __attribute__((deprecated));
 
 /*!
  Records a event.
- @param name the new eventType attributed to the event.
+ @param eventType is the new event type attributed to the event.
  @param attributes A NSDictionary of attributes associated with the event. Attributes should have NSString keys and NSString or NSNumber values, this include boolean support with NSNumbers. (@YES/@NO)
  @return YES if successfully added event, NO if failed with error in log.
 
@@ -663,8 +664,9 @@ extern "C" {
    If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
  */
 
-+ (BOOL) recordCustomEvent:(NSString*)eventType
-                attributes:(NSDictionary*)attributes;
++ (BOOL) recordCustomEvent:(NSString* __nonnull)eventType
+                attributes:(NSDictionary* __nullable)attributes;
+
 
 #pragma mark - Configuring event collection
 
@@ -707,8 +709,8 @@ extern "C" {
   @note The SDK limits you to storing 64 named attributes. Adding more than 64 will fail and return NO.
  */
 
-+ (BOOL) setAttribute:(NSString*)name
-                value:(id) value;
++ (BOOL) setAttribute:(NSString* _Nonnull)name
+                value:(id _Nonnull) value;
 
 /*!
  Increments the value of the named attribute by 1.
@@ -719,7 +721,7 @@ extern "C" {
  @note This method will create an attribute with value 1 if the attribute does not exist. 
  @note Calling incrementAttribute on an attribute with a NSString* value is an error and will not alter the value of the attribute.
  */
-+ (BOOL) incrementAttribute:(NSString*)name;
++ (BOOL) incrementAttribute:(NSString* _Nonnull)name;
 
 /*!
  Increments the value of the named attribute by the supplied amount.
@@ -731,8 +733,8 @@ extern "C" {
  @note This method will create an attribute with value 'amount' if the attribute does not exist.
  @note Calling incrementAttribute on an attribute with a NSString* value is an error and will not alter the value of the attribute.
  */
-+ (BOOL) incrementAttribute:(NSString*)name
-                      value:(NSNumber*)amount;
++ (BOOL) incrementAttribute:(NSString* _Nonnull)name
+                      value:(NSNumber* _Nonnull)amount;
 
 /*!
  Sets the value of the attribute 'userId' to the supplied string.
@@ -740,7 +742,7 @@ extern "C" {
  @param userId the identifier for the user
  @return  YES if successfully set attribute value, NO if failed with error in log.
  */
-+ (BOOL) setUserId:(NSString*)userId;
++ (BOOL) setUserId:(NSString* _Nonnull)userId;
 
 /*!
  Removes the named attribute.
@@ -750,7 +752,7 @@ extern "C" {
  
  @note removing an attribute will remove it from all events that have been recorded but not yet sent to New Relic's server.
  */
-+ (BOOL) removeAttribute:(NSString*)name;
++ (BOOL) removeAttribute:(NSString* _Nonnull)name;
 
 /*!
  Removes all defined attributes.
