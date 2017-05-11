@@ -33,13 +33,23 @@ upload_dsym_archive_to_new_relic() {
 		exit -3
 	fi
 
+    PLIST_FILE="${SOURCE_ROOT}/${INFOPLIST_FILE}"
+
+    VERSION=`defaults read "${PLIST_FILE}" CFBundleShortVersionString`
+
+    if [ $? -eq 0 ]; then
+        echo got version $VERSION
+    else
+        VERSION=`defaults read "${PLIST_FILE}" CFBundleVersion`
+    fi
+
 	while [ "$RETRY_COUNT" -lt "$RETRY_LIMIT" ]
 	do
 		let RETRY_COUNT=$RETRY_COUNT+1
 		echo "dSYM archive upload attempt #${RETRY_COUNT} (of ${RETRY_LIMIT})"
 
 		echo "curl --write-out %{http_code} --silent --output /dev/null -F dsym=@\"${DSYM_ARCHIVE_PATH}\" -F buildId=\"$DSYM_UUIDS\" -F appName=\"$EXECUTABLE_NAME\" -H \"X-APP-LICENSE-KEY: ${API_KEY}\" \"${DSYM_UPLOAD_URL}\""
-		SERVER_RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null -F dsym=@"${DSYM_ARCHIVE_PATH}" -F buildId="$DSYM_UUIDS"  -F appName="$EXECUTABLE_NAME" -H "X-APP-LICENSE-KEY: ${API_KEY}" "${DSYM_UPLOAD_URL}")
+		SERVER_RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null -F dsym=@"${DSYM_ARCHIVE_PATH}" -F buildId="$DSYM_UUIDS"  -F appName="$EXECUTABLE_NAME" H "X-NewRelic-App-Version: ${VERSION}" -H "X-App-License-Key: ${API_KEY}" -H "X-NewRelic-OS-Name: ${PLATFORM_DISPLAY_NAME}" "${DSYM_UPLOAD_URL}")
 
 		if [ $SERVER_RESPONSE -eq 201 ]; then
 		    echo "New Relic: Successfully uploaded debug symbols"

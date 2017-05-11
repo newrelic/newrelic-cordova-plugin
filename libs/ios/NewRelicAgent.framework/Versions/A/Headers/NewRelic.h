@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 5.12.3
+// Using New Relic Agent Version: 5.13.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -664,9 +664,32 @@ extern "C" {
    If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
  */
 
-+ (BOOL) recordCustomEvent:(NSString* __nonnull)eventType
-                attributes:(NSDictionary* __nullable)attributes;
++ (BOOL) recordCustomEvent:(NSString* _Nonnull)eventType
+                attributes:(NSDictionary* _Nullable)attributes;
 
+/*!
+ Records a event.
+ @param eventType is the new event type attributed to the event.
+ @param name adds a attribute 'name' to the event's attributes that will be used by the New Relic UI for display.
+    Using this field is the same as adding an additional attribute to the attributes dictionary with the key 'name'.
+ @param attributes A NSDictionary of attributes associated with the event. Attributes should have NSString keys and NSString or NSNumber values, this include boolean support with NSNumbers. (@YES/@NO)
+ @return YES if successfully added event, NO if failed with error in log.
+ @note Events are transmitted at the end of the application session. Each event will include all global attributes defined at the end of the session.
+ If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
+ */
+
++ (BOOL) recordCustomEvent:(NSString* _Nonnull)eventType
+                      name:(NSString* _Nullable)name
+                attributes:(NSDictionary* _Nullable)attributes ;
+
+/*!
+ * Record a MobileBreadcrumb event
+ * @param name identfying name of the breadcrumb
+ * @return YES if successfully added event, no if failed with error in log.
+ */
+
++ (BOOL) recordBreadcrumb:(NSString* _Nonnull)name
+               attributes:(NSDictionary* _Nullable)attributes;
 
 #pragma mark - Configuring event collection
 
