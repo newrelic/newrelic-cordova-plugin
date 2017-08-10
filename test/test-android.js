@@ -8,7 +8,7 @@ var fs = require('fs');
 
 describe('Verify Android agent life cycle', function () {
   //lets wait a while for this all to run
-  this.timeout(150000);
+  this.timeout(600000);
 
   after(function (done) {
     shell.exec(helper.removeProject(), done);
