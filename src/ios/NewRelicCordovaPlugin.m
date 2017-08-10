@@ -10,25 +10,29 @@
 #import "NewRelicCordovaPlugin.h"
 
 @interface NewRelic (Private)
-+ (void) setPlatformVersion:(NSString*)version;
+  + (void) setPlatformVersion:(NSString*)version;
+  + (NSDictionary*) keyAttributes;
 @end
 
 @implementation NewRelicCordovaPlugin
 
+- (void)pluginInitialize {
+  NSString* applicationToken = [self.commandDelegate.settings objectForKey:@"ios_app_token"];
+  NSString* platformVersion =  [self.commandDelegate.settings objectForKey:@"plugin_version"];
 
-- (void)pluginInitialize
-{
-    NSString* applicationToken = [self.commandDelegate.settings objectForKey:@"ios_app_token"];
-    NSString* platformVersion =  [self.commandDelegate.settings objectForKey:@"plugin_version"];
+  if (applicationToken == nil || ([applicationToken isEqualToString:@""] || [applicationToken isEqualToString:@"x"])) {
+    NRLOG_ERROR(@"Failed to load application token! The iOS agent is not configured for Cordova.");
+  } else {
+    [NewRelic setPlatform:NRMAPlatform_Cordova];
+    [NewRelic setPlatformVersion:platformVersion];
+    [NewRelicAgent startWithApplicationToken:applicationToken];
+  }
+}
 
-    if (applicationToken == nil || ([applicationToken isEqualToString:@""] || [applicationToken isEqualToString:@"x"])) {
-    	NRLOG_ERROR(@"Failed to load application token! The iOS agent is not configured for Cordova.");
-    
-	} else {
-	    [NewRelic setPlatform:NRMAPlatform_Cordova];
-	    [NewRelic setPlatformVersion:platformVersion];
-	    [NewRelicAgent startWithApplicationToken:applicationToken];
-	}
+- (void) getNativeData:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                  messageAsDictionary:[NewRelic keyAttributes]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end

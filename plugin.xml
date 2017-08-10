@@ -8,32 +8,38 @@
   <license>New Relic</license>
   <keywords>cordova,newrelic,monitoring,ios,android</keywords>
   <engines>
-      <engine name="cordova" version=">=4.0.0" />
-      <engine name="cordova-ios" version=">=4.0.0" />
-      <engine name="cordova-android" version=">=5.0.0" />
+    <engine name="cordova" version=">=4.0.0"/>
+    <engine name="cordova-ios" version=">=4.0.0"/>
+    <engine name="cordova-android" version=">=5.0.0"/>
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="5.0.0" />
+  <preference name="PLUGIN_VERSION" default="5.0.0"/>
+
+  <js-module name="NewRelicPlugin" src="www/newrelic.js">
+    <clobbers target="nrma.hybrid"/>
+  </js-module>
+
+  <hook type="before_plugin_install" src="hooks/ios/before_plugin_install.js"/>
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
-
+ 
     <config-file target="config.xml" parent="/*">
-      <feature name="NewRelic">
-        <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN" />
-        <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION" />
-        <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
+      <feature name="NewRelicCordovaPlugin">
+        <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN"/>
+        <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION"/>
+        <param name="ios-package" value="NewRelicCordovaPlugin" onload="true"/>
       </feature>
     </config-file>
 
-    <header-file src="src/ios/NewRelicCordovaPlugin.h" />
-    <source-file src="src/ios/NewRelicCordovaPlugin.m" />
+    <header-file src="src/ios/NewRelicCordovaPlugin.h"/>
+    <source-file src="src/ios/NewRelicCordovaPlugin.m"/>
 
-    <framework src="libs/ios/NewRelicAgent.framework" custom="true" />
-    <framework src="CoreTelephony.framework" />
-    <framework src="SystemConfiguration.framework" />
-    <framework src="libz.dylib" />
-    <framework src="libc++.dylib" />
+    <framework src="libs/ios/NewRelicAgent.framework" custom="true"/>
+    <framework src="CoreTelephony.framework"/>
+    <framework src="SystemConfiguration.framework"/>
+    <framework src="libz.dylib"/>
+    <framework src="libc++.dylib"/>
 
     <hook type="before_plugin_uninstall" src="hooks/ios/before_plugin_uninstall.js" />
     <hook type="after_plugin_install" src="hooks/ios/after_plugin_install.js" />
@@ -60,7 +66,7 @@
     <source-file src="src/android/NewRelicCordovaPlugin.java"
                  target-dir="src/com/newrelic/cordova/plugin"/>
 
-    <hook type="before_plugin_uninstall" src="hooks/android/before_plugin_uninstall.js" />
     <hook type="after_plugin_install" src="hooks/android/after_plugin_install.js" />
+    <hook type="before_plugin_uninstall" src="hooks/android/before_plugin_uninstall.js" />
   </platform>
 </plugin>
