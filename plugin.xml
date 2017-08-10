@@ -15,14 +15,16 @@
 
   <preference name="PLUGIN_VERSION" default="5.0.0" />
 
+  <hook type="before_plugin_install" src="hooks/ios/before_plugin_install.js"/>
+
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
 
     <config-file target="config.xml" parent="/*">
       <feature name="NewRelic">
-        <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN" />
-        <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION" />
-        <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
+        <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN"/>
+        <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION"/>
+        <param name="ios-package" value="NewRelicCordovaPlugin" onload="true"/>
       </feature>
     </config-file>
 
