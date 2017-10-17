@@ -27,6 +27,9 @@
 - NRFeatureFlag_CrashReporting 
    Enabled by default. Enable or disable New Relic's crash reporter.
 
+- NRHandledExceptionEvents
+   Enabled by default. Controls capture of handled exceptions via 'recordHandledException:' API.
+
 - NRFeatureFlag_NSURLSessionInstrumentation
    Enable (default) flag for instrumentation of NSURLSessions.
    Currently only instruments network activity dispatched with
@@ -59,6 +62,7 @@ typedef NS_OPTIONS(unsigned long long, NRMAFeatureFlags){
     NRFeatureFlag_WebViewInstrumentation                = 1 << 7,
     NRFeatureFlag_RequestErrorEvents                    = 1 << 8,
     NRFeatureFlag_NetworkRequestEvents                  = 1 << 9,
+    NRFeatureFlag_HandledExceptionEvents                = 1 << 10,
     NRFeatureFlag_DefaultInteractions                   = 1 << 12,
     NRFeatureFlag_ExperimentalNetworkingInstrumentation = 1 << 13, //disabled by default
     NRFeatureFlag_AllFeatures                           = ~0ULL //in 32-bit land the alignment is 4bytes
