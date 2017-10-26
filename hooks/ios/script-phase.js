@@ -17,7 +17,6 @@ function ScriptPhase(args) {
   this.shellPath = args.shellPath || '/bin/sh';
   this.shellScript = args.shellScript;
   this.showEnvVarsInLog = args.showEnvVarsInLog;
-  this.uuid = args.uuid;
 }
 
 module.exports = ScriptPhase;
