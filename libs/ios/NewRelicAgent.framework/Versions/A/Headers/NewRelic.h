@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 5.15.0
+// Using New Relic Agent Version: 6.0.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -806,10 +806,29 @@ extern "C" {
 /*!
  *  Record a caught exception and add custom attributes.
  * @param exception the caught exception to record.
- * @param attributes attributes that will be appended to the hanled exception event created in insights.
+ * @param attributes attributes that will be appended to the handled exception event created in insights.
  */
 + (void) recordHandledException:(NSException* _Nonnull)exception
            withAttributes:(NSDictionary* _Nullable)attributes;
+
+#pragma mark - Handled Errors
+
+
+/*!
+ * Record an Error. This will be presented along side handled exceptions.
+ * @param error the error to record. It can be a swift error or an Objective-C NSError.
+ */
++ (void) recordError:(NSError* _Nonnull)error;
+
+/*!
+ * Record an Error. This will be presented along side handled exceptions.
+ * @param error the error to record. It can be a swift error or an Objective-C NSError.
+ * @param attributes a dictionary of attributes that will be appended to the handled exception event created in insights.
+ */
+
++ (void) recordError:(NSError* _Nonnull)error
+          attributes:(NSDictionary* _Nullable)attributes;
+
 @end
 
 // Deprecated class name, included for compatibility

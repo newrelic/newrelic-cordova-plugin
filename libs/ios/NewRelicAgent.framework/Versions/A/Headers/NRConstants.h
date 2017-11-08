@@ -89,7 +89,7 @@ typedef NSString NRMetricUnit;
 
 
 
-#define kNRMASecondsPerMillisecond      0.001f
+#define kNRMASecondsPerMillisecond      0.001
 
 //Metrics Constants
 #define kNRSupportabilityPrefix          @"Supportability/MobileAgent"
