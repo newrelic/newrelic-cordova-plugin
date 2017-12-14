@@ -36,18 +36,18 @@ bitcode_enabled() {
   upload_dsym_to_new_relic() {
     echo "executing upload_dsym_to_new_relic"
 
-    let retry_limit=3
-    let retry_count=0
+    let RETRY_LIMIT=3
+    let RETRY_COUNT=0
 
-    while [ "$retry_count" -lt "$retry_limit" ]
+    while [ "$RETRY_COUNT" -lt "$RETRY_LIMIT" ]
     do
-      server_response=$(curl --write-out %{http_code} --silent --output /dev/null -f dsym=@"${dsym_archive_path}" -h "x-app-license-key: ${api_key}" "${dsym_upload_url}/symbol")
-      if [ $server_response -eq 201 ]; then
+      SERVER_RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null -F dsym=@"${DSYM_ARCHIVE_PATH}" -H "x-app-license-key: ${API_KEY}" "${DSYM_UPLOAD_URL}/symbol")
+      if [ $SERVER_RESPONSE -eq 201 ]; then
         echo "new relic: successfully uploaded dsym files"
-        dsym_upload_status="success"
+        DSYM_UPLOAD_STATUS="success"
         return 0
       else
-        echo "new relic: error \"${server_response}\" while uploading \"${dsym_archive_path}\" to \"${dsym_archive_path}\""
+        echo "new relic: error \"${SERVER_RESPONSE}\" while uploading \"${DSYM_ARCHIVE_PATH}\" to \"${DSYM_ARCHIVE_PATH}\""
       fi
     done
     return -1
