@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 6.1.0
+// Using New Relic Agent Version: 6.1.1
 //
 //  New Relic for Mobile -- iOS edition
 //
