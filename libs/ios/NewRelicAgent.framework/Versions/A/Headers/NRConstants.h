@@ -53,6 +53,10 @@ enum NRTraceType {
     NRTraceTypeNetwork
 };
 
+
+
+#define X_APP_LICENSE_KEY_REQUEST_HEADER        @"X-App-License-Key"
+
 #define kNRNetworkStatusDidChangeNotification @"com.newrelic.networkstatus.changed"
 #define kNRCarrierNameDidUpdateNotification   @"com.newrelic.carrierName.changed"
 #define kNRMemoryUsageDidChangeNotification   @"com.newrelic.memoryusage.changed"
@@ -78,6 +82,7 @@ enum NRTraceType {
 #define kNRMAAppUpgradeMetric                 @"Mobile/App/Upgrade"
 #define kNRMALastVersionKey                   @"lastVersion"
 #define kNRMACurrentVersionKey                @"currentVersion"
+    
 //Custom Metric Units
 typedef NSString NRMetricUnit;
 
@@ -107,6 +112,11 @@ typedef NSString NRMetricUnit;
 #define kNRCarrierNameCacheLifetime     50 // milliseconds
 #define kNRWanTypeCacheLifetime         25 // milliseconds
 #define kNRNetworkStatusCacheLifetime   25 // milliseconds
+
+// UserActions
+#define kNRMAUserActionAppLaunch        @"AppLaunch"
+#define kNRMAUserActionAppBackground    @"AppBackground"
+#define kNRMAUserActionTap              @"Tap"
 
 
 // Network Failure Codes
@@ -156,6 +166,7 @@ enum NRNetworkFailureCode {
         NRURLErrorDownloadDecodingFailedMidStream = -3006,
         NRURLErrorDownloadDecodingFailedToComplete = -3007
 };
+
 
 #ifdef __cplusplus
 }

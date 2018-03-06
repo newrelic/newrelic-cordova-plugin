@@ -41,6 +41,7 @@ bitcode_enabled() {
 
     while [ "$RETRY_COUNT" -lt "$RETRY_LIMIT" ]
     do
+      let RETRY_COUNT=$RETRY_COUNT+1
       SERVER_RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null -F dsym=@"${DSYM_ARCHIVE_PATH}" -H "x-app-license-key: ${API_KEY}" "${DSYM_UPLOAD_URL}/symbol")
       if [ $SERVER_RESPONSE -eq 201 ]; then
         echo "new relic: successfully uploaded dsym files"

@@ -119,6 +119,29 @@ def twenty(line):
 	symbolstring = lineSplit[3]
 	symbolsDict[padhex(symboladdr)] = functionname.rstrip() + " (" + symbolstring + ")"
 
+def processSymbolFile(line):
+	whitespace = len(re.match(r"\s*", line).group())
+
+	# strip out whitespace
+	line = line.strip()
+
+	# call a method based on whitespace
+	for case in switch(whitespace):
+		if case(0):
+			break
+		if case(4):
+			break
+		if case(8):
+			eight(line)
+			break
+		if case(12):
+			break
+		if case(16):
+			sixteen(line)
+			break
+		if case(20):
+			twenty(line)
+
 
 def processDsymFile(dsymFile, workDir):
 	uuidDict.clear()
@@ -134,34 +157,17 @@ def processDsymFile(dsymFile, workDir):
 		#clear out any existing vmaddresses or symbols left over from previous runs
 		del vmaddresses[:]
 		symbolsDict.clear()
-		file = open("{0}/{1}.map".format(workDir, key.lower(),"w"),"w+")
+		tmpwrite = open("{0}/{1}.tmp".format(workDir, key,"w"),"w+")
+		file = open("{0}/{1}.map".format(workDir, key,"w"),"w+")
 		file.write("# uuid {}\r\n".format(key.upper(),"w"))
 		file.write("# architecture {}\r\n".format(uuidDict[key], "w"))
-		proc = subprocess.Popen(["symbols -arch {arch} {filepath}".format(arch=uuidDict[key], filepath=dsymFile)], stdout=subprocess.PIPE, shell=True)
-		for line in iter(proc.stdout.readline, ''):
+		proc = subprocess.Popen(["symbols -arch {arch} {filepath}".format(arch=uuidDict[key], filepath=dsymFile)], stdout=tmpwrite, shell=True)
+		proc.wait()
+		tmpwrite.close()
+
+		map(processSymbolFile, open("{0}/{1}.tmp".format(workDir, key,"w")))
 
 			#calculate the leading whitespace
-			whitespace = len(re.match(r"\s*", line).group())
-
-			#strip out whitespace
-			line = line.strip()
-
-			#call a method based on whitespace
-			for case in switch(whitespace):
-				if case(0):
-				    break
-				if case(4):
-				    break
-				if case(8):
-				    eight(line)
-				    break
-				if case(12):
-				    break
-				if case(16):
-				    sixteen(line)
-				    break
-				if case(20):
-					twenty(line)
 
 		vmaddresses.sort()
 		#symbols.sort()

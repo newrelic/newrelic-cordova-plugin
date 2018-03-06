@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 6.1.1
+// Using New Relic Agent Version: 6.2.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -168,76 +168,6 @@ extern "C" {
 /************************/
 /** Interaction Traces **/
 /************************/
-
-/*******************************************************************************
- * + (NSString*) startInteractionFromMethodName:(NSString*)selectorName
- *                                  object:(id)object
- *
- * Method Deprecated.
- * see "+(NSString*)startInteractionWithName:(NSString*)interactionName" instead.
- *
- * NOTE:
- *  This method no longer has a function. Under the hood this method calls
- *  [NewRelic startInteractionFromMethodName:selectorName
- *                                     object:object
- *                             customizedName:nil]
- *  and customizedName is now a required parameter.
- *  this function will log an warning and return nil now.
- *
- ******************************************************************************/
-
-
-+ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName
-                                      object:(id _Null_unspecified)object __attribute__((deprecated));
-#define NR_INTERACTION_START [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self]
-
-
-
-
-/*******************************************************************************
- * + (NSString*) startInteractionFromMethodName:(NSString*)selectorName
- *                                  object:(id)object
- *                          customizedName:(NSString*)interactionName
- *
- * Method Deprecated.
- * see "+(NSString*)startInteractionWithName:(NSString*)interactionName" instead.
- *
- * NOTE:
- *  this method will function the same as +startInteractionWithName: if the
- *  parameter, interactionName, is passed. All other parameters are ignored.
- *  If interactionName is nil, a warning will be logged and nil will be returned.
- *  All other parameters are ignored. 
- *
- *******************************************************************************/
-
-
-+ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName object:(id _Null_unspecified)object customizedName:(NSString* _Null_unspecified)interactionName __attribute__((deprecated));
-#define NR_INTERACTION_START_WITH_NAME(name) [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self customizedName:name]
-
-
-
-
-/*******************************************************************************
- * + (NSString*) startInteractionFromMethodName:(NSString*)selectorName
- *                                  object:(id)object
- *                          customizedName:(NSString*)interactionName 
- *                   invalidateActiveTrace:(BOOL)invalidate;
- *
- * Method Deprecated.
- * see "+(NSString*)startInteractionWithName:(NSString*)interactionName" instead.
- *
- * NOTE:
- *  this method will function the same as +startInteractionWithName: if the
- *  parameter, interactionName, is passed. All other parameters are ignored.
- *  If interactionName is nil, a warning will be logged and nil will be returned.
- *  All other parameters are ignored. 
- ******************************************************************************/
-+ (NSString* _Null_unspecified) startInteractionFromMethodName:(NSString* _Null_unspecified)selectorName
-                                 object:(id _Null_unspecified)object
-                         customizedName:(NSString* _Null_unspecified)interactionName
-                  cancelRunningTrace:(BOOL)cancel __attribute__((deprecated));
-
-#define NR_INTERACTION_START_WITH_NAME_CANCEL(name,cancel) [NewRelic startInteractionFromMethodName:NSStringFromSelector(_cmd) object:self customizedName:name cancelRunningTrace:cancel]
 
 /*******************************************************************************
  * + (NSString*) startInteractionWithName:(NSString*)interactionName;
@@ -423,7 +353,7 @@ extern "C" {
  *  Note:
  *      Avoid Using variable string in names and categories, such as GUIDs, to 
  *      avoid metric grouping issues.
-*       More details @ http://docs.newrelic.com/docs/features/metric-grouping-issues
+ *      More details @ http://docs.newrelic.com/docs/features/metric-grouping-issues
  *
  *
  ******************************************************************************/
@@ -613,16 +543,6 @@ extern "C" {
                       responseData:(NSData * _Null_unspecified)responseData
                          andParams:(NSDictionary * _Nullable)params;
 
-+ (void)noticeNetworkRequestForURL:(NSURL* _Null_unspecified)url
-                         withTimer:(NRTimer* _Null_unspecified)timer
-                   responseHeaders:(NSDictionary* _Null_unspecified)headers
-                        statusCode:(NSInteger)httpStatusCode
-                         bytesSent:(NSUInteger)bytesSent
-                     bytesReceived:(NSUInteger)bytesReceived
-                      responseData:(NSData* _Null_unspecified)responseData
-                         andParams:(NSDictionary * _Nullable)params __attribute__((deprecated));
-
-
 
 /*******************************************************************************
  * Manually record a failed transactional network request.
@@ -635,31 +555,13 @@ extern "C" {
  * NSURLConnection failure codes:
  * http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html#//apple_ref/doc/uid/TP40003793-CH3g-SW40
  *******************************************************************************/
+
 + (void)noticeNetworkFailureForURL:(NSURL* _Null_unspecified)url
                         httpMethod:(NSString* _Null_unspecified)httpMethod
                          withTimer:(NRTimer* _Null_unspecified)timer
                     andFailureCode:(NSInteger)iOSFailureCode;
 
-
-+ (void)noticeNetworkFailureForURL:(NSURL* _Null_unspecified)url
-                         withTimer:(NRTimer* _Null_unspecified)timer
-                    andFailureCode:(NSInteger)iOSFailureCode __attribute__((deprecated));
-
-
-
 #pragma mark - Recording custom events
-
-/*!
- Records a event. Now deprecated: use -recordCustomEvent:attributes: going forward
- @param name a name for the event. This will be stored in the 'category' attribute of Mobile events in New Relic Insights.
- @param attributes A NSDictionary of attributes associated with the event. Attributes should have NSString keys and NSString or NSNumber values, this include boolean support with NSNumbers. (@YES/@NO)
- @return YES if successfully added event, NO if failed with error in log.
- 
- @note Events are transmitted at the end of the application session. Each event will include all global attributes defined at the end of the session.
-   If a session runs for more than `maxEventBufferTime` seconds, events will be transmitted mid-session and include all global attributes defined at the time of transmission.
- */
-+ (BOOL) recordEvent:(NSString* _Nonnull)name
-          attributes:(NSDictionary* _Nullable)attributes __attribute__((deprecated));
 
 /*!
  Records a event.

@@ -48,6 +48,10 @@
 - NRFeatureFlag_ExperimentalNetworkingInstrumentation
    Disabled by default. Enables experimental networking instrumentation. This
    feature may decrease the stability of applications.
+ 
+ - NRFeatureFlag_DistributedTracing
+    Disabled by default. Enables beta distributed tracing support for network
+    requests.
 */
 
 
@@ -58,12 +62,11 @@ typedef NS_OPTIONS(unsigned long long, NRMAFeatureFlags){
     NRFeatureFlag_CrashReporting                        = 1 << 3,
     NRFeatureFlag_NSURLSessionInstrumentation           = 1 << 4,
     NRFeatureFlag_HttpResponseBodyCapture               = 1 << 5,
-    NRFeatureFlag_GestureInstrumentation                = 1 << 6,
     NRFeatureFlag_WebViewInstrumentation                = 1 << 7,
     NRFeatureFlag_RequestErrorEvents                    = 1 << 8,
     NRFeatureFlag_NetworkRequestEvents                  = 1 << 9,
     NRFeatureFlag_HandledExceptionEvents                = 1 << 10,
     NRFeatureFlag_DefaultInteractions                   = 1 << 12,
     NRFeatureFlag_ExperimentalNetworkingInstrumentation = 1 << 13, //disabled by default
-    NRFeatureFlag_AllFeatures                           = ~0ULL //in 32-bit land the alignment is 4bytes
+    NRFeatureFlag_DistributedTracing                    = 1 << 14, //disabled by default
 };
