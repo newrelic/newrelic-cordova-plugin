@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 6.2.0
+// Using New Relic Agent Version: 6.4.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -138,16 +138,13 @@ extern "C" {
 
 
 /*!
- Starts New Relic data collection and optionally reports data to New Relic over unencrypted HTTP.
 
- Call this at the beginning of your UIApplicationDelegate's application:didFinishLaunchingWithOptions: method.
- You can find your App Token in the Settings tab of your mobile app on https://rpm.newrelic.com/
+ This method is now deprecated. All agent connects will be using SSL despite the value of `disabledSSL` flag.
 
- Note that each app within New Relic has a unique app token, be sure to use the correct one.
+ use +(void) startWithApplicationToken: instead.
 
- @param disableSSL If TRUE, data will be sent to New Relic unencrypted
  */
-+ (void)startWithApplicationToken:(NSString*_Nonnull)appToken withoutSecurity:(BOOL)disableSSL;
++ (void)startWithApplicationToken:(NSString*_Nonnull)appToken withoutSecurity:(BOOL)disableSSL __attribute__ ((deprecated));
 
 
 #pragma mark - Custom instrumentation

@@ -28,6 +28,7 @@ import zipfile
 import warnings
 import requests
 import tempfile
+import uuid
 from subprocess import call
 
 #Enable this to filter warnings
@@ -80,7 +81,8 @@ url = os.environ.get('DSYM_UPLOAD_URL', 'https://mobile-symbol-upload.newrelic.c
 workDir = tempfile.mkdtemp()
 
 #Create an empty zip file into which we will add all the map files
-nrZipFile = zipfile.ZipFile('nrdSYM.zip', 'w', zipfile.ZIP_DEFLATED)
+nrZipFileName = 'nrdSYM' + str(uuid.uuid4()) + '.zip'
+nrZipFile = zipfile.ZipFile(nrZipFileName, 'w', zipfile.ZIP_DEFLATED)
 
 ###---------------------------------------###
 ###       dSYM Processing Methods         ###
@@ -246,13 +248,13 @@ nrZipFile.close()
 ###        Upload nrdSYM.zip              ###
 ###---------------------------------------###
 
-files= { 'upload': open('./nrdSYM.zip','rb') }
+files= { 'upload': open('./' + nrZipFileName,'rb') }
 headers= { 'X-APP-LICENSE-KEY' : a.appLicenseKey }
 
 
 r = requests.post("/".join((url,"map")), files=files, headers=headers)
 if r.status_code == 201:
-	os.remove('./nrdSYM.zip')
+	os.remove('./' + nrZipFileName + '.zip')
 
 print r.status_code
 

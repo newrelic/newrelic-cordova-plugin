@@ -69,4 +69,5 @@ typedef NS_OPTIONS(unsigned long long, NRMAFeatureFlags){
     NRFeatureFlag_DefaultInteractions                   = 1 << 12,
     NRFeatureFlag_ExperimentalNetworkingInstrumentation = 1 << 13, //disabled by default
     NRFeatureFlag_DistributedTracing                    = 1 << 14, //disabled by default
+    NRFeatureFlag_GestureInstrumentation                = 1 << 15, //disabled by default
 };
