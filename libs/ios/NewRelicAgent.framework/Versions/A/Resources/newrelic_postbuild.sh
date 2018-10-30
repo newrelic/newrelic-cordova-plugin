@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 #
 # Shell script to upload an iOS build's debug symbols to New Relic.
 #
@@ -145,12 +146,9 @@ fi
 
 parse_region_aware
 
-# Save and set IFS to only trigger on \n\b
-
-
 SAVEIFS=$IFS
 
-IFS=$(\n\b)
+IFS=$'\n'
 
 # Gather dSYMs and upload
 for dSYM in `find ${DWARF_DSYM_FOLDER_PATH} | grep .dSYM$`;
@@ -160,7 +158,7 @@ do
     # Add pid/timestamp to tmp file name
     DSYM_TIMESTAMP=`date +%s`
 
-    DSYM_ARCHIVE_PATH="/${TEMP_FILES_DIR}/${DSYM_SRC##*/}-${DSYM_TIMESTAMP}.zip"
+    DSYM_ARCHIVE_PATH="${TEMP_FILES_DIR}/${dSYM##*/}-${DSYM_TIMESTAMP}.zip"
 
     echo "New Relic: Archiving ${dSYM} to ${DSYM_ARCHIVE_PATH}"
     echo "New Relic: /usr/bin/zip --recurse-paths --quiet "${DSYM_ARCHIVE_PATH}" "${dSYM}""
