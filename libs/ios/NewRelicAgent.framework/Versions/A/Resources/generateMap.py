@@ -77,11 +77,28 @@ functionname = "";
 
 url = os.environ.get('DSYM_UPLOAD_URL', 'https://mobile-symbol-upload.newrelic.com')
 
+
+
+
+
+proc = subprocess.Popen(["file {}".format(a.dsymFilePath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+output, errors = proc.communicate()
+fileType = output.split(":")[-1]
+
 #Define the working directory. Delete it if it exists previously and recreate it.
-workDir = tempfile.mkdtemp()
+dsymDir,filename = os.path.split(a.dsymFilePath)
+workDir = os.path.join(dsymDir, "tmp")
+try:
+    os.stat(workDir)
+    os.rmdir(workDir)
+    os.mkdir(workDir)
+except:
+    os.mkdir(workDir)
+
 
 #Create an empty zip file into which we will add all the map files
-nrZipFileName = 'nrdSYM' + str(uuid.uuid4()) + '.zip'
+zipPath, _ = os.path.split(workDir)
+nrZipFileName = os.path.join(zipPath, 'nrdSYM' + str(uuid.uuid4()) + '.zip')
 nrZipFile = zipfile.ZipFile(nrZipFileName, 'w', zipfile.ZIP_DEFLATED)
 
 ###---------------------------------------###
@@ -224,11 +241,6 @@ def unzipFile(zipFile, workDir):
 ###---------------------------------------###
 
 
-#Take the argument passed into the script and figure out if it's a zip, directory or dSYM file
-proc = subprocess.Popen(["file {}".format(a.dsymFilePath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
-output, errors = proc.communicate()
-fileType = output.split(":")[-1]
-
 #Process any found dSYM file(s) and create nrdSYM.zip from them
 if 'Zip' in fileType:
 	unzipFile(a.dsymFilePath, workDir)
@@ -248,13 +260,13 @@ nrZipFile.close()
 ###        Upload nrdSYM.zip              ###
 ###---------------------------------------###
 
-files= { 'upload': open('./' + nrZipFileName,'rb') }
+files= { 'upload': open(nrZipFileName,'rb') }
 headers= { 'X-APP-LICENSE-KEY' : a.appLicenseKey }
 
 
 r = requests.post("/".join((url,"map")), files=files, headers=headers)
 if r.status_code == 201:
-	os.remove('./' + nrZipFileName + '.zip')
+	os.remove(nrZipFileName)
 
 print r.status_code
 
