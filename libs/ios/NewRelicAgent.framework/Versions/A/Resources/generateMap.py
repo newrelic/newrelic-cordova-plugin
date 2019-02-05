@@ -228,7 +228,8 @@ def unzipFile(zipFile, workDir):
 			# skip directories
 			if not filename or ".plist" in filename or ".bin" in filename or filename.startswith('.'):
 				continue
-	        # copy file (taken from zipfile's extract)
+			filename = filename + str(uuid.uuid4())
+	     		# copy file (taken from zipfile's extract)
 			source = zip_file.open(member)
 			target = file(os.path.join(workDir, filename), "w")
 			with source, target:
