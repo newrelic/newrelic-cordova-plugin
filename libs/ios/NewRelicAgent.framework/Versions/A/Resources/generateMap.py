@@ -81,7 +81,7 @@ url = os.environ.get('DSYM_UPLOAD_URL', 'https://mobile-symbol-upload.newrelic.c
 
 
 
-proc = subprocess.Popen(["file {}".format(a.dsymFilePath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+proc = subprocess.Popen(["file \"{}\"".format(a.dsymFilePath)],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
 output, errors = proc.communicate()
 fileType = output.split(":")[-1]
 
@@ -167,7 +167,7 @@ def processDsymFile(dsymFile, workDir):
 	#get the architectures and uuids from the dsym file
 	#massage the uuid to be what we expect then put them into a dict
 	#uuid : architecture
-	proc = subprocess.Popen(["symbols -uuid {}".format(dsymFile)], stdout=subprocess.PIPE, shell=True)
+	proc = subprocess.Popen(["symbols -uuid \"{}\"".format(dsymFile)], stdout=subprocess.PIPE, shell=True)
 	for line in iter(proc.stdout.readline, ''):
 	   splitLine = line.strip().split();
 	   uuidDict[splitLine[0].lower().replace('-', '')] = splitLine[1]
@@ -180,7 +180,7 @@ def processDsymFile(dsymFile, workDir):
 		file = open("{0}/{1}.map".format(workDir, key,"w"),"w+")
 		file.write("# uuid {}\r\n".format(key.upper(),"w"))
 		file.write("# architecture {}\r\n".format(uuidDict[key], "w"))
-		proc = subprocess.Popen(["symbols -arch {arch} {filepath}".format(arch=uuidDict[key], filepath=dsymFile)], stdout=tmpwrite, shell=True)
+		proc = subprocess.Popen(["symbols -arch {arch} \"{filepath}\"".format(arch=uuidDict[key], filepath=dsymFile)], stdout=tmpwrite, shell=True)
 		proc.wait()
 		tmpwrite.close()
 
@@ -213,8 +213,7 @@ def findAllDsymsInDir(directory):
 	dsyms = []
 	for root, dirs, files in os.walk(directory):
 		for file in files:
-			file = file.replace(' ','\ ')
-			proc = subprocess.Popen(["file {}".format(os.path.join(root, file))],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+			proc = subprocess.Popen(["file \"{}\"".format(os.path.join(root, file))],stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
 			output, errors = proc.communicate()
 			fileType = output.split(":")[-1]
 			if 'Mach-O' in fileType:
