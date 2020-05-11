@@ -2,7 +2,7 @@
   "name": "newrelic-cordova-plugin",
   "version": "5.0.0",
   "description": "New Relic Cordova Plugin for iOS and Android",
-  "repo": "https://github.com/newrelic/newrelic-cordova-plugin/",
+  "repository": "https://github.com/newrelic/newrelic-cordova-plugin/",
   "scripts": {
     "test": "mocha"
   },
@@ -16,8 +16,9 @@
   "author": "New Relic",
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.2.0",
+    "mocha": "^7.1.2",
     "shelljs": "^0.7.6",
     "xcode": "^2.0.0"
-  }
+  },
+  "license": "MIT"
 }
