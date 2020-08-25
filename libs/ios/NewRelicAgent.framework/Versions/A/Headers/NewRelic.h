@@ -1,4 +1,4 @@
-// Using New Relic Agent Version: 6.13.0
+// Using New Relic Agent Version: 6.14.0
 //
 //  New Relic for Mobile -- iOS edition
 //
@@ -136,6 +136,9 @@ extern "C" {
  */
 + (void)startWithApplicationToken:(NSString*_Nonnull)appToken;
 
++ (void)startWithApplicationToken:(NSString*_Nonnull)appToken
+			  andCollectorAddress:(NSString*_Nonnull)url
+		 andCrashCollectorAddress:(NSString*_Nonnull)crashCollectorUrl;
 
 /*!
 
