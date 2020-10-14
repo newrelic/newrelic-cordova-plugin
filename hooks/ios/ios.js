@@ -157,7 +157,7 @@ module.exports = {
    * @returns {*}
    */
   getXcodeProject: function (context) {
-    var xcode = context.requireCordovaModule("xcode");
+    var xcode = require("xcode");
     return xcode.project(this.xcodePath(context));
   },
 
