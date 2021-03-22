@@ -11,7 +11,7 @@
 # Installation
 
 ### Prerequisites
-1. Cordova 4.x or newer
+1. Cordova 7.x or newer
 2. Node 6.0 or newer
 3. Cordova CLI tools
 4. Android and iOS Cordova platforms
