@@ -3,7 +3,7 @@
 //  See:
 //    https://docs.newrelic.com/docs/releases/android for release notes
 //
-//  Copyright (c) 2017 New Relic. All rights reserved.
+//  Copyright (c) 2021 New Relic. All rights reserved.
 //  See https://docs.newrelic.com/docs/licenses/android-agent-licenses for license details
 //
 
@@ -16,7 +16,8 @@ import com.newrelic.agent.android.NewRelic;
 import com.newrelic.agent.android.harvest.DeviceInformation;
 import com.newrelic.agent.android.logging.AgentLog;
 import com.newrelic.agent.android.Agent;
-import com.newrelic.agent. android.ApplicationFramework;
+import com.newrelic.agent.android.ApplicationFramework;
+import com.newrelic.agent.android.analytics.AnalyticsAttribute;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -45,7 +46,8 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             final DeviceInformation devInfo = Agent.getDeviceInformation();
 
             devInfo.setApplicationFramework(ApplicationFramework.Cordova);
-            devInfo.setApplicationFrameworkVersion(pluginVersion);             
+            devInfo.setApplicationFrameworkVersion(pluginVersion);
+            NewRelic.setAttribute(AnalyticsAttribute.APPLICATION_PLATFORM_VERSION_ATTRIBUTE, pluginVersion);             
         }
 
     }
