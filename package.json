@@ -1,6 +1,6 @@
 {
-  "name": "newrelic-cordova-plugin",
-  "version": "5.0.0",
+  "name": "@zenput/newrelic-cordova-plugin",
+  "version": "5.0.0-zp1",
   "description": "New Relic Cordova Plugin for iOS and Android",
   "repo": "https://github.com/newrelic/newrelic-cordova-plugin/",
   "scripts": {
@@ -19,5 +19,18 @@
     "mocha": "^3.2.0",
     "shelljs": "^0.7.6",
     "xcode": "^2.0.0"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zenput/newrelic-cordova-plugin.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zenput/newrelic-cordova-plugin/issues"
+  },
+  "homepage": "https://github.com/zenput/newrelic-cordova-plugin#readme"
 }
