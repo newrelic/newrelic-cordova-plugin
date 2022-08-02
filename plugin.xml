@@ -43,7 +43,7 @@
 
   <platform name="android">
     <preference name="ANDROID_APP_TOKEN" default="x" />
-    <preference name="ANDROID_AGENT_VER" default="6.5.0" />
+    <preference name="ANDROID_AGENT_VER" default="6.8.0" />
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET"/>
