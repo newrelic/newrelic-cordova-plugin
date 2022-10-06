@@ -27,7 +27,7 @@
 	} else {
 	    [NewRelic setPlatform:NRMAPlatform_Cordova];
 	    [NewRelic setPlatformVersion:platformVersion];
-	    [NewRelicAgent startWithApplicationToken:applicationToken];
+	    [NewRelic startWithApplicationToken:applicationToken];
 	}
 }
 

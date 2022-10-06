@@ -9,7 +9,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <NewRelicAgent/NewRelic.h>
+#import <NewRelic/NewRelic.h>
 #import <Cordova/CDV.h>
 
 @interface NewRelicCordovaPlugin : CDVPlugin {

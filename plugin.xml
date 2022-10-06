@@ -31,7 +31,7 @@
     <header-file src="src/ios/NewRelicCordovaPlugin.h" />
     <source-file src="src/ios/NewRelicCordovaPlugin.m" />
 
-    <framework src="libs/ios/NewRelicAgent.framework" custom="true" />
+    <framework src="libs/ios/NewRelic.xcframework" custom="true" />
     <framework src="CoreTelephony.framework" />
     <framework src="SystemConfiguration.framework" />
     <framework src="libz.dylib" />
