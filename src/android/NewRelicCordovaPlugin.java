@@ -52,4 +52,22 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
     }
 
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        try {
+
+            if(action.equals("recordBreadCrumb")) {
+                final String breadcrumb = args.getString(0);
+                NewRelic.recordBreadcrumb(breadcrumb);
+            }
+        } catch (Exception e) {
+            NewRelic.recordHandledException(e);
+            return false;
+        }
+
+        return true;
+
+
+    }
+
 }

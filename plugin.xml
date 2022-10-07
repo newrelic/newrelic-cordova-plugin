@@ -50,6 +50,10 @@
       <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     </config-file>
 
+     <js-module name="NewRelicCordovaPlugin" src="www/js/newrelic.js">
+			<clobbers target="NewRelicCordovaPlugin" />
+		</js-module>
+
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="NewRelicCordovaPlugin">
         <param name="android-package" value="com.newrelic.cordova.plugin.NewRelicCordovaPlugin"/>
