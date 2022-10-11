@@ -25,7 +25,7 @@
 		</js-module>
 
     <config-file target="config.xml" parent="/*">
-      <feature name="NewRelic">
+      <feature name="NewRelicCordovaPlugin">
         <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN"/>
         <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION"/>
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true"/>
