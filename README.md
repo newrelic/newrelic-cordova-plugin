@@ -3,7 +3,7 @@
 > The official [New Relic](https://newrelic.com/mobile-monitoring) [Cordova](http://cordova.apache.org/) plugin for iOS and Android.
 
 # When added the New Relic Cordova plugin will
-* Detect the platforms added to your Cordova application and apply the most recent release of the appropriate New Relic Mobile agent ([Android ](http://docs.newrelic.com/docs/releases/android), [iOS ](http://docs.newrelic.com/docs/releases/ios))
+* Detect the platforms added to your Cordova application and apply the most recent release of the appropriate New Relic Mobile agent ([Android ](http://docs.newrelic.com/docs/releases/android), [iOS ](https://docs.newrelic.com/docs/release-notes/mobile-release-notes/xcframework-release-notes/))
 * Add post-build scripts for uploading iOS symbolication files
 * Upload Android Proguard mapping files
 * Automatically instrument mobile applications built via Cordova
@@ -44,7 +44,7 @@ Following these helps us efficiently review and incorporate your contribution an
 
 # License
 
-Copyright (c) 2017 New Relic. All rights reserved.
+Copyright (c) 2017 - Present New Relic. All rights reserved.
 For New Relic agent license details see:
 * https://docs.newrelic.com/docs/licenses/ios-agent-licenses
 * https://docs.newrelic.com/docs/licenses/android-agent-licenses
