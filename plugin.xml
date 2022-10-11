@@ -28,6 +28,10 @@
       </feature>
     </config-file>
 
+     <js-module name="NewRelic" src="www/js/newrelic.js">
+			<clobbers target="NewRelic" />
+		</js-module>
+
     <header-file src="src/ios/NewRelicCordovaPlugin.h" />
     <source-file src="src/ios/NewRelicCordovaPlugin.m" />
 
