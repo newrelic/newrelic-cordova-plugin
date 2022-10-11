@@ -20,6 +20,10 @@
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
 
+    <js-module name="NewRelic" src="www/js/newrelic.js">
+			<clobbers target="NewRelic" />
+		</js-module>
+
     <config-file target="config.xml" parent="/*">
       <feature name="NewRelic">
         <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN"/>
@@ -28,9 +32,7 @@
       </feature>
     </config-file>
 
-     <js-module name="NewRelic" src="www/js/newrelic.js">
-			<clobbers target="NewRelic" />
-		</js-module>
+  
 
     <header-file src="src/ios/NewRelicCordovaPlugin.h" />
     <source-file src="src/ios/NewRelicCordovaPlugin.m" />
