@@ -15,4 +15,26 @@
 @interface NewRelicCordovaPlugin : CDVPlugin {
     
 }
+
+- (void)recordBreadCrumb:(CDVInvokedUrlCommand *)command;
+
+- (void)recordCustomEvent:(CDVInvokedUrlCommand *)command;
+
+- (void)setAttribute:(CDVInvokedUrlCommand *)command;
+
+- (void)removeAttribute:(CDVInvokedUrlCommand *)command;
+
+- (void)setUserId:(CDVInvokedUrlCommand *)command;
+
+- (void)startInteraction:(CDVInvokedUrlCommand *)command;
+
+- (void)endInteraction:(CDVInvokedUrlCommand *)command;
+
+- (void)noticeDistributedTrace:(CDVInvokedUrlCommand *)command;
+
+- (void)noticeHttpTransaction:(CDVInvokedUrlCommand *)command;
+
+- (void)recordError:(CDVInvokedUrlCommand *)command;
+
+
 @end
