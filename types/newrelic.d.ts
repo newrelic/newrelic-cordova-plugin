@@ -1,0 +1,15 @@
+export function noticeHttpTransaction(url: any, method: any, status: any, startTime: any, endTime: any, bytesSent: any, bytesreceived: any, body: any, cb: any, fail: any): void;
+export function noticeDistributedTrace(cb: any, fail: any): void;
+export function setUserId(userId: any, cb: any, fail: any): void;
+export function setAttribute(name: any, value: any, cb: any, fail: any): void;
+export function removeAttribute(name: any, cb: any, fail: any): void;
+export function recordBreadcrumb(name: any, eventAttributes: any, cb: any, fail: any): void;
+export function recordCustomEvent(eventType: any, eventName: any, attributes: any, cb: any, fail: any): void;
+export function startInteraction(actionName: any, cb: any, fail: any): Promise<any>;
+export function endInteraction(interactionId: any, cb: any, fail: any): void;
+export function sendConsole(type: any, args: any): void;
+export function sendConsole(type: any, args: any): void;
+export function send(name: any, args: any): void;
+export function send(name: any, args: any): void;
+export function recordError(name: any, message: any, stack: any, isFatal: any, cb: any, fail: any): void;
+export function recordError(name: any, message: any, stack: any, isFatal: any, cb: any, fail: any): void;

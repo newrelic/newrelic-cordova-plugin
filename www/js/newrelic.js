@@ -33,7 +33,9 @@ var NewRelic = {
     },
 
     startInteraction: function (actionName, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "startInteraction", [actionName]);
+        return new Promise(function(cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "startInteraction", [actionName]);
+        });
     },
 
     endInteraction: function (interactionId, cb, fail) {
