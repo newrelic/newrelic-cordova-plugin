@@ -162,4 +162,22 @@ try {
     // do nothing -- addEventListener is not supported
 }
 
+
+const defaultLog = window.console.log;
+const defaultWarn = window.console.warn;
+const defaultError = window.console.error;
+
+console.log = function() {
+  NewRelic.sendConsole('log', arguments);
+  defaultLog.apply(console, arguments);
+};
+console.warn = function() {
+  NewRelic.sendConsole('warn', arguments);
+  defaultWarn.apply(console, arguments);
+};
+console.error = function() {
+  NewRelic.sendConsole('error', arguments);
+  defaultError.apply(console, arguments);
+};
+
 module.exports = NewRelic;
