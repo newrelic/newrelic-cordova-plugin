@@ -10,16 +10,13 @@ var NewRelic = {
      * @param {number} startTime The start time of the request in milliseconds since the epoch.
      * @param {number} endTime The end time of the request in milliseconds since the epoch.
      * @param {number} bytesSent The number of bytes sent in the request.
-     * @param {number} bytesreceived The number of bytes received in the response.
+     * @param {number} bytesReceived The number of bytes received in the response.
      * @param {string} body Optional. The response body of the HTTP response. The response body will be truncated and included in an HTTP Error metric if the HTTP transaction is an error.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
-    noticeHttpTransaction: function (url, method, status, startTime, endTime, bytesSent, bytesreceived, body, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeHttpTransaction", [url, method, status, startTime, endTime, bytesSent, bytesreceived, body]);
+    noticeHttpTransaction: function (url, method, status, startTime, endTime, bytesSent, bytesReceived, body, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeHttpTransaction", [url, method, status, startTime, endTime, bytesSent, bytesReceived, body]);
     },
 
-    //
     noticeDistributedTrace: function (cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeDistributedTrace");
     },
@@ -27,8 +24,6 @@ var NewRelic = {
     /**
      * Sets a custom user identifier value to associate mobile user
      * @param {string} userId The user identifier string.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     setUserId: function (userId, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setUserId", [userId]);
@@ -40,8 +35,6 @@ var NewRelic = {
      * The created attribute is shared by multiple Mobile event types.
      * @param {string} name Name of the attribute.
      * @param {number} value Value of the attribute.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     setAttribute: function (name, value, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [name, value]);
@@ -52,8 +45,6 @@ var NewRelic = {
      * When called, it removes the attribute specified by the name string.
      * The removed attribute is shared by multiple Mobile event types.
      * @param {string} name Name of the attribute. 
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     removeAttribute: function (name, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAttribute", [name, value]);
@@ -63,8 +54,6 @@ var NewRelic = {
      * Creates and records a MobileBreadcrumb event.
      * @param {string} name The name you want to give to a breadcrumb event.
      * @param {Map<string, string|number>} eventAttributes A map that includes a list of attributes.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     recordBreadcrumb: function (name, eventAttributes, cb, fail) {
         if (eventAttributes === undefined) {
@@ -79,8 +68,6 @@ var NewRelic = {
      * @param {string} eventType The type of event.
      * @param {string} eventName The name of the event.
      * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     recordCustomEvent: function (eventType, eventName, attributes, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, attributes]);
@@ -90,8 +77,7 @@ var NewRelic = {
      * Track a method as an interaction.
      * @param {string} actionName The name of the action.
      * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
-     * @returns 
+     * @returns {Promise} A promise containing the interactionId.
      */
     startInteraction: function (actionName, cb, fail) {
         return new Promise(function(cb, fail) {
@@ -102,8 +88,6 @@ var NewRelic = {
     /**
      * End an interaction
      * @param {string} interactionId The string ID for the interaction you want to end. This string is returned when you use startInteraction().
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     endInteraction: function (interactionId, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "endInteraction", [interactionId]);
@@ -130,8 +114,6 @@ var NewRelic = {
      * @param {string} message The message of the error.
      * @param {string} stack The error stack of the error.
      * @param {boolean} isFatal The flag for whether the error is fatal.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     recordError(name, message, stack, isFatal, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [name, message, stack, isFatal]);
@@ -140,8 +122,6 @@ var NewRelic = {
     /**
      * Throws a demo run-time exception to test New Relic crash reporting.
      * @param {string} message An optional argument attached to the exception.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     crashNow: function(message='', cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "crashNow", [message]);
@@ -151,10 +131,12 @@ var NewRelic = {
      * Returns the current session ID as a parameter to the successful callback function.
      * This method is useful for consolidating monitoring of app data (not just New Relic data) based on a single session definition and identifier.
      * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
+     * @returns {Promise} A promise containing the current session ID.
      */
     currentSessionId: function(cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "currentSessionId");
+        return new Promise(function(cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "currentSessionId");
+        });
     },
 
     /**
@@ -164,8 +146,6 @@ var NewRelic = {
      * The incremented attribute is shared by multiple Mobile event types.
      * @param {string} name The name of the attribute.
      * @param {number} value Optional argument that increments the attribute by this value.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     incrementAttribute: function(name, value=1, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
@@ -180,8 +160,6 @@ var NewRelic = {
      * @param {number} startTime The start time of the request in milliseconds since the epoch.
      * @param {number} endTime The end time of the request in milliseconds since the epoch.
      * @param {string} failure The name of the network failure. Possible values are 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     noticeNetworkFailure: function(url, httpMethod, startTime, endTime, failure, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
@@ -194,17 +172,13 @@ var NewRelic = {
      * @param {number} value Optional. The value of the metric. Value should be a non-zero positive number.
      * @param {string} countUnit Optional (but requires value and valueUnit to be set). Unit of measurement for the metric count. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'.
      * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'. 
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     recordMetric: function(name, category, value=-1, countUnit=null, valueUnit=null, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordMetric", [name, category, value, countUnit, valueUnit]);
     },
 
     /**
-     * Removes all attributes from the session.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
+     * Removes all attributes from the session..
      */
     removeAllAttributes: function(cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAllAttributes");
@@ -216,8 +190,6 @@ var NewRelic = {
      * Minimum value cannot be less than 60 seconds.
      * Maximum value should not be greater than 600 seconds.
      * @param {number} maxBufferTimeInSeconds The maximum time (in seconds) that the agent should store events in memory.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     setMaxEventBufferTime: function(maxBufferTimeInSeconds, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventBufferTime", [maxBufferTimeInSeconds]);
@@ -228,8 +200,6 @@ var NewRelic = {
      * When the pool size limit is reached, the agent will start sampling events, discarding some new and old, until the pool of events is sent in the next harvest cycle.
      * Default is a maximum of 1000 events per event harvest cycle.
      * @param {number} maxPoolSize The maximum number of events per harvest cycle.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     setMaxEventPoolSize: function(maxPoolSize, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
@@ -239,8 +209,6 @@ var NewRelic = {
      * FOR ANDROID ONLY.
      * Enable or disable collection of event data.
      * @param {boolean} enabled Boolean value for enabling analytics events.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     analyticsEventEnabled: function(enabled, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
@@ -249,8 +217,6 @@ var NewRelic = {
     /**
      * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
      * @param {boolean} enabled Boolean value for enable successful HTTP requests.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     networkRequestEnabled: function(enabled, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
@@ -259,8 +225,6 @@ var NewRelic = {
     /**
      * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
      * @param {boolean} enabled Boolean value for enabling network request errors.
-     * @param {function} cb A success callback function.
-     * @param {function} fail An error callback function.
      */
     networkErrorRequestEnabled: function(enabled, cb, fail) {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);

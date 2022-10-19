@@ -137,8 +137,8 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                                     errorStack.length() > 4095 ? errorStack.substring(0, 4094) : errorStack);
                         }
 
-                        NewRelic.recordBreadcrumb("Mobile JS Errors", crashEvents);
-                        NewRelic.recordCustomEvent("Mobile JS Errors", "", crashEvents);
+                        NewRelic.recordBreadcrumb("JS Errors", crashEvents);
+                        NewRelic.recordCustomEvent("JS Errors", "", crashEvents);
 
                         StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
 
