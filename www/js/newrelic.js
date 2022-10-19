@@ -235,45 +235,44 @@ var NewRelic = {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
     },
 
+    /**
+     * FOR ANDROID ONLY.
+     * Enable or disable collection of event data.
+     * @param {boolean} enabled Boolean value for enabling analytics events.
+     * @param {function} cb A success callback function.
+     * @param {function} fail An error callback function.
+     */
+    analyticsEventEnabled: function(enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
+    },
 
-    // /**
-    //  * FOR ANDROID ONLY.
-    //  * Enable or disable collection of event data.
-    //  * @param {boolean} enabled Boolean value for enabling analytics events.
-    //  * @param {function} cb A success callback function.
-    //  * @param {function} fail An error callback function.
-    //  */
-    // analyticsEventEnabled: function(enabled, cb, fail) {
-    //     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
-    // },
+    /**
+     * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
+     * @param {boolean} enabled Boolean value for enable successful HTTP requests.
+     * @param {function} cb A success callback function.
+     * @param {function} fail An error callback function.
+     */
+    networkRequestEnabled: function(enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
+    },
 
-    // /**
-    //  * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
-    //  * @param {boolean} enabled Boolean value for enable successful HTTP requests.
-    //  * @param {function} cb A success callback function.
-    //  * @param {function} fail An error callback function.
-    //  */
-    // networkRequestEnabled: function(enabled, cb, fail) {
-    //     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", enabled);
-    // },
+    /**
+     * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
+     * @param {boolean} enabled Boolean value for enabling network request errors.
+     * @param {function} cb A success callback function.
+     * @param {function} fail An error callback function.
+     */
+    networkErrorRequestEnabled: function(enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
+    },
 
-    // /**
-    //  * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
-    //  * @param {boolean} enabled Boolean value for enabling network request errors.
-    //  * @param {function} cb A success callback function.
-    //  * @param {function} fail An error callback function.
-    //  */
-    // networkErrorRequestEnabled: function(enabled, cb, fail) {
-    //     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
-    // },
-
-    // /**
-    //  * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
-    //  * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
-    //  */
-    // httpRequestBodyCaptureEnabled: function(enabled, cb, fail) {
-    //     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
-    // }
+    /**
+     * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
+     * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
+     */
+    httpRequestBodyCaptureEnabled: function(enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
+    },
 
 }
 

@@ -208,33 +208,33 @@
     [NewRelic setMaxEventPoolSize:uint_maxPoolSize];
 }
 
-// - (void)analyticsEventEnabled:(CDVInvokedUrlCommand *)command {
-//     // This should only be an android method call, so we do nothing here.
-//     return;
-// }
+- (void)analyticsEventEnabled:(CDVInvokedUrlCommand *)command {
+    // This should only be an android method call, so we do nothing here.
+    return;
+}
 
-// - (void)networkRequestEnabled:(CDVInvokedUrlCommand *)command {
-//     if([[command.arguments objectAtIndex:0] boolValue] == YES) {
-//         [NewRelic enableFeatures:NRFeatureFlag_NetworkRequestEvents];
-//     } else {
-//         [NewRelic disableFeatures:NRFeatureFlag_NetworkRequestEvents];
-//     }
-// }
+- (void)networkRequestEnabled:(CDVInvokedUrlCommand *)command {
+    if([[command.arguments objectAtIndex:0] boolValue] == YES) {
+        [NewRelic enableFeatures:NRFeatureFlag_NetworkRequestEvents];
+    } else {
+        [NewRelic disableFeatures:NRFeatureFlag_NetworkRequestEvents];
+    }
+}
 
-// - (void)networkErrorRequestEnabled:(CDVInvokedUrlCommand *)command {
-//     if([[command.arguments objectAtIndex:0] boolValue] == YES) {
-//         [NewRelic enableFeatures:NRFeatureFlag_RequestErrorEvents];
-//     } else {
-//         [NewRelic disableFeatures:NRFeatureFlag_RequestErrorEvents];
-//     }
-// }
+- (void)networkErrorRequestEnabled:(CDVInvokedUrlCommand *)command {
+    if([[command.arguments objectAtIndex:0] boolValue] == YES) {
+        [NewRelic enableFeatures:NRFeatureFlag_RequestErrorEvents];
+    } else {
+        [NewRelic disableFeatures:NRFeatureFlag_RequestErrorEvents];
+    }
+}
 
-// - (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *)command {
-//     if([[command.arguments objectAtIndex:0] boolValue] == YES) {
-//         [NewRelic enableFeatures:NRFeatureFlag_HttpResponseBodyCapture];
-//     } else {
-//         [NewRelic disableFeatures:NRFeatureFlag_HttpResponseBodyCapture];
-//     }
+- (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *)command {
+    if([[command.arguments objectAtIndex:0] boolValue] == YES) {
+        [NewRelic enableFeatures:NRFeatureFlag_HttpResponseBodyCapture];
+    } else {
+        [NewRelic disableFeatures:NRFeatureFlag_HttpResponseBodyCapture];
+    }
 }
 
 @end

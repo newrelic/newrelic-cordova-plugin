@@ -263,42 +263,42 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     NewRelic.setMaxEventPoolSize(maxPoolSize);
                     break;
                 }
-                // case "analyticsEventEnabled": {
-                //     final boolean enabled = args.getBoolean(0);
-                //     if(enabled) {
-                //         NewRelic.enableFeature(FeatureFlag.AnalyticsEvents);
-                //     } else {
-                //         NewRelic.disableFeature(FeatureFlag.AnalyticsEvents);
-                //     }
-                //     break;
-                // }
-                // case "networkRequestEnabled": {
-                //     final boolean enabled = args.getBoolean(0);
-                //     if(enabled) {
-                //         NewRelic.enableFeature(FeatureFlag.NetworkRequests);
-                //     } else {
-                //         NewRelic.disableFeature(FeatureFlag.NetworkRequests);
-                //     }
-                //     break;
-                // }
-                // case "networkErrorRequestEnabled": {
-                //     final boolean enabled = args.getBoolean(0);
-                //     if(enabled) {
-                //         NewRelic.enableFeature(FeatureFlag.NetworkErrorRequests);
-                //     } else {
-                //         NewRelic.disableFeature(FeatureFlag.NetworkErrorRequests);
-                //     }
-                //     break;
-                // }
-                // case "httpRequestBodyCaptureEnabled": {
-                //     final boolean enabled = args.getBoolean(0);
-                //     if(enabled) {
-                //         NewRelic.enableFeature(FeatureFlag.HttpResponseBodyCapture);
-                //     } else {
-                //         NewRelic.disableFeature(FeatureFlag.HttpResponseBodyCapture);
-                //     }
-                //     break;
-                // }
+                case "analyticsEventEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.AnalyticsEvents);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.AnalyticsEvents);
+                    }
+                    break;
+                }
+                case "networkRequestEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.NetworkRequests);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.NetworkRequests);
+                    }
+                    break;
+                }
+                case "networkErrorRequestEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.NetworkErrorRequests);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.NetworkErrorRequests);
+                    }
+                    break;
+                }
+                case "httpRequestBodyCaptureEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.HttpResponseBodyCapture);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.HttpResponseBodyCapture);
+                    }
+                    break;
+                }
                 
             }
         } catch (Exception e) {

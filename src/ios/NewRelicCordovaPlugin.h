@@ -52,12 +52,12 @@
 
 - (void)setMaxEventPoolSize:(CDVInvokedUrlCommand *)command;
 
-// - (void)analyticsEventEnabled:(CDVInvokedUrlCommand *) command;
+- (void)analyticsEventEnabled:(CDVInvokedUrlCommand *) command;
 
-// - (void)networkRequestEnabled:(CDVInvokedUrlCommand *) command;
+- (void)networkRequestEnabled:(CDVInvokedUrlCommand *) command;
 
-// - (void)networkErrorRequestEnabled:(CDVInvokedUrlCommand *) command;
+- (void)networkErrorRequestEnabled:(CDVInvokedUrlCommand *) command;
 
-// - (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *) command;
+- (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *) command;
 
 @end
