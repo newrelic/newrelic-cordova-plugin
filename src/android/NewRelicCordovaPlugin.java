@@ -19,6 +19,9 @@ import com.newrelic.agent.android.distributedtracing.TraceContext;
 import com.newrelic.agent.android.distributedtracing.TraceHeader;
 import com.newrelic.agent.android.harvest.DeviceInformation;
 import com.newrelic.agent.android.stats.StatsEngine;
+import com.newrelic.agent.android.metric.MetricUnit;
+import com.newrelic.agent.android.util.NetworkFailure;
+import com.newrelic.agent.android.FeatureFlag;
 import com.newrelic.com.google.gson.Gson;
 
 import org.apache.cordova.CallbackContext;
@@ -134,8 +137,8 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                                     errorStack.length() > 4095 ? errorStack.substring(0, 4094) : errorStack);
                         }
 
-                        NewRelic.recordBreadcrumb("Mobile JS Errors", crashEvents);
-                        NewRelic.recordCustomEvent("Mobile JS Errors", "", crashEvents);
+                        NewRelic.recordBreadcrumb("JS Errors", crashEvents);
+                        NewRelic.recordCustomEvent("JS Errors", "", crashEvents);
 
                         StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
 
@@ -145,7 +148,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
                     break;
                 }
-                case "noticeHttpTransaction":
+                case "noticeHttpTransaction": {
                     final String url = args.getString(0);
                     final String method = args.getString(1);
                     final int status = args.getInt(2);
@@ -158,7 +161,8 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     NewRelic.noticeHttpTransaction(url, method, status, startTime, endTime, bytesSent, bytesReceived,
                             body);
                     break;
-                case "noticeDistributedTrace":
+                }
+                case "noticeDistributedTrace": {
 
                     cordova.getThreadPool().execute(new Runnable() {
                         public void run() {
@@ -179,6 +183,123 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     });
 
                     break;
+                }
+                case "crashNow": {
+                    final String message = args.getString(0);
+                    if(message.isEmpty()) {
+                        NewRelic.crashNow();
+                    } else {
+                        NewRelic.crashNow(message);
+                    }
+                    break;
+                }
+                case "currentSessionId": {
+                    String sessionId = NewRelic.currentSessionId();
+                    callbackContext.success(sessionId);
+                    break;
+                }
+                case "incrementAttribute": {
+                    final String name = args.getString(0);
+                    final double value = args.getDouble(1);
+                    NewRelic.incrementAttribute(name, value);
+                    break;
+                }
+                case "noticeNetworkFailure": {
+                    final String url = args.getString(0);
+                    final String httpMethod = args.getString(1);
+                    final long startTime = args.getLong(2);
+                    final long endTime = args.getLong(3);
+                    final String failure = args.getString(4);
+
+                    Map<String, NetworkFailure> strToNetworkFailure = new HashMap<>();
+                    strToNetworkFailure.put("Unknown", NetworkFailure.Unknown);
+                    strToNetworkFailure.put("BadURL", NetworkFailure.BadURL);
+                    strToNetworkFailure.put("TimedOut", NetworkFailure.TimedOut);
+                    strToNetworkFailure.put("CannotConnectToHost", NetworkFailure.CannotConnectToHost);
+                    strToNetworkFailure.put("DNSLookupFailed", NetworkFailure.DNSLookupFailed);
+                    strToNetworkFailure.put("BadServerResponse", NetworkFailure.BadServerResponse);
+                    strToNetworkFailure.put("SecureConnectionFailed", NetworkFailure.SecureConnectionFailed);
+
+                    NewRelic.noticeNetworkFailure(url, httpMethod, startTime, endTime, strToNetworkFailure.get(failure));
+                    break;
+                }
+                case "recordMetric": {
+                    final String name = args.getString(0);
+                    final String category = args.getString(1);
+                    final double value = args.getDouble(2);
+                    final String metricUnit = args.getString(3);
+                    final String valueUnit = args.getString(4);
+
+                    Map<String, MetricUnit> strToMetricUnit = new HashMap<>();
+                    strToMetricUnit.put("PERCENT", MetricUnit.PERCENT);
+                    strToMetricUnit.put("BYTES", MetricUnit.BYTES);
+                    strToMetricUnit.put("SECONDS", MetricUnit.SECONDS);
+                    strToMetricUnit.put("BYTES_PER_SECOND", MetricUnit.BYTES_PER_SECOND);
+                    strToMetricUnit.put("OPERATIONS", MetricUnit.OPERATIONS);
+
+                    if (value < 0) {
+                        NewRelic.recordMetric(name, category);
+                    } else {
+                        if (metricUnit == null || valueUnit == null || metricUnit.equals("null") || valueUnit.equals("null")) {
+                            NewRelic.recordMetric(name, category, value);
+                        } else {
+                            NewRelic.recordMetric(name, category, 1, value, value, strToMetricUnit.get(metricUnit), strToMetricUnit.get(valueUnit));
+                        }
+                    }
+
+                    break;
+                }
+                case "removeAllAttributes": {
+                    NewRelic.removeAllAttributes();
+                    break;
+                }
+                case "setMaxEventBufferTime": {
+                    final int maxEventBufferTimeInSeconds = args.getInt(0);
+                    NewRelic.setMaxEventBufferTime(maxEventBufferTimeInSeconds);
+                    break;
+                }
+                case "setMaxEventPoolSize": {
+                    final int maxPoolSize = args.getInt(0);
+                    NewRelic.setMaxEventPoolSize(maxPoolSize);
+                    break;
+                }
+                case "analyticsEventEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.AnalyticsEvents);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.AnalyticsEvents);
+                    }
+                    break;
+                }
+                case "networkRequestEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.NetworkRequests);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.NetworkRequests);
+                    }
+                    break;
+                }
+                case "networkErrorRequestEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.NetworkErrorRequests);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.NetworkErrorRequests);
+                    }
+                    break;
+                }
+                case "httpRequestBodyCaptureEnabled": {
+                    final boolean enabled = args.getBoolean(0);
+                    if(enabled) {
+                        NewRelic.enableFeature(FeatureFlag.HttpResponseBodyCapture);
+                    } else {
+                        NewRelic.disableFeature(FeatureFlag.HttpResponseBodyCapture);
+                    }
+                    break;
+                }
+                
             }
         } catch (Exception e) {
             NewRelic.recordHandledException(e);

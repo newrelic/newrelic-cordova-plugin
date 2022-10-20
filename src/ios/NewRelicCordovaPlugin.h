@@ -36,5 +36,28 @@
 
 - (void)recordError:(CDVInvokedUrlCommand *)command;
 
+- (void)crashNow:(CDVInvokedUrlCommand *)command;
+
+- (void)currentSessionId:(CDVInvokedUrlCommand *)command;
+
+- (void)incrementAttribute:(CDVInvokedUrlCommand *)command;
+
+- (void)noticeNetworkFailure:(CDVInvokedUrlCommand *)command;
+
+- (void)recordMetric:(CDVInvokedUrlCommand *)command;
+
+- (void)removeAllAttributes:(CDVInvokedUrlCommand *)command;
+
+- (void)setMaxEventBufferTime:(CDVInvokedUrlCommand *)command;
+
+- (void)setMaxEventPoolSize:(CDVInvokedUrlCommand *)command;
+
+- (void)analyticsEventEnabled:(CDVInvokedUrlCommand *) command;
+
+- (void)networkRequestEnabled:(CDVInvokedUrlCommand *) command;
+
+- (void)networkErrorRequestEnabled:(CDVInvokedUrlCommand *) command;
+
+- (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *) command;
 
 @end
