@@ -39,6 +39,11 @@ cordova plugin update
 # Usage
 See the examples below and for more detail see: [New Relic IOS SDK doc](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-ios/ios-sdk-api) or [Android SDK](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api).
 
+### Javascript
+> Methods in our plugin in Cordova can be called by importing `NewRelic` from `plugins/newrelic-cordova-plugin/www/js` or by using `window.NewRelic`.
+### Typescript
+> In TypeScript, you'll have to define our plugin before using it: `declare const NewRelic: any;`
+
 ### [noticeHttpTransaction](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/notice-http-transaction)(url: string, method: string, status: number, startTime: number, endTime: number, bytesSent: number, bytesReceived: number, body?: string)
 > The New Relic Cordova plugin automatically collects HTTP transactions, but if you want to manually record HTTP transactions, use this method to do so.
   ```js
