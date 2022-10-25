@@ -65,7 +65,7 @@ describe('Verify plugin lifecycle', function () {
 
     it('NewRelic agent should be in the build', function (done) {
       fs.readFile(helper.buildLogPath(), function (err, buildLog) {
-        assert.notEqual(buildLog.indexOf('newRelicInstrumentTask'), -1, "NewRelic Gradle tasks(s) not found");
+        assert.notEqual(buildLog.indexOf('newrelicConfig'), -1, "NewRelic Gradle tasks(s) not found");
         done();
       });
     });

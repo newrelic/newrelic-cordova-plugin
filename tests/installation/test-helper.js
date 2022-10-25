@@ -25,7 +25,7 @@ module.exports = {
   },
 
   installPlugin: function () {
-    return this.jumpToWorkingDirectory() + '; cordova plugin add  ' + processDir + ' --save --variable ANDROID_APP_TOKEN=1234 --variable IOS_APP_TOKEN=123456  --variable ANDROID_AGENT_VER=5.10.0'
+    return this.jumpToWorkingDirectory() + '; cordova plugin add  ' + processDir + ' --save --variable ANDROID_APP_TOKEN=1234 --variable IOS_APP_TOKEN=12345'
   },
 
   installPluginiOS: function () {
@@ -33,11 +33,11 @@ module.exports = {
   },
 
   installPluginAndroid: function () {
-    return this.jumpToWorkingDirectory() + '; cordova plugin add  ' + processDir + ' --save --variable ANDROID_APP_TOKEN=1234 --variable ANDROID_AGENT_VER=5.10.0'
+    return this.jumpToWorkingDirectory() + '; cordova plugin add  ' + processDir + ' --save --variable ANDROID_APP_TOKEN=1234'
   },
 
   buildGradlePath: function () {
-    return workingDirectory + '/platforms/android/build.gradle'
+    return workingDirectory + '/platforms/android/app/build.gradle'
   },
 
   buildApps: function () {

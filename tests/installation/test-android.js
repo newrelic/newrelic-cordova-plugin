@@ -45,7 +45,7 @@ describe('Verify Android agent life cycle', function () {
 
     it('Android agent should be injected into the build', function (done) {
       fs.readFile(helper.buildLogPath(), function (err, buildLog) {
-        expect(buildLog.indexOf('newRelicInstrumentTask')).to.not.equal(-1);
+        expect(buildLog.indexOf('newrelicConfig')).to.not.equal(-1);
         done();
       });
     });
