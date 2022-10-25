@@ -6,20 +6,32 @@ development team. Because of this, we need to be more defensive in our coding
 practices than most projects.
 
 ## Testing
-
+### Functional Testing
 The plugin includes a suite of functional tests which should be used to
 verify your changes don't break existing functionality.
 
 Functional tests are stored in the `test` directory.
 
-### Running Tests
-
 Running the test suite is simple.  Just invoke:
-
+```
     npm install
     npm test
+```
 
 This will run the tests in standalone mode, executing the test suite.
+### Unit Testing
+The plugin includes unit testing that is stored in the `tests` directory. 
+
+Our testing makes use of [cordova-paramedic](https://github.com/apache/cordova-paramedic) to run our tests in a test app in an emulator. The npm version of cordova-paramedic is out of date, so it is preferred to install it using GitHub. To install it, run:
+```
+    npm install -g github:apache/cordova-paramedic
+```
+Once it is installed, you will be able to run tests for each individual platform.
+```
+    npm run test:android
+    npm run test:ios
+```
+
 
 ### Writing Tests
 

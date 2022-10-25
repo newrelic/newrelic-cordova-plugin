@@ -1,0 +1,14 @@
+{
+  "name": "newrelic-cordova-plugin-tests",
+  "version": "5.0.0-dev",
+  "description": "",
+  "cordova": {
+    "id": "newrelic-cordova-plugin-tests",
+    "platforms": []
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "",
+  "license": "Apache 2.0"
+}
