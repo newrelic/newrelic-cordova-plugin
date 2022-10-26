@@ -173,6 +173,8 @@
     NSString* countUnit = [command.arguments objectAtIndex:3];
     NSString* valueUnit = [command.arguments objectAtIndex:4];
     
+    int intval = (value.intValue);
+    
     NSDictionary *dict = @{
         @"PERCENT": kNRMetricUnitPercent,
         @"BYTES": kNRMetricUnitBytes,
@@ -181,10 +183,11 @@
         @"OPERATIONS": kNRMetricUnitsOperations
     };
     
-    if (value < 0) {
+    if (intval < 0) {
         [NewRelic recordMetricWithName:name category:category];
     } else {
-        if (countUnit == nil || valueUnit == nil) {
+        
+        if (countUnit == nil || valueUnit == nil || [countUnit isKindOfClass:[NSNull class]] || [valueUnit isKindOfClass:[NSNull class]]) {
             [NewRelic recordMetricWithName:name category:category value:value];
         } else {
             [NewRelic recordMetricWithName:name category:category value:value valueUnits:dict[valueUnit] countUnits:dict[countUnit]];
