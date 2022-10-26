@@ -1,4 +1,11 @@
 var exec = require("cordova/exec");
+const { LOG } = require("./newrelic-utils/nr-logger");
+// import utils from '../../newrelic-utils/nr-utils';
+// import { LOG } from '../../newrelic-utils/nr-logger';
+// import { Attribute, BreadCrumb, NewRelicEvent } from '../../newrelic-utils/models';
+// var utils = require("../../newrelic-utils/nr-utils");
+// var LOG = require("../../newrelic-utils/nr-logger");
+// var { Attribute, BreadCrumb, NewRelicEvent } = require('../../newrelic-utils/models/index');
 
 var NewRelic = {
 
@@ -37,7 +44,14 @@ var NewRelic = {
      * @param {number} value Value of the attribute.
      */
     setAttribute: function (name, value, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [name, value]);
+        const attribute = new Attribute({ name, value });
+        attribute.attributeName.isValid(() => {
+            attribute.attributeValue.isValid(() => {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [name, value]);
+                return;
+            });
+            LOG.error(`invalid value '${value}' sent to setAttribute()`);
+        });
     },
 
     /**
@@ -56,10 +70,12 @@ var NewRelic = {
      * @param {Map<string, string|number>} eventAttributes A map that includes a list of attributes.
      */
     recordBreadcrumb: function (name, eventAttributes, cb, fail) {
-        if (eventAttributes === undefined) {
-            eventAttributes = {}
-        }
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [name, eventAttributes]);
+        const crumb = new BreadCrumb({ name, eventAttributes });
+        crumb.attributes.isValid(() => {
+            crumb.eventName.isValid(() => {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [name, eventAttributes]);
+            });
+        });
     },
 
     /**
@@ -70,7 +86,14 @@ var NewRelic = {
      * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
      */
     recordCustomEvent: function (eventType, eventName, attributes, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, attributes]);
+        const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
+        customEvent.attributes.isValid(() => {
+            if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, attributes]);
+            } else {
+                LOG.error("Invalid event name or type in recordCustomEvent");
+            }
+        });
     },
 
     /**
@@ -116,7 +139,12 @@ var NewRelic = {
      * @param {boolean} isFatal The flag for whether the error is fatal.
      */
     recordError(name, message, stack, isFatal, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [name, message, stack, isFatal]);
+        if(name === null || message == null) {
+            LOG.warn('undefined error name or message in recordError');
+            return;
+        } else {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [name, message, stack, isFatal]);
+        }
     },
 
     /**
@@ -148,7 +176,14 @@ var NewRelic = {
      * @param {number} value Optional argument that increments the attribute by this value.
      */
     incrementAttribute: function(name, value=1, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
+        const attribute = new Attribute({ name , value });
+        attribute.attributeName.isValid(() => {
+            attribute.attributeValue.isValid(() => {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
+                return;
+            });
+            LOG.error(`invalid value '${value}' sent to incrementAttribute()`);
+        }); 
     },
 
     /**
@@ -164,10 +199,11 @@ var NewRelic = {
     noticeNetworkFailure: function(url, httpMethod, startTime, endTime, failure, cb, fail) {
         const failureNames = new Set(['Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed']);
         if(!failureNames.has(failure)) {
-          window.console.error("NewRelic.noticeNetworkFailure: Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
-          return;
+            LOG.error("Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
+            return;
+        } else {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
         }
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
     },
 
     /**
@@ -182,17 +218,17 @@ var NewRelic = {
         const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
         if(value < 0) {
           if(countUnit !== null || valueUnit !== null) {
-            window.console.error('NewRelic.recordMetric: value must be set in recordMetric if countUnit and valueUnit are set');
-            return;
+                LOG.error('value must be set in recordMetric if countUnit and valueUnit are set');
+                return;
           }
         } else {
           if((countUnit !== null && valueUnit == null) || (countUnit == null && valueUnit !== null)) {
-            window.console.error('NewRelic.recordMetric: countUnit and valueUnit in recordMetric must both be null or set');
-            return;
+                LOG.error('countUnit and valueUnit in recordMetric must both be null or set');
+                return;
           } else if(countUnit !== null && valueUnit !== null) {
             if(!metricUnits.has(countUnit) || !metricUnits.has(valueUnit)) {
-              window.console.error("NewRelic.recordMetric: countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
-              return;
+                LOG.error("countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
+                return;
             }
           }
         }
