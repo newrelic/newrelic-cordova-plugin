@@ -1,4 +1,4 @@
-class Utils {
+export default class Utils {
   static isObject(value) {
     return value instanceof Object && !(value instanceof Array);
   }
@@ -23,5 +23,3 @@ class Utils {
     return Utils.isObject(attributes) && attributes !== null;
   }
 }
-
-module.exports = Utils;
