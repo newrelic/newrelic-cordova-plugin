@@ -162,6 +162,11 @@ var NewRelic = {
      * @param {string} failure The name of the network failure. Possible values are 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'.
      */
     noticeNetworkFailure: function(url, httpMethod, startTime, endTime, failure, cb, fail) {
+        const failureNames = new Set(['Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed']);
+        if(!failureNames.has(failure)) {
+          window.console.error("NewRelic.noticeNetworkFailure: Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
+          return;
+        }
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
     },
 
@@ -174,6 +179,23 @@ var NewRelic = {
      * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'. 
      */
     recordMetric: function(name, category, value=-1, countUnit=null, valueUnit=null, cb, fail) {
+        const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
+        if(value < 0) {
+          if(countUnit !== null || valueUnit !== null) {
+            window.console.error('NewRelic.recordMetric: value must be set in recordMetric if countUnit and valueUnit are set');
+            return;
+          }
+        } else {
+          if((countUnit !== null && valueUnit == null) || (countUnit == null && valueUnit !== null)) {
+            window.console.error('NewRelic.recordMetric: countUnit and valueUnit in recordMetric must both be null or set');
+            return;
+          } else if(countUnit !== null && valueUnit !== null) {
+            if(!metricUnits.has(countUnit) || !metricUnits.has(valueUnit)) {
+              window.console.error("NewRelic.recordMetric: countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
+              return;
+            }
+          }
+        }
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordMetric", [name, category, value, countUnit, valueUnit]);
     },
 
