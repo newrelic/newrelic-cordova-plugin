@@ -9,7 +9,6 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "types": "module",
   "author": "",
   "license": "Apache 2.0"
 }

@@ -31,6 +31,7 @@ Once it is installed, you will be able to run tests for each individual platform
     npm run test:android
     npm run test:ios
 ```
+If you run into issues on iOS side, you might have to restart your emulator. 
 
 
 ### Writing Tests

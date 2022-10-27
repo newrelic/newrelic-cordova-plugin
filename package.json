@@ -15,17 +15,9 @@
     "ios",
     "android"
   ],
-  "jest": {
-    "transform": {
-      "^.+\\.[t|j]sx?$": "babel-jest"
-    }
-  },
   "author": "New Relic",
   "devDependencies": {
-    "@babel/preset-env": "^7.19.4",
-    "babel-jest": "^29.2.2",
     "chai": "^3.5.0",
-    "jest": "^29.2.2",
     "mocha": "^3.2.0",
     "shelljs": "^0.7.6",
     "xcode": "^2.0.0"

@@ -1,11 +1,4 @@
 var exec = require("cordova/exec");
-const { LOG } = require("./newrelic-utils/nr-logger");
-// import utils from '../../newrelic-utils/nr-utils';
-// import { LOG } from '../../newrelic-utils/nr-logger';
-// import { Attribute, BreadCrumb, NewRelicEvent } from '../../newrelic-utils/models';
-// var utils = require("../../newrelic-utils/nr-utils");
-// var LOG = require("../../newrelic-utils/nr-logger");
-// var { Attribute, BreadCrumb, NewRelicEvent } = require('../../newrelic-utils/models/index');
 
 var NewRelic = {
 
@@ -40,17 +33,16 @@ var NewRelic = {
      * Creates a custom attribute with a specified name and value.
      * When called, it overwrites its previous value and type.
      * The created attribute is shared by multiple Mobile event types.
-     * @param {string} name Name of the attribute.
+     * @param {string} attributeName Name of the attribute.
      * @param {number} value Value of the attribute.
      */
-    setAttribute: function (name, value, cb, fail) {
-        const attribute = new Attribute({ name, value });
+    setAttribute: function (attributeName, value, cb, fail) {
+        const attribute = new Attribute({ attributeName, value });
         attribute.attributeName.isValid(() => {
             attribute.attributeValue.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [name, value]);
-                return;
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [attributeName, value]);
             });
-            LOG.error(`invalid value '${value}' sent to setAttribute()`);
+            window.console.error(`invalid value '${value}' sent to setAttribute()`);
         });
     },
 
@@ -61,19 +53,19 @@ var NewRelic = {
      * @param {string} name Name of the attribute. 
      */
     removeAttribute: function (name, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAttribute", [name, value]);
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAttribute", [name]);
     },
 
     /**
      * Creates and records a MobileBreadcrumb event.
-     * @param {string} name The name you want to give to a breadcrumb event.
-     * @param {Map<string, string|number>} eventAttributes A map that includes a list of attributes.
+     * @param {string} eventName The name you want to give to a breadcrumb event.
+     * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
      */
-    recordBreadcrumb: function (name, eventAttributes, cb, fail) {
-        const crumb = new BreadCrumb({ name, eventAttributes });
+    recordBreadcrumb: function (eventName, attributes, cb, fail) {
+        const crumb = new BreadCrumb({ eventName, attributes });
         crumb.attributes.isValid(() => {
             crumb.eventName.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [name, eventAttributes]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [eventName, attributes]);
             });
         });
     },
@@ -91,7 +83,7 @@ var NewRelic = {
             if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, attributes]);
             } else {
-                LOG.error("Invalid event name or type in recordCustomEvent");
+                window.console.error("Invalid event name or type in recordCustomEvent");
             }
         });
     },
@@ -140,7 +132,7 @@ var NewRelic = {
      */
     recordError(name, message, stack, isFatal, cb, fail) {
         if(name === null || message == null) {
-            LOG.warn('undefined error name or message in recordError');
+            window.console.warn('undefined error name or message in recordError');
             return;
         } else {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [name, message, stack, isFatal]);
@@ -182,7 +174,7 @@ var NewRelic = {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
                 return;
             });
-            LOG.error(`invalid value '${value}' sent to incrementAttribute()`);
+            window.console.error(`invalid value '${value}' sent to incrementAttribute()`);
         }); 
     },
 
@@ -199,7 +191,7 @@ var NewRelic = {
     noticeNetworkFailure: function(url, httpMethod, startTime, endTime, failure, cb, fail) {
         const failureNames = new Set(['Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed']);
         if(!failureNames.has(failure)) {
-            LOG.error("Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
+            window.console.error("Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
             return;
         } else {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
@@ -218,16 +210,16 @@ var NewRelic = {
         const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
         if(value < 0) {
           if(countUnit !== null || valueUnit !== null) {
-                LOG.error('value must be set in recordMetric if countUnit and valueUnit are set');
+                window.console.error('value must be set in recordMetric if countUnit and valueUnit are set');
                 return;
           }
         } else {
           if((countUnit !== null && valueUnit == null) || (countUnit == null && valueUnit !== null)) {
-                LOG.error('countUnit and valueUnit in recordMetric must both be null or set');
+                window.console.error('countUnit and valueUnit in recordMetric must both be null or set');
                 return;
           } else if(countUnit !== null && valueUnit !== null) {
             if(!metricUnits.has(countUnit) || !metricUnits.has(valueUnit)) {
-                LOG.error("countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
+                window.console.error("countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
                 return;
             }
           }
@@ -414,6 +406,111 @@ console.warn = function() {
 console.error = function() {
   NewRelic.sendConsole('error', arguments);
   defaultError.apply(console, arguments);
+};
+
+class Utils {
+    static isObject(value) {
+      return value instanceof Object && !(value instanceof Array);
+    }
+  
+    static isString(value) {
+      return typeof value === 'string' || value instanceof String;
+    }
+  
+    static isBool(value) {
+      return typeof value === 'boolean' || value instanceof Boolean;
+    }
+  
+    static isNumber(value) {
+      return !Number.isNaN(parseFloat(value)) && Number.isFinite(value);
+    }
+  
+    static notEmptyString(value) {
+      return value && value.length !== 0;
+    }
+  
+    static hasValidAttributes(attributes) {
+      return Utils.isObject(attributes) && attributes !== null;
+    }
+}
+
+class Validator {
+    static isString = 'isString';
+  
+    static isBool = 'isBool';
+  
+    static isNumber = 'isNumber';
+  
+    static isObject = 'isObject';
+  
+    static notEmptyString = 'notEmptyString';
+  
+    static hasValidAttributes = 'hasValidAttributes';
+  
+    validate = (value, rules, msg) => rules.every((rule) => {
+      const isValid = Utils[rule](value);
+      if (!isValid) {
+        window.console.error(msg);
+      }
+      return Utils[rule](value);
+    });
+};
+
+class Rule {
+    constructor(value, rules = [], message) {
+      this.value = value;
+      this.rules = rules;
+      this.message = message;
+      this.validator = new Validator();
+    }
+  
+    isValid(isValid = val => val, failedValidation = val => val) {
+      const hasValidValues = this.validator.validate(this.value, this.rules, this.message);
+  
+      if (hasValidValues) {
+        isValid();
+      } else {
+        failedValidation(hasValidValues, this.message);
+      }
+  
+      return hasValidValues;
+    }
+};
+
+const BreadCrumb = class CustomEvent {
+    constructor({ eventName, attributes }) {
+      this.eventName = new Rule(eventName,
+        [Validator.isString, Validator.notEmptyString],
+        `eventName '${eventName}' is not a string.`);
+      this.attributes = new Rule(attributes,
+        [Validator.isObject, Validator.hasValidAttributes],
+        `attributes '${attributes}' are not valid.`);
+    }
+};
+  
+const NewRelicEvent = class CustomEvent {
+    constructor({ eventName = '', attributes, eventType }) {
+      this.eventType = new Rule(eventType,
+        [Validator.isString, Validator.notEmptyString],
+        `eventType '${eventType}' is not a string`);
+  
+      this.eventName = new Rule(eventName,
+        [Validator.isString],
+        `eventName '${eventName}' is not a string`);
+  
+      this.attributes = new Rule(attributes,
+        [Validator.isObject, Validator.hasValidAttributes],
+        `attributes '${attributes}' are not valid.`);
+    }
+};
+  
+const Attribute = class CustomEvent {
+    constructor({ attributeName, value }) {
+      this.attributeName = new Rule(attributeName,
+        [Validator.isString, Validator.notEmptyString],
+        `attributeName '${attributeName}' is not a string`);
+      this.attributeValue = new Rule(value, [], `invalid value '${value}' sent to setAttribute()`);
+    }
 };
 
 module.exports = NewRelic;
