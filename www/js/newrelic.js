@@ -263,13 +263,14 @@ var NewRelic = {
 }
 
 networkRequest = {};
+var originalXhrOpen = XMLHttpRequest.prototype.open;
+var originalXHRSend = XMLHttpRequest.prototype.send;
 window.XMLHttpRequest.prototype.open = function (method, url) {
     // Keep track of the method and url
     // start time is tracked by the `send` method
 
     // eslint-disable-next-line prefer-rest-params
-    console.log("nis" + method);
-    console.log(url);
+
     networkRequest.url = url;
     networkRequest.method = method;
     networkRequest.bytesSent = 0;
@@ -278,14 +279,7 @@ window.XMLHttpRequest.prototype.open = function (method, url) {
 
 }
 
-window.XMLHttpRequest.prototype.setRequestHeader = function (string, value) {
 
-    console.log("string" + string);
-    console.log("value" + value);
-    return originalXHRSsetRequestHeaders.apply(this, arguments);
-
-
-}
 
 
 window.XMLHttpRequest.prototype.send = function (data) {
@@ -298,9 +292,7 @@ window.XMLHttpRequest.prototype.send = function (data) {
 
                 if (this.readyState === this.HEADERS_RECEIVED) {
                     const contentTypeString = this.getResponseHeader('Content-Type');
-                    if (contentTypeString) {
-                        console.log("1" + contentTypeString);
-                    }
+                
 
                     if (this.getAllResponseHeaders()) {
                         const responseHeaders = this.getAllResponseHeaders().split('\r\n');
@@ -310,29 +302,19 @@ window.XMLHttpRequest.prototype.send = function (data) {
                             const value = element.split(':')[1];
                             responseHeadersDictionary[key] = value;
                         });
-                        console.log("2" + responseHeadersDictionary);
+                      
                     }
                 }
                 if (this.readyState === this.DONE) {
-                    console.log("3" + this.status);
                     networkRequest.endTime = Date.now();
                     networkRequest.status = this.status;
                     networkRequest.bytesreceived = this.responseText.length;
                     networkRequest.body = this.responseText;
 
-                    if (this.response) {
-                        if (this.responseType === 'blob') {
-                            var responseText = await (new Response(this.response)).text();
-                            console.log("3" + responseText);
+                    
+                    NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body);
 
-
-                        } else if (this.responseType === 'text') {
-                            console.log("3" + this.response);
-                        }
-
-                        NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body);
-
-                    }
+                    
 
                 }
             },
