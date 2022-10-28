@@ -39,7 +39,13 @@ cordova plugin update
 ```
 
 # Usage
-See the examples below and for more detail see: [New Relic IOS SDK doc](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-ios/ios-sdk-api) or [Android SDK](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api).
+Our plugin uses the same APIs as our native agents. See the examples below for usage and for more detail see: [New Relic IOS SDK doc](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-ios/ios-sdk-api) or [Android SDK](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api).
+
+### Ionic
+> For those using Ionic, you can import our plugin by using awesome-cordova-plugins.
+```js
+  import { NewRelic } from '@awesome-cordova-plugins/newrelic';
+```
 
 ### Javascript
 > Methods in our plugin in Cordova can be called by importing `NewRelic` from `plugins/newrelic-cordova-plugin/www/js` or by using `window.NewRelic`.
@@ -123,17 +129,6 @@ See the examples below and for more detail see: [New Relic IOS SDK doc](https://
   
   ```
 
-### recordError(name: string, message: string, stack: string, isFatal: boolean): void;
-> Records JavaScript errors for Cordova.
-```js
-    try {
-      var foo = {};
-      foo.bar();
-    } catch(err) {
-      NewRelic.recordError(err.name, err.message, err.stack, true);
-    }
-```
-
 ### [crashNow](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/crashnow-android-sdk-api)(message?: string): void;
 > Throws a demo run-time exception to test New Relic crash reporting.
 
@@ -201,7 +196,118 @@ By default, these configurations are already set to true on agent start.
     NewRelic.httpRequestBodyCaptureEnabled(true);
 ```
 
-## How to see JSErrors(Fatal/Non Fatal) in NewRelic One?
+## Error Reporting
+
+### Angular
+Angular 2+ exposes an [ErrorHandler](https://angular.io/api/core/ErrorHandler) class to handle errors. You can implement New Relic by extending this class as follows:
+
+```ts
+import { ErrorHandler, Injectable } from '@angular/core';
+import { NewRelic } from "@awesome-cordova-plugins/newrelic";
+@Injectable()
+export class GlobalErrorHandler extends ErrorHandler {
+  constructor() {
+    super();
+  }
+  handleError(error: any): void {
+    NewRelic.recordError(error.name, error.message, error.stack, false);
+    super.handleError(error);
+  }
+}
+```
+Then, you'll need to let Angular 2 know about this new error handler by listing overrides for the provider in `app.module.ts`:
+```ts
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,HttpClientModule],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },{provide: ErrorHandler, useClass: GlobalErrorHandler}],
+  bootstrap: [AppComponent],
+})
+```
+
+### React
+React 16+ has added error boundary components that catch errors that bubble up from child components. These are very useful for tracking errors and reporting errors to New Relic.
+
+```js
+import React, { Component } from "react";
+import { NewRelic } from "@awesome-cordova-plugins/newrelic";
+
+export class ErrorBoundary extends Component {
+    componentDidCatch(error, errorInfo) {
+        if (errorInfo && errorInfo.componentStack) {
+            // Optional line to print out the component stack for debugging.
+            console.log(errorInfo.componentStack);
+        }
+
+        NewRelic.recordError(error.name, error.message, error.stack, false);
+        this.setState({ error });
+    }
+
+    render() {
+        // Render error messages or other components here.
+    }
+}
+```
+
+### Redux
+You can create [Redux Middleware](https://redux.js.org/tutorials/fundamentals/part-4-store#middleware) and apply it to your store. This will allow you to report any errors to New Relic.
+
+```js
+import { NewRelic } from "@awesome-cordova-plugins/newrelic";
+
+const NewRelicLogger = store => next => action => {
+    try {
+        // You can log every action as a custom event
+        NewRelic.recordCustomEvent("eventType", "eventName", action);
+        return next(action)
+    } catch (err) { 
+
+        // 
+        NewRelic.recordBreadcrumb("NewRelicLogger error", store.getState());
+
+        // Record the JS error to New Relic
+        NewRelic.recordError(err.name, err.message, err.stack, false);
+    }
+}
+
+export default NewRelicLogger;
+```
+Make sure that the middleware is applied when creating your store:
+```js
+import { createStore, applyMiddleware } from "redux"
+import NewRelicLogger from "./middleware/NewRelicLogger"
+
+const store = createStore(todoApp, applyMiddleware(NewRelicLogger));
+```
+
+### Vue
+Vue has a global error handler that reports native JavaScript errors and passes in the Vue instance. This handler will be useful for reporting errors to New Relic.
+
+```js
+import { NewRelic } from "@awesome-cordova-plugins/newrelic";
+
+Vue.config.errorHandler = (err, vm, info) => {
+
+    // Record properties passed to the component if there are any
+    if(vm.$options.propsData) {
+        NewRelic.recordBreadcrumb("Props passed to component", vm.$options.propsData);
+    }
+
+    // Get the lifecycle hook, if present
+    let lifecycleHookInfo = 'none';
+    if (info){
+        lifecycleHookInfo = info;
+    }
+
+    // Record a breadcrumb with more details such as component name and lifecycle hook
+    NewRelic.recordBreadcrumb("Vue Error", { 'componentName': vm.$options.name, 'lifecycleHook': lifecycleHookInfo })
+
+    // Record the JS error to New Relic
+    NewRelic.recordError(err.name, err.message, err.stack, false);
+}
+```
+
+### How to see JSErrors(Fatal/Non Fatal) in NewRelic One?
 
 There is no section for JavaScript errors, but you can see JavaScript errors in custom events and also query them in NRQL explorer.
 
