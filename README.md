@@ -197,6 +197,8 @@ By default, these configurations are already set to true on agent start.
 ```
 
 ## Error Reporting
+### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error), isFatal: boolean) : void;
+Records JavaScript errors for Cordova. It is useful to add this method by adding it to the error handler of the framework that you are using. Here are some examples below:
 
 ### Angular
 Angular 2+ exposes an [ErrorHandler](https://angular.io/api/core/ErrorHandler) class to handle errors. You can implement New Relic by extending this class as follows:
@@ -204,13 +206,14 @@ Angular 2+ exposes an [ErrorHandler](https://angular.io/api/core/ErrorHandler) c
 ```ts
 import { ErrorHandler, Injectable } from '@angular/core';
 import { NewRelic } from "@awesome-cordova-plugins/newrelic";
+
 @Injectable()
 export class GlobalErrorHandler extends ErrorHandler {
   constructor() {
     super();
   }
   handleError(error: any): void {
-    NewRelic.recordError(error.name, error.message, error.stack, false);
+    NewRelic.recordError(error, false);
     super.handleError(error);
   }
 }
@@ -239,7 +242,7 @@ export class ErrorBoundary extends Component {
             console.log(errorInfo.componentStack);
         }
 
-        NewRelic.recordError(error.name, error.message, error.stack, false);
+        NewRelic.recordError(error, false);
         this.setState({ error });
     }
 
@@ -266,7 +269,7 @@ const NewRelicLogger = store => next => action => {
         NewRelic.recordBreadcrumb("NewRelicLogger error", store.getState());
 
         // Record the JS error to New Relic
-        NewRelic.recordError(err.name, err.message, err.stack, false);
+        NewRelic.recordError(err, false);
     }
 }
 
@@ -303,7 +306,7 @@ Vue.config.errorHandler = (err, vm, info) => {
     NewRelic.recordBreadcrumb("Vue Error", { 'componentName': vm.$options.name, 'lifecycleHook': lifecycleHookInfo })
 
     // Record the JS error to New Relic
-    NewRelic.recordError(err.name, err.message, err.stack, false);
+    NewRelic.recordError(error, false);
 }
 ```
 

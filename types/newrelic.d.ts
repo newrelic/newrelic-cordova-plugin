@@ -12,21 +12,11 @@ export function sendConsole(type: any, args: any): void;
 export function send(name: any, args: any): void;
 export function send(name: any, args: any): void;
 /**
- * Records JavaScript errors for cordova.
- * @param {string} name The name of the error.
- * @param {string} message The message of the error.
- * @param {string} stack The error stack of the error.
+ * Records JavaScript errors for Cordova.
+ * @param {Error} err The name of the error.
  * @param {boolean} isFatal The flag for whether the error is fatal.
  */
-export function recordError(name: string, message: string, stack: string, isFatal: boolean, cb: any, fail: any): void;
-/**
- * Records JavaScript errors for cordova.
- * @param {string} name The name of the error.
- * @param {string} message The message of the error.
- * @param {string} stack The error stack of the error.
- * @param {boolean} isFatal The flag for whether the error is fatal.
- */
-export function recordError(name: string, message: string, stack: string, isFatal: boolean, cb: any, fail: any): void;
+export function recordError(err: Error, isFatal: boolean, cb: any, fail: any): void;
 export function crashNow(message: string, cb: any, fail: any): void;
 export function currentSessionId(cb: Function, fail: any): Promise<any>;
 export function incrementAttribute(name: string, value: number, cb: any, fail: any): void;
