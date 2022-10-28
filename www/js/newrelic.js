@@ -126,9 +126,8 @@ var NewRelic = {
     /**
      * Records JavaScript errors for Cordova.
      * @param {Error} err The error to record.
-     * @param {boolean} isFatal The flag for whether the error is fatal.
      */
-    recordError(err, isFatal, cb, fail) {
+    recordError: function(err, cb, fail) {
         if (err) {
             var error;
 
@@ -141,7 +140,7 @@ var NewRelic = {
             }
 
             if(error !== undefined) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, isFatal]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
             } else {
                 window.console.warn('Undefined error in NewRelic.recordError');
             }
@@ -373,20 +372,20 @@ window.addEventListener("error", (event) => {
         err.name = event.message;
         err.message = event.error.message;
         err.stack = event.error.stack;
-        NewRelic.recordError(err, true);
+        NewRelic.recordError(err);
     } else if (cordova.platformId == "iOS") {
         const err = new Error();
         err.name = event.message;
         err.message = '';
         err.stack = '';
-        NewRelic.recordError(err, true);
+        NewRelic.recordError(err);
     }
 });
 
 try {
     window.addEventListener('unhandledrejection', (e) => {
         const err = new Error(`${e.reason}`)
-        NewRelic.recordError(err, true);
+        NewRelic.recordError(err);
     })
 } catch (err) {
     // do nothing -- addEventListener is not supported

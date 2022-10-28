@@ -197,7 +197,7 @@ By default, these configurations are already set to true on agent start.
 ```
 
 ## Error Reporting
-### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error), isFatal: boolean) : void;
+### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)) : void;
 Records JavaScript errors for Cordova. It is useful to add this method by adding it to the error handler of the framework that you are using. Here are some examples below:
 
 ### Angular
@@ -213,7 +213,7 @@ export class GlobalErrorHandler extends ErrorHandler {
     super();
   }
   handleError(error: any): void {
-    NewRelic.recordError(error, false);
+    NewRelic.recordError(error);
     super.handleError(error);
   }
 }
@@ -242,7 +242,7 @@ export class ErrorBoundary extends Component {
             console.log(errorInfo.componentStack);
         }
 
-        NewRelic.recordError(error, false);
+        NewRelic.recordError(error);
         this.setState({ error });
     }
 
@@ -269,7 +269,7 @@ const NewRelicLogger = store => next => action => {
         NewRelic.recordBreadcrumb("NewRelicLogger error", store.getState());
 
         // Record the JS error to New Relic
-        NewRelic.recordError(err, false);
+        NewRelic.recordError(err);
     }
 }
 
@@ -306,7 +306,7 @@ Vue.config.errorHandler = (err, vm, info) => {
     NewRelic.recordBreadcrumb("Vue Error", { 'componentName': vm.$options.name, 'lifecycleHook': lifecycleHookInfo })
 
     // Record the JS error to New Relic
-    NewRelic.recordError(error, false);
+    NewRelic.recordError(error);
 }
 ```
 

@@ -8,15 +8,12 @@ export function recordCustomEvent(eventType: string, eventName: string, attribut
 export function startInteraction(actionName: string, cb: Function, fail: any): Promise<any>;
 export function endInteraction(interactionId: string, cb: any, fail: any): void;
 export function sendConsole(type: any, args: any): void;
-export function sendConsole(type: any, args: any): void;
-export function send(name: any, args: any): void;
 export function send(name: any, args: any): void;
 /**
  * Records JavaScript errors for Cordova.
  * @param {Error} err The name of the error.
- * @param {boolean} isFatal The flag for whether the error is fatal.
  */
-export function recordError(err: Error, isFatal: boolean, cb: any, fail: any): void;
+export function recordError(err: Error, cb: any, fail: any): void;
 export function crashNow(message: string, cb: any, fail: any): void;
 export function currentSessionId(cb: Function, fail: any): Promise<any>;
 export function incrementAttribute(name: string, value: number, cb: any, fail: any): void;

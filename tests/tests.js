@@ -131,18 +131,18 @@ exports.defineAutoTests = () => {
       exampleError.name = 'fakeErrorName';
       exampleError.message = 'fakeMsg';
       exampleError.stack = 'fakeStack';
-      window.NewRelic.recordError(exampleError, true);
-      window.NewRelic.recordError(new TypeError, false);
-      window.NewRelic.recordError(new EvalError, true);
-      window.NewRelic.recordError(new RangeError, false);
-      window.NewRelic.recordError(new ReferenceError, true);
-      window.NewRelic.recordError(new Error, false);
+      window.NewRelic.recordError(exampleError);
+      window.NewRelic.recordError(new TypeError);
+      window.NewRelic.recordError(new EvalError);
+      window.NewRelic.recordError(new RangeError);
+      window.NewRelic.recordError(new ReferenceError);
+      window.NewRelic.recordError(new Error);
 
       // Bad arguments
-      window.NewRelic.recordError(undefined, false);
-      window.NewRelic.recordError(null, true);
-      window.NewRelic.recordError(123, true);
-      window.NewRelic.recordError(true, false);
+      window.NewRelic.recordError(undefined);
+      window.NewRelic.recordError(null);
+      window.NewRelic.recordError(123);
+      window.NewRelic.recordError(true);
 
       let numOfNativeCalls = cordova.exec.calls.count() - window.console.warn.calls.count();
       expect(numOfNativeCalls).toBe(6);
