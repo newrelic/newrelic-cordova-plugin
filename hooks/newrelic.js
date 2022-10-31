@@ -118,15 +118,15 @@ module.exports = {
   /**
    * Return {boolean} - if this platform exists and has been configured with an application token
    */
-  isPlatformConfigured: function(config) {
-    return (config && config.hasOwnProperty('appToken') && config.appToken !== 'x'); 
+  isPlatformConfigured: function (config) {
+    return (config && config.hasOwnProperty('appToken') && config.appToken !== 'x');
   },
 
-  warnPlatformNotConfigured: function(platform) {
+  warnPlatformNotConfigured: function (platform) {
     console.log('[newrelic.warn]: An ' + platform + ' platform exists, but an ' + platform + ' New Relic application token was not provided when "' + this.pluginName() + '" was added.\n' +
       'To use the plugin on ' + platform + ', reinstall and provide an ' + platform + ' application token:\n\n' +
       "'cordova plugin rm " + this.pluginName() + "'\n" +
-      "'cordova plugin add <plugin repo> --variable IOS_APP_TOKEN=<iOS application id> --variable ANDROID_APP_TOKEN=<Android application id>'\n"); 
+      "'cordova plugin add <plugin repo> --variable IOS_APP_TOKEN=<iOS application id> --variable ANDROID_APP_TOKEN=<Android application id>'\n");
   }
 
 };

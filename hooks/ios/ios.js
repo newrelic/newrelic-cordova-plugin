@@ -187,7 +187,7 @@ module.exports = {
   /**
    * Return {boolean} - if this platform exists and has been configured with an application token
    */
-  isPlatformConfigured: function() {
+  isPlatformConfigured: function () {
     var config = newrelic.getIosConfig();
     return newrelic.isPlatformConfigured(config);
   },

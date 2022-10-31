@@ -52,7 +52,7 @@ module.exports = {
     return this.jumpToWorkingDirectory() + '; cordova plugin remove newrelic-cordova-plugin --save'
   },
 
-  iosXcodeProject: function() {
+  iosXcodeProject: function () {
     return workingDirectory + '/platforms/ios/' + projectName + '.xcodeproj/project.pbxproj'
   }
 

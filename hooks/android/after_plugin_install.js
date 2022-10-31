@@ -6,6 +6,6 @@ module.exports = function (context) {
   android.removeAgentPlugin();
   android.injectAgentPlugin(context, isConfigured);
   if (isConfigured) {
-  	android.injectNewRelicProperties(context);
+    android.injectNewRelicProperties(context);
   }
 };
