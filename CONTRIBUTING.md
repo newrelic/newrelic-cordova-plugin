@@ -25,6 +25,13 @@ Keep in mind that when you submit your Pull Request, you'll need to sign the CLA
 For more information about CLAs, please check out Alex Russell’s excellent post,
 [“Why Do I Need to Sign This?”](https://infrequently.org/2008/06/why-do-i-need-to-sign-this/).
 
+Contributions are always welcome. Before contributing please read the
+[code of conduct](https://github.com/newrelic/.github/blob/main/CODE_OF_CONDUCT.md) and [search the issue tracker](issues); your issue may have already been discussed or fixed in `main`. To contribute,
+[fork](https://help.github.com/articles/fork-a-repo/) this repository, commit your changes, and [send a Pull Request](https://help.github.com/articles/using-pull-requests/).
+
+Note that our [code of conduct](https://github.com/newrelic/.github/blob/main/CODE_OF_CONDUCT.md) applies to all platforms and venues related to this project; please follow it in all your interactions with the project and its participants.
+
+
 ## Slack
 
 We host a public Slack with a dedicated channel for contributors and maintainers of open source projects hosted by New Relic.  If you are contributing to this project, you're welcome to request access to the #oss-contributors channel in the newrelicusers.slack.com workspace.  To request access, see https://newrelicusers-signup.herokuapp.com/.
@@ -69,5 +76,3 @@ There are some rare cases where code changes do not result in changed
 functionality (e.g. a performance optimization) and new tests are not required.
 In general, including tests with your pull request dramatically increases the
 chances it will be accepted.
-
-
