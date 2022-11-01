@@ -1,0 +1,6 @@
+  <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
+  id="newrelic-cordova-plugin-tests" version="5.0.0">
+      <name>New Relic Cordova Plugin Tests</name>
+      <license>Apache 2.0</license>
+      <js-module src="tests.js" name="tests"></js-module>
+  </plugin>
