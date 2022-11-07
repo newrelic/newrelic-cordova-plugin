@@ -1,8 +1,7 @@
-//  New Relic for Mobile -- iOS edition
-//
-//  Copyright (c) 2017 - Present New Relic. All rights reserved.
-//  See https://docs.newrelic.com/docs/licenses/ios-agent-licenses for license details
-//
+/*
+ * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 
+ */
 
 #import <Foundation/Foundation.h>
 #import <NewRelic/NewRelic.h>

@@ -73,11 +73,10 @@
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
-- (void)endInteraction:(CDVInvokedUrlCommand *)command {
-    NSString* interActionId = [command.arguments objectAtIndex:0];
-    [NewRelic stopCurrentInteraction:interActionId];
-}
+/*
+ * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 
+ */
 
 - (void)recordError:(CDVInvokedUrlCommand *)command {
     NSString* errorName = [command.arguments objectAtIndex:0];

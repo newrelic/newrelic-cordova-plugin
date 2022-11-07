@@ -1,3 +1,8 @@
+<!--
+  Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0 
+-->
+
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
