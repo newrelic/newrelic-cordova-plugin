@@ -38,6 +38,14 @@ Update the New Relic Cordova plugin to the latest released version easily via th
 ```
 cordova plugin update
 ```
+# Ionic Native Install
+
+``` shell
+ ionic cordova plugin add https://github.com/newrelic/newrelic-cordova-plugin.git --variable IOS_APP_TOKEN="{ios-app-token}" --variable ANDROID_APP_TOKEN="{android-app-token}"
+ 
+ npm install @awesome-cordova-plugins/newrelic
+
+``` 
 
 # Usage
 See the examples below and for more detail see: [New Relic IOS SDK doc](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-ios/ios-sdk-api) or [Android SDK](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api).
