@@ -132,17 +132,26 @@ exports.defineAutoTests = () => {
       spyOn(cordova, "exec").and.callThrough();
       spyOn(window.console, "warn").and.callThrough();
 
-      let exampleError = new TypeError;
-      window.NewRelic.recordError(exampleError.name, exampleError.message, exampleError.stack, true);
-      window.NewRelic.recordError('fakeErrorName', 'fakeMsg', 'fakeStack', false);
+      let exampleError = new Error();
+      exampleError.name = 'fakeErrorName';
+      exampleError.message = 'fakeMsg';
+      exampleError.stack = 'fakeStack';
+      window.NewRelic.recordError(exampleError);
+      window.NewRelic.recordError(new TypeError);
+      window.NewRelic.recordError(new EvalError);
+      window.NewRelic.recordError(new RangeError);
+      window.NewRelic.recordError(new ReferenceError);
+      window.NewRelic.recordError(new Error);
 
       // Bad arguments
-      window.NewRelic.recordError(null, 'fakeMsg', 'fakeStack', false);
-      window.NewRelic.recordError('fakeErrorName', null, 'fakeStack', true);
+      window.NewRelic.recordError(undefined);
+      window.NewRelic.recordError(null);
+      window.NewRelic.recordError(123);
+      window.NewRelic.recordError(true);
 
       let numOfNativeCalls = cordova.exec.calls.count() - window.console.warn.calls.count();
-      expect(numOfNativeCalls).toBe(2);
-      expect(window.NewRelic.recordError).toHaveBeenCalledTimes(4);
+      expect(numOfNativeCalls).toBe(6);
+      expect(window.NewRelic.recordError).toHaveBeenCalledTimes(10);
     });
 
     it('should have currentSessionId', () => {

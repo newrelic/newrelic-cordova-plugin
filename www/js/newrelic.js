@@ -129,18 +129,29 @@ var NewRelic = {
     },
 
     /**
-     * Records JavaScript errors for cordova.
-     * @param {string} name The name of the error.
-     * @param {string} message The message of the error.
-     * @param {string} stack The error stack of the error.
-     * @param {boolean} isFatal The flag for whether the error is fatal.
+     * Records JavaScript errors for Cordova.
+     * @param {Error} err The error to record.
      */
-    recordError(name, message, stack, isFatal, cb, fail) {
-        if(name === null || message == null) {
-            window.console.warn('undefined error name or message in recordError');
-            return;
+    recordError: function(err, cb, fail) {
+        if (err) {
+            var error;
+
+            if (err instanceof Error) {
+                error = err;
+            }
+
+            if (typeof err === 'string') {
+                error = new Error(err || '');
+            }
+
+            if(error !== undefined) {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
+            } else {
+                window.console.warn('Undefined error in NewRelic.recordError');
+            }
+
         } else {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [name, message, stack, isFatal]);
+            window.console.warn('Error is required in NewRelic.recordError');
         }
     },
 
@@ -361,16 +372,24 @@ window.XMLHttpRequest.prototype.send = function (data) {
 window.addEventListener("error", (event) => {
     console.log(event);
     if (cordova.platformId == "android") {
-        NewRelic.recordError(event.message, event.error.message, event.error.stack, true);
+        const err = new Error();
+        err.name = event.message;
+        err.message = event.error.message;
+        err.stack = event.error.stack;
+        NewRelic.recordError(err);
     } else if (cordova.platformId == "iOS") {
-        NewRelic.recordError(event.message, "", "", true);
+        const err = new Error();
+        err.name = event.message;
+        err.message = '';
+        err.stack = '';
+        NewRelic.recordError(err);
     }
 });
 
 try {
     window.addEventListener('unhandledrejection', (e) => {
         const err = new Error(`${e.reason}`)
-        NewRelic.recordError(error.name, error.message, "", true);
+        NewRelic.recordError(err);
     })
 } catch (err) {
     // do nothing -- addEventListener is not supported
