@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 
+ */
+
 /**
  * @desc Script Phase helper object.
  * @param args {{isa: string, buildActionMask: number, files: Array, inputPaths: Array, name: string, outputPaths: Array, runOnlyForDeploymentPostprocessing: number, shellPath: string, shellScript: *, showEnvVarsInLog: number}}

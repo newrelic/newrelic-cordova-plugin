@@ -1,3 +1,8 @@
+<!--
+  Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0 
+ -->
+  
   <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
   id="newrelic-cordova-plugin-tests" version="5.0.0">
       <name>New Relic Cordova Plugin Tests</name>
