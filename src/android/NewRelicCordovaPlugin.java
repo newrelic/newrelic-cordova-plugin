@@ -1,8 +1,7 @@
-//  New Relic for Mobile -- Android edition
-//
-//  Copyright (c) 2017 - Present New Relic. All rights reserved.
-//  See https://docs.newrelic.com/docs/licenses/android-agent-licenses for license details
-//
+/*
+ * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 
+ */
 
 package com.newrelic.cordova.plugin;
 
