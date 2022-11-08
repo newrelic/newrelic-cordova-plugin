@@ -67,7 +67,7 @@ See the examples below and for more detail see: [New Relic IOS SDK doc](https://
      NewRelic.setUserId("CORDOVA12934");
   ```
 
-### [setAttribute](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/set-attribute)(name: string, value: boolean | number | string): void;
+### [setAttribute](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/set-attribute)(attributeName: string, value: boolean | number | string): void;
 > Creates a session-level attribute shared by multiple mobile event types. Overwrites its previous value and type each time it is called.
   ```js
      NewRelic.setAttribute('CordovaCustomAttrNumber', 37);
@@ -93,7 +93,7 @@ See the examples below and for more detail see: [New Relic IOS SDK doc](https://
     NewRelic.removeAllAttributes();
 ```
 
-### [recordBreadcrumb](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/recordbreadcrumb)(name: string, attributes?: {[key: string]: boolean | number | string}): void;
+### [recordBreadcrumb](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/recordbreadcrumb)(eventName: string, attributes?: {[key: string]: boolean | number | string}): void;
 > Track app activity/screen that may be helpful for troubleshooting crashes.
 
   ```js
