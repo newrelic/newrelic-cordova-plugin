@@ -39,3 +39,5 @@ typings/
 # dotenv environment variables file
 .env
 .idea
+
+package-lock.json
