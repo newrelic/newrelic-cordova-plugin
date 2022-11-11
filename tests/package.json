@@ -1,6 +1,6 @@
 {
   "name": "newrelic-cordova-plugin-tests",
-  "version": "5.0.0-dev",
+  "version": "6.0.0",
   "description": "",
   "cordova": {
     "id": "newrelic-cordova-plugin-tests",
