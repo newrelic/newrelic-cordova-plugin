@@ -42,13 +42,7 @@ var NewRelic = {
      * @param {number} value Value of the attribute.
      */
     setAttribute: function (attributeName, value, cb, fail) {
-        const attribute = new Attribute({ attributeName, value });
-        attribute.attributeName.isValid(() => {
-            attribute.attributeValue.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [attributeName, value]);
-            });
-            window.console.error(`invalid value '${value}' sent to setAttribute()`);
-        });
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [attributeName, value]);
     },
 
     /**
@@ -184,14 +178,7 @@ var NewRelic = {
      * @param {number} value Optional argument that increments the attribute by this value.
      */
     incrementAttribute: function(name, value=1, cb, fail) {
-        const attribute = new Attribute({ name , value });
-        attribute.attributeName.isValid(() => {
-            attribute.attributeValue.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
-                return;
-            });
-            window.console.error(`invalid value '${value}' sent to incrementAttribute()`);
-        });
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
     },
 
     /**
@@ -509,13 +496,5 @@ const NewRelicEvent = class CustomEvent {
     }
 };
 
-const Attribute = class CustomEvent {
-    constructor({ attributeName, value }) {
-      this.attributeName = new Rule(attributeName,
-        [Validator.isString, Validator.notEmptyString],
-        `attributeName '${attributeName}' is not a string`);
-      this.attributeValue = new Rule(value, [], `invalid value '${value}' sent to setAttribute()`);
-    }
-};
 
 module.exports = NewRelic;

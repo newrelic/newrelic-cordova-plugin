@@ -19,7 +19,7 @@ export function noticeDistributedTrace(cb: any, fail: any): void;
 export function setUserId(userId: string, cb: any, fail: any): void;
 export function setAttribute(
   name: string,
-  value: number,
+  value: any,
   cb: any,
   fail: any
 ): void;
