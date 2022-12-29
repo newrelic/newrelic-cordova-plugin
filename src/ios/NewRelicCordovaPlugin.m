@@ -1,11 +1,7 @@
-//  New Relic for Mobile -- iOS edition
-//
-//  See:
-//    https://docs.newrelic.com/docs/releases/ios for release notes
-//
-//  Copyright (c) 2017 New Relic. All rights reserved.
-//  See https://docs.newrelic.com/docs/licenses/ios-agent-licenses for license details
-//
+/*
+ * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 
+ */
 
 #import "NewRelicCordovaPlugin.h"
 
@@ -73,10 +69,14 @@
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-/*
- * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0 
- */
+
+-  (void)endInteraction:(CDVInvokedUrlCommand *)command {
+
+    CDVPluginResult* pluginResult = nil;
+    NSString* actionName = [command.arguments objectAtIndex:0];
+    [NewRelic stopCurrentInteraction:actionName];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
 - (void)recordError:(CDVInvokedUrlCommand *)command {
     NSString* errorName = [command.arguments objectAtIndex:0];
