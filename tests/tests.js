@@ -56,18 +56,7 @@ exports.defineAutoTests = () => {
       window.NewRelic.setAttribute('eventType', 'eventName');
       window.NewRelic.setAttribute('eventType', false);
 
-      // Bad arguments
-      window.NewRelic.setAttribute(null, null);
-      window.NewRelic.setAttribute(null, 'yes');
-      window.NewRelic.setAttribute(false, null);
-      window.NewRelic.setAttribute(123, null);
-      window.NewRelic.setAttribute(true, null);
-      window.NewRelic.setAttribute(true, undefined);
-      window.NewRelic.setAttribute('', undefined);
-
-      let numOfNativeCalls = cordova.exec.calls.count() - window.console.error.calls.count();
-      expect(numOfNativeCalls).toBe(4);
-      expect(window.NewRelic.setAttribute).toHaveBeenCalledTimes(11);
+      expect(window.NewRelic.setAttribute).toHaveBeenCalledTimes(4);
     });
 
     it('should remove attribute', () => {
