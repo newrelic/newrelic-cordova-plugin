@@ -181,12 +181,25 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     break;
                 }
                 case "crashNow": {
-                    final String message = args.getString(0);
-                    if(message.isEmpty()) {
-                        NewRelic.crashNow();
-                    } else {
-                        NewRelic.crashNow(message);
-                    }
+                    Handler mainHandler = new Handler(Looper.getMainLooper());
+
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            String message = null;
+                            try {
+                                message = args.getString(0);
+                            } catch (Exception e) {
+                                NewRelic.recordHandledException(e);
+                            }
+                            if (message == null || message.isEmpty()) {
+                                NewRelic.crashNow();
+                            } else {
+                                NewRelic.crashNow(message);
+                            }
+                        }
+                    };
+                    mainHandler.post(myRunnable);
                     break;
                 }
                 case "currentSessionId": {
