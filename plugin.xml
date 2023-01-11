@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="6.0.0">
+  id="newrelic-cordova-plugin" version="6.0.1">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.0.0" />
+  <preference name="PLUGIN_VERSION" default="6.0.1" />
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
