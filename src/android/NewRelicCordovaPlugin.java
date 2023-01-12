@@ -5,6 +5,8 @@
 
 package com.newrelic.cordova.plugin;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.newrelic.agent.android.Agent;
@@ -30,6 +32,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class NewRelicCordovaPlugin extends CordovaPlugin {
     private final static String TAG = NewRelicCordovaPlugin.class.getSimpleName();
