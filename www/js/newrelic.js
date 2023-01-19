@@ -64,7 +64,7 @@ var NewRelic = {
         const crumb = new BreadCrumb({ eventName, attributes });
         crumb.attributes.isValid(() => {
             crumb.eventName.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [eventName, attributes]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [eventName, crumb.attributes.value]);
             });
         });
     },
@@ -80,7 +80,7 @@ var NewRelic = {
         const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
         customEvent.attributes.isValid(() => {
             if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, attributes]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, customEvent.attributes.value]);
             } else {
                 window.console.error("Invalid event name or type in recordCustomEvent");
             }
@@ -474,7 +474,7 @@ const BreadCrumb = class CustomEvent {
       this.eventName = new Rule(eventName,
         [Validator.isString, Validator.notEmptyString],
         `eventName '${eventName}' is not a string.`);
-      this.attributes = new Rule(attributes,
+      this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
         [Validator.isObject, Validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
@@ -490,7 +490,7 @@ const NewRelicEvent = class CustomEvent {
         [Validator.isString],
         `eventName '${eventName}' is not a string`);
 
-      this.attributes = new Rule(attributes,
+      this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
         [Validator.isObject, Validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
