@@ -1,0 +1,49 @@
+name: Update Agent Version
+on:
+  workflow_call:
+    inputs:
+      VERSION_NUMBER:
+        required: true
+        type: string
+      IS_ANDROID_AGENT:
+        required: true
+        type: boolean
+jobs:
+  update_agent_version:
+    name: Update Native Agent version on Cordova
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: develop
+      - name: Update version number
+        run: |
+          if ${{ github.event.inputs.IS_ANDROID_AGENT }}
+          then
+            sed -i 's/preference name=\"ANDROID_AGENT_VER\" default=\".*\"/preference name=\"ANDROID_AGENT_VER\" default=\"'${{ github.event.inputs.VERSION_NUMBER }}'\"/' plugin.xml
+          else 
+            sed -i 's/pod name=\"NewRelicAgent\" spec=\".*\"/pod name=\"NewRelicAgent\" spec=\"'${{ github.event.inputs.VERSION_NUMBER }}'\"/' plugin.xml
+          fi
+      - name: Setup GitHub Credentials
+        run: |
+          git config user.name $GITHUB_ACTOR
+          git config user.email gh-actions-${GITHUB_ACTOR}@github.com
+      - name: Push Changes to GitHub
+        run: |
+          if ${{ github.event.inputs.IS_ANDROID_AGENT }}
+          then
+            AGENT_NAME="Android"
+          else
+            AGENT_NAME="iOS"
+          fi
+          echo $AGENT_NAME
+          git config --list
+          git checkout -b "update_${AGENT_NAME}_ver_${{ github.event.inputs.VERSION_NUMBER }}"
+          git add plugin.xml
+          git commit -m "Update $AGENT_NAME Version to ${{ github.event.inputs.VERSION_NUMBER }}"
+          git remote -v
+          git push origin HEAD
+          gh pr create -B "develop" -H "update_${AGENT_NAME}_ver_${{ github.event.inputs.VERSION_NUMBER }}" --title "Update ${AGENT_NAME} agent to ${{ github.event.inputs.VERSION_NUMBER }}" --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
