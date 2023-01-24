@@ -361,8 +361,8 @@ window.addEventListener("error", (event) => {
     if (cordova.platformId == "android") {
         const err = new Error();
         err.name = event.message;
-        err.message = event.error.message;
-        err.stack = event.error.stack;
+        err.message = (event.error) ? event.error.message : '';
+        err.stack = (event.error) ? event.error.stack : '';
         NewRelic.recordError(err);
     } else if (cordova.platformId == "iOS") {
         const err = new Error();
