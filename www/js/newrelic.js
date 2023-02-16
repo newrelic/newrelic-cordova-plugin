@@ -108,7 +108,6 @@ var NewRelic = {
     },
 
     sendConsole(type, args) {
-
         const argsStr = JSON.stringify(args, getCircularReplacer());
         this.send('MobileJSConsole', { consoleType: type, args: argsStr });
     },
@@ -513,6 +512,5 @@ const getCircularReplacer = () => {
       return value;
     };
 };
-  
 
 module.exports = NewRelic;
