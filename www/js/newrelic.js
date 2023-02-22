@@ -427,26 +427,28 @@ class Utils {
 }
 
 class Validator {
-    static isString = 'isString';
+    constructor() {
+        this.isString = 'isString';
 
-    static isBool = 'isBool';
+        this.isBool = 'isBool';
 
-    static isNumber = 'isNumber';
+        this.isNumber = 'isNumber';
 
-    static isObject = 'isObject';
+        this.isObject = 'isObject';
 
-    static notEmptyString = 'notEmptyString';
+        this.notEmptyString = 'notEmptyString';
 
-    static hasValidAttributes = 'hasValidAttributes';
+        this.hasValidAttributes = 'hasValidAttributes';
 
-    validate = (value, rules, msg) => rules.every((rule) => {
-      const isValid = Utils[rule](value);
-      if (!isValid) {
-        window.console.error(msg);
-      }
-      return Utils[rule](value);
-    });
-};
+        this.validate = (value, rules, msg) => rules.every((rule) => {
+            const isValid = Utils[rule](value);
+            if (!isValid) {
+                window.console.error(msg);
+            }
+            return Utils[rule](value);
+        });
+    }
+}
 
 class Rule {
     constructor(value, rules = [], message) {
