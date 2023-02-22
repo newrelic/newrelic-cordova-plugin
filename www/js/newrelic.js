@@ -473,27 +473,29 @@ class Rule {
 
 const BreadCrumb = class CustomEvent {
     constructor({ eventName, attributes }) {
+      let validator = new Validator();  
       this.eventName = new Rule(eventName,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventName '${eventName}' is not a string.`);
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
 
 const NewRelicEvent = class CustomEvent {
     constructor({ eventName = '', attributes, eventType }) {
+      let validator = new Validator();  
       this.eventType = new Rule(eventType,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventType '${eventType}' is not a string`);
 
       this.eventName = new Rule(eventName,
-        [Validator.isString],
+        [validator.isString],
         `eventName '${eventName}' is not a string`);
 
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
