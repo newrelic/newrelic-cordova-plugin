@@ -427,26 +427,28 @@ class Utils {
 }
 
 class Validator {
-    static isString = 'isString';
+    constructor() {
+        this.isString = 'isString';
 
-    static isBool = 'isBool';
+        this.isBool = 'isBool';
 
-    static isNumber = 'isNumber';
+        this.isNumber = 'isNumber';
 
-    static isObject = 'isObject';
+        this.isObject = 'isObject';
 
-    static notEmptyString = 'notEmptyString';
+        this.notEmptyString = 'notEmptyString';
 
-    static hasValidAttributes = 'hasValidAttributes';
+        this.hasValidAttributes = 'hasValidAttributes';
 
-    validate = (value, rules, msg) => rules.every((rule) => {
-      const isValid = Utils[rule](value);
-      if (!isValid) {
-        window.console.error(msg);
-      }
-      return Utils[rule](value);
-    });
-};
+        this.validate = (value, rules, msg) => rules.every((rule) => {
+            const isValid = Utils[rule](value);
+            if (!isValid) {
+                window.console.error(msg);
+            }
+            return Utils[rule](value);
+        });
+    }
+}
 
 class Rule {
     constructor(value, rules = [], message) {
@@ -471,27 +473,29 @@ class Rule {
 
 const BreadCrumb = class CustomEvent {
     constructor({ eventName, attributes }) {
+      let validator = new Validator();  
       this.eventName = new Rule(eventName,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventName '${eventName}' is not a string.`);
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
 
 const NewRelicEvent = class CustomEvent {
     constructor({ eventName = '', attributes, eventType }) {
+      let validator = new Validator();  
       this.eventType = new Rule(eventType,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventType '${eventType}' is not a string`);
 
       this.eventName = new Rule(eventName,
-        [Validator.isString],
+        [validator.isString],
         `eventName '${eventName}' is not a string`);
 
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
