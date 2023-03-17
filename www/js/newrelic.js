@@ -108,7 +108,7 @@ var NewRelic = {
     },
 
     sendConsole(type, args) {
-        const argsStr = JSON.stringify(args);
+        const argsStr = JSON.stringify(args, getCircularReplacer());
         this.send('MobileJSConsole', { consoleType: type, args: argsStr });
     },
 
@@ -361,8 +361,8 @@ window.addEventListener("error", (event) => {
     if (cordova.platformId == "android") {
         const err = new Error();
         err.name = event.message;
-        err.message = event.error.message;
-        err.stack = event.error.stack;
+        err.message = (event.error) ? event.error.message : '';
+        err.stack = (event.error) ? event.error.stack : '';
         NewRelic.recordError(err);
     } else if (cordova.platformId == "iOS") {
         const err = new Error();
@@ -427,26 +427,28 @@ class Utils {
 }
 
 class Validator {
-    static isString = 'isString';
+    constructor() {
+        this.isString = 'isString';
 
-    static isBool = 'isBool';
+        this.isBool = 'isBool';
 
-    static isNumber = 'isNumber';
+        this.isNumber = 'isNumber';
 
-    static isObject = 'isObject';
+        this.isObject = 'isObject';
 
-    static notEmptyString = 'notEmptyString';
+        this.notEmptyString = 'notEmptyString';
 
-    static hasValidAttributes = 'hasValidAttributes';
+        this.hasValidAttributes = 'hasValidAttributes';
 
-    validate = (value, rules, msg) => rules.every((rule) => {
-      const isValid = Utils[rule](value);
-      if (!isValid) {
-        window.console.error(msg);
-      }
-      return Utils[rule](value);
-    });
-};
+        this.validate = (value, rules, msg) => rules.every((rule) => {
+            const isValid = Utils[rule](value);
+            if (!isValid) {
+                window.console.error(msg);
+            }
+            return Utils[rule](value);
+        });
+    }
+}
 
 class Rule {
     constructor(value, rules = [], message) {
@@ -471,30 +473,48 @@ class Rule {
 
 const BreadCrumb = class CustomEvent {
     constructor({ eventName, attributes }) {
+      let validator = new Validator();  
       this.eventName = new Rule(eventName,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventName '${eventName}' is not a string.`);
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
 
 const NewRelicEvent = class CustomEvent {
     constructor({ eventName = '', attributes, eventType }) {
+      let validator = new Validator();  
       this.eventType = new Rule(eventType,
-        [Validator.isString, Validator.notEmptyString],
+        [validator.isString, validator.notEmptyString],
         `eventType '${eventType}' is not a string`);
 
       this.eventName = new Rule(eventName,
-        [Validator.isString],
+        [validator.isString],
         `eventName '${eventName}' is not a string`);
 
       this.attributes = new Rule( attributes instanceof Map ? Object.fromEntries(attributes):attributes,
-        [Validator.isObject, Validator.hasValidAttributes],
+        [validator.isObject, validator.hasValidAttributes],
         `attributes '${attributes}' are not valid.`);
     }
 };
 
+/**
+ * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
+ * Any copyright is dedicated to the Public Domain: https://creativecommons.org/publicdomain/zero/1.0/
+ */
+const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+      }
+      return value;
+    };
+};
 
 module.exports = NewRelic;
