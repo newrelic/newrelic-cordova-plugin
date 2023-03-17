@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.1.0">
+  <preference name="PLUGIN_VERSION" default="6.1.0" />
 
 
   <platform name="ios">
