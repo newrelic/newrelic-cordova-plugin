@@ -342,6 +342,10 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     }
                     break;
                 }
+                case "shutdown": {
+                    NewRelic.shutdown();
+                    break;
+                }
                 
             }
         } catch (Exception e) {

@@ -297,4 +297,8 @@
     }
 }
 
+- (void)shutdown:(CDVInvokedUrlCommand *)command {
+    [NewRelic shutdown];
+}
+
 @end
