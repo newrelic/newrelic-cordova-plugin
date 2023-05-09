@@ -30,12 +30,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class NewRelicCordovaPlugin extends CordovaPlugin {
     private final static String TAG = NewRelicCordovaPlugin.class.getSimpleName();
+    private final Pattern chromeStackTraceRegex =
+    Pattern.compile("^\\s*at (.*?) ?\\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\\/|[a-z]:\\\\|\\\\\\\\).*?)(?::(\\d+))?(?::(\\d+))?\\)?\\s*$",
+      Pattern.CASE_INSENSITIVE);
+    private final Pattern nodeStackTraceRegex =
+    Pattern.compile("^\\s*at (?:((?:\\[object object\\])?[^\\\\/]+(?: \\[as \\S+\\])?) )?\\(?(.*?):(\\d+)(?::(\\d+))?\\)?\\s*$",
+      Pattern.CASE_INSENSITIVE);
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -60,6 +69,29 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
         }
 
     }
+
+    public StackTraceElement[] parseStackTrace(String stack) {
+        String[] lines = stack.split("\n");
+        ArrayList<StackTraceElement> stackTraceList = new ArrayList<>();
+    
+        for (String line : lines) {
+          Matcher chromeMatcher = chromeStackTraceRegex.matcher(line);
+          Matcher nodeMatcher = nodeStackTraceRegex.matcher(line);
+          if (chromeMatcher.matches() || nodeMatcher.matches()) {
+            Matcher matcher = chromeMatcher.matches() ? chromeMatcher : nodeMatcher;
+            try {
+              String method = matcher.group(1) == null ? " " : matcher.group(1);
+              String file = matcher.group(2) == null ? " " : matcher.group(2);
+              int lineNumber = matcher.group(3) == null ? 1 : Integer.parseInt(matcher.group(3));
+              stackTraceList.add(new StackTraceElement("", method, file, lineNumber));
+            } catch (Exception e) {
+              NewRelic.recordHandledException(e);
+              return new StackTraceElement[0];
+            }
+          }
+        }
+        return stackTraceList.toArray(new StackTraceElement[0]);
+      }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -124,26 +156,25 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     final String errorStack = args.getString(2);
                     final Boolean isFatal = args.getBoolean(3);
 
+                    HashMap<String, Object> exceptionMap = new HashMap<>();
                     try {
-
-                        Map<String, Object> crashEvents = new HashMap<>();
-                        crashEvents.put("Name", errorName);
-                        crashEvents.put("Message", errorMessage);
-                        crashEvents.put("isFatal", isFatal);
-                        if (errorStack != null) {
-                            // attribute limit is 4096
-                            crashEvents.put("errorStack",
-                                    errorStack.length() > 4095 ? errorStack.substring(0, 4094) : errorStack);
-                        }
-
-                        NewRelic.recordBreadcrumb("JS Errors", crashEvents);
-                        NewRelic.recordCustomEvent("JS Errors", "", crashEvents);
-
-                        StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
-
+                        exceptionMap.put("name", errorName);
+                        exceptionMap.put("message", errorMessage);
+                        exceptionMap.put("isFatal", isFatal);
                     } catch (IllegalArgumentException e) {
                         Log.w("NRMA", e.getMessage());
                     }
+
+                    if(errorStack == null) {
+                      NewRelic.recordBreadcrumb("JS Errors", exceptionMap);
+                      StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
+                      break;
+                    }
+
+                    StackTraceElement[] stackTraceElements = parseStackTrace(errorStack);
+                    NewRelicCordovaException exception = new NewRelicCordovaException(errorMessage, stackTraceElements);
+                    exception.setStackTrace(stackTraceElements);
+                    NewRelic.recordHandledException(exception, exceptionMap);
 
                     break;
                 }
