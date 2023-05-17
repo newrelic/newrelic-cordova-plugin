@@ -201,6 +201,12 @@ By default, these configurations are already set to true on agent start.
     NewRelic.networkErrorRequestEnabled(true);
 ```
 
+### [shutdown](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/shut-down/)() : void;
+> Shut down the agent within the current application lifecycle during runtime.
+```js
+    NewRelic.shutdown();
+```
+
 ### [httpRequestBodyCaptureEnabled](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/android-agent-configuration-feature-flags/#ff-withHttpResponseBodyCaptureEnabled)(enabled: boolean) : void;
 > Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
 ```js
