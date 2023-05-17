@@ -201,6 +201,12 @@ By default, these configurations are already set to true on agent start.
     NewRelic.networkErrorRequestEnabled(true);
 ```
 
+### [shutdown](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/shut-down/)() : void;
+> Shut down the agent within the current application lifecycle during runtime.
+```js
+    NewRelic.shutdown();
+```
+
 ### [httpRequestBodyCaptureEnabled](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/android-agent-configuration-feature-flags/#ff-withHttpResponseBodyCaptureEnabled)(enabled: boolean) : void;
 > Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
 ```js
@@ -323,6 +329,16 @@ Vue.config.errorHandler = (err, vm, info) => {
 
 ### How to see JSErrors(Fatal/Non Fatal) in NewRelic One?
 
+#### Cordova Plugin v6.2.0 and above:
+JavaScript errors can be seen in the `Handled Exceptions` tab in New Relic One. You will be able to see the event trail, attributes, and stack trace for every JavaScript error recorded. 
+
+You can also build a dashboard for these errors using this query:
+
+```sql
+SELECT * FROM MobileHandledException SINCE 24 hours ago
+```
+
+#### Cordova Plugin v6.0.0 - v6.1.0
 There is no section for JavaScript errors, but you can see JavaScript errors in custom events and also query them in NRQL explorer.
 
 <img width="1753" alt="Screen Shot 2022-02-10 at 12 41 11 PM" src="https://user-images.githubusercontent.com/89222514/153474861-87213e70-c3fb-4e14-aee7-a6a3fb482f73.png">

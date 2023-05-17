@@ -55,4 +55,6 @@
 
 - (void)httpRequestBodyCaptureEnabled:(CDVInvokedUrlCommand *) command;
 
+- (void)shutdown:(CDVInvokedUrlCommand *) command;
+
 @end

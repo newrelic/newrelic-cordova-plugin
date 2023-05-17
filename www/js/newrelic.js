@@ -290,6 +290,14 @@ var NewRelic = {
         cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
     },
 
+    /**
+     * Shut down the agent within the current application lifecycle during runtime.
+     * Once the agent has shut down, it cannot be restarted within the current application lifecycle.
+     */
+    shutdown: function (cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "shutdown");
+    },
+
 }
 
 networkRequest = {};

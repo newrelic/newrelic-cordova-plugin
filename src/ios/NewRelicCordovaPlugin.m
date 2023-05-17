@@ -9,13 +9,27 @@
 + (void) setPlatformVersion:(NSString*)version;
 @end
 
-@implementation NewRelicCordovaPlugin
+@implementation NewRelicCordovaPlugin {
+    NSRegularExpression* jscRegex;
+    NSRegularExpression* geckoRegex;
+    NSRegularExpression* nodeRegex;   
+}
 
 
 - (void)pluginInitialize
 {
     NSString* applicationToken = [self.commandDelegate.settings objectForKey:@"ios_app_token"];
     NSString* platformVersion =  [self.commandDelegate.settings objectForKey:@"plugin_version"];
+
+    jscRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*(?:([^@]*)(?:\\((.*?)\\))?@)?(\\S.*?):(\\d+)(?::(\\d+))?\\s*$"
+                                                         options:NSRegularExpressionCaseInsensitive
+                                                           error:nil];
+    geckoRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*(.*?)(?:\\((.*?)\\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\\[native).*?|[^@]*bundle)(?::(\\d+))?(?::(\\d+))?\\s*$"
+                                                              options:NSRegularExpressionCaseInsensitive
+                                                                error:nil];
+    nodeRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*at (?:((?:\\[object object\\])?[^\\/]+(?: \\[as \\S+\\])?) )?\\(?(.*?):(\\d+)(?::(\\d+))?\\)?\\s*$"
+                                                          options:NSRegularExpressionCaseInsensitive
+                                                            error:nil];
     
     if (applicationToken == nil || ([applicationToken isEqualToString:@""] || [applicationToken isEqualToString:@"x"])) {
         NRLOG_ERROR(@"Failed to load application token! The iOS agent is not configured for Cordova.");
@@ -78,6 +92,36 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (NSMutableArray*)parseStackTrace:(NSString*)stackString {
+    NSArray* lines = [stackString componentsSeparatedByString:@"\n"];
+    NSMutableArray* stackFramesArr = [NSMutableArray new];
+    NSRange stringRange;
+    
+    for(NSString* line in lines){
+        NSArray* result;
+        stringRange = NSMakeRange(0, [line length]);
+        if ([[jscRegex matchesInString:line options:0 range:stringRange] firstObject] != nil) {
+            result = [jscRegex matchesInString:line options:0 range:stringRange];
+        } else if ([[geckoRegex matchesInString:line options:0 range:stringRange] firstObject] != nil) {
+            result = [geckoRegex matchesInString:line options:0 range:stringRange];
+        } else if ([[nodeRegex matchesInString:line options:0 range:stringRange] firstObject] != nil) {
+            result = [nodeRegex matchesInString:line options:0 range:stringRange];
+        } else {
+            continue;
+        }
+        
+        NSMutableDictionary* stackTraceElement = [NSMutableDictionary new];
+        stackTraceElement[@"method"] = [line substringWithRange:[result[0] rangeAtIndex:1]];
+        stackTraceElement[@"file"] = [line substringWithRange:[result[0] rangeAtIndex:3]];
+        NSNumber* lineNum = @([[line substringWithRange:[result[0] rangeAtIndex:4]] intValue]);
+        stackTraceElement[@"line"] = lineNum;
+        
+        [stackFramesArr addObject:stackTraceElement];
+    }
+    
+    return stackFramesArr;
+}
+
 - (void)recordError:(CDVInvokedUrlCommand *)command {
     NSString* errorName = [command.arguments objectAtIndex:0];
     NSString* errorMessage = [command.arguments objectAtIndex:1];
@@ -88,10 +132,23 @@
         isFatal = @"true";
     }
     
-    NSDictionary *dict =  @{@"Name":errorName,@"Message": errorMessage, @"errorStack": errorStack,@"isFatal": isFatal};
+    NSMutableDictionary* attributes = [NSMutableDictionary new];
+    attributes[@"name"] = errorName;
+    attributes[@"cause"] = errorMessage;
+    attributes[@"reason"] = errorMessage;
+    attributes[@"fatal"] = isFatal;
+    
+    NSMutableArray* stackTraceArr = [self parseStackTrace:errorStack];
+    attributes[@"stackTraceElements"] = stackTraceArr;
+    
+    @try {
+        [NewRelic recordHandledExceptionWithStackTrace:attributes];
+    } @catch (NSException* exception){
+        NSLog(@"%@", exception.reason);
+        NSDictionary *dict =  @{@"Name":errorName,@"Message": errorMessage, @"errorStack": errorStack,@"isFatal": isFatal};
         [NewRelic recordBreadcrumb:@"JS Errors" attributes:dict];
         [NewRelic recordCustomEvent:@"JS Errors" attributes:dict];
-
+    }
 }
 
 - (void)noticeDistributedTrace:(CDVInvokedUrlCommand *)command {
@@ -238,6 +295,10 @@
     } else {
         [NewRelic disableFeatures:NRFeatureFlag_HttpResponseBodyCapture];
     }
+}
+
+- (void)shutdown:(CDVInvokedUrlCommand *)command {
+    [NewRelic shutdown];
 }
 
 @end
