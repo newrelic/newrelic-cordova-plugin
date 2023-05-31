@@ -19,7 +19,14 @@
   </engines>
 
   <preference name="PLUGIN_VERSION" default="6.2.0" />
-
+  <preference name="CRASH_REPORTING_ENABLED" default="true" />
+  <preference name="DISTRIBUTED_TRACING_ENABLED" default="true" />
+  <preference name="INTERACTION_TRACING_ENABLED" default="true" />
+  <preference name="DEFAULT_INTERACTIONS_ENABLED" default="true" />
+  <preference name="LOGGING_ENABLED" default="true" />
+  <preference name="LOG_LEVEL" default="default" />
+  <preference name="COLLECTOR_ADDRESS" default="x" />
+  <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
@@ -32,6 +39,14 @@
       <feature name="NewRelicCordovaPlugin">
         <preference name="IOS_APP_TOKEN" value="$IOS_APP_TOKEN" />
         <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION" />
+        <preference name="CRASH_REPORTING_ENABLED" value="$CRASH_REPORTING_ENABLED" />
+        <preference name="DISTRIBUTED_TRACING_ENABLED" value="$DISTRIBUTED_TRACING_ENABLED" />
+        <preference name="INTERACTION_TRACING_ENABLED" value="$INTERACTION_TRACING_ENABLED" />
+        <preference name="DEFAULT_INTERACTIONS_ENABLED" value="$DEFAULT_INTERACTIONS_ENABLED" />
+        <preference name="LOGGING_ENABLED" value="$LOGGING_ENABLED" />
+        <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
+        <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
+        <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
     </config-file>
@@ -77,6 +92,14 @@
       </feature>
       <preference name="ANDROID_APP_TOKEN" value="$ANDROID_APP_TOKEN" />
       <preference name="PLUGIN_VERSION" value="$PLUGIN_VERSION" />
+      <preference name="CRASH_REPORTING_ENABLED" value="$CRASH_REPORTING_ENABLED" />
+      <preference name="DISTRIBUTED_TRACING_ENABLED" value="$DISTRIBUTED_TRACING_ENABLED" />
+      <preference name="INTERACTION_TRACING_ENABLED" value="$INTERACTION_TRACING_ENABLED" />
+      <preference name="DEFAULT_INTERACTIONS_ENABLED" value="$DEFAULT_INTERACTIONS_ENABLED" />
+      <preference name="LOGGING_ENABLED" value="$LOGGING_ENABLED" />
+      <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
+      <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
+      <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
     </config-file>
 
     <source-file src="src/android/NewRelicCordovaPlugin.java"

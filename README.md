@@ -28,12 +28,36 @@ If you don't have a New Relic account, [create a free trial](https://newrelic.co
 
 Finally, copy the application tokens from your New Relic applications page, and have them ready for the next step. You only need to copy the application tokens of the platforms you are building on.
 
-### Adding the plugin
+## Adding the plugin
 Change to your Cordova project directory and add the plugin to your project using the Cordova command line tool. The `--variable` argument is used to pass application tokens to the plugin.
 ```
 # Install from github repository
 cordova plugin add https://github.com/newrelic/newrelic-cordova-plugin.git --variable IOS_APP_TOKEN="{ios-app-token}" --variable ANDROID_APP_TOKEN="{android-app-token}"
 ```
+
+### Agent Configuration Options
+The `--variable` argument can also be used to add optional configuration options on agent start to the plugin. 
+```
+# Disable Crash Reporting
+cordova plugin add https://github.com/newrelic/newrelic-cordova-plugin.git --variable IOS_APP_TOKEN="{ios-app-token}" --variable ANDROID_APP_TOKEN="{android-app-token}" --variable CRASH_REPORTING_ENABLED="false"
+```
+
+Currently, the plugin supports the following agent configuration options:
+* `CRASH_REPORTING_ENABLED`: Enable or disable crash reporting.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `DISTRIBUTED_TRACING_ENABLED`: Enable or disable the adding of distributed tracing headers to network requests.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `INTERACTION_TRACING_ENABLED`: Enable or disable interaction tracing. Trace instrumentation still occurs, but no traces are harvested. This will disable default and custom interactions.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `DEFAULT_INTERACTIONS_ENABLED`: Enable or disable default interactions. Trace instrumentation still occurs, but no traces are harvested. This will enable or disable default interactions only while custom interactions remain enabled.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `LOGGING_ENABLED`: Enable or disable agent logging.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `LOG_LEVEL`: Specifies the log level.
+    * Possible values are `ERROR` (least verbose), `WARNING` `INFO`, `VERBOSE`, `DEBUG`, `AUDIT` (most verbose).
+    * Defaults to `INFO` on Android and `WARNING` on iOS.
+* `COLLECTOR_ADDRESS`: Specifies the URI authority component of the harvest data upload endpoint.
+* `CRASH_COLLECTOR_ADDRESS`: Specifies the authority component of the crash data upload URI.
 
 # Updating the plugin
 Update the New Relic Cordova plugin to the latest released version easily via the following command:

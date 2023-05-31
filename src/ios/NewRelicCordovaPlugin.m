@@ -19,7 +19,8 @@
 - (void)pluginInitialize
 {
     NSString* applicationToken = [self.commandDelegate.settings objectForKey:@"ios_app_token"];
-    NSString* platformVersion =  [self.commandDelegate.settings objectForKey:@"plugin_version"];
+    
+    NSDictionary* config = self.commandDelegate.settings;
 
     jscRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*(?:([^@]*)(?:\\((.*?)\\))?@)?(\\S.*?):(\\d+)(?::(\\d+))?\\s*$"
                                                          options:NSRegularExpressionCaseInsensitive
@@ -31,14 +32,74 @@
                                                           options:NSRegularExpressionCaseInsensitive
                                                             error:nil];
     
-    if (applicationToken == nil || ([applicationToken isEqualToString:@""] || [applicationToken isEqualToString:@"x"])) {
+    if ([self isEmptyConfigParameter:applicationToken]) {
         NRLOG_ERROR(@"Failed to load application token! The iOS agent is not configured for Cordova.");
         
     } else {
+        
+        if ([self shouldDisableFeature:config[@"crash_reporting_enabled"]]) {
+            [NewRelic disableFeatures:NRFeatureFlag_CrashReporting];
+        }
+        if ([self shouldDisableFeature:config[@"distributed_tracing_enabled"]]) {
+            [NewRelic disableFeatures:NRFeatureFlag_DistributedTracing];
+        }
+        if ([self shouldDisableFeature:config[@"interaction_tracing_enabled"]]) {
+            [NewRelic disableFeatures:NRFeatureFlag_InteractionTracing];
+        }
+        if ([self shouldDisableFeature:config[@"default_interactions_enabled"]]) {
+            [NewRelic disableFeatures:NRFeatureFlag_DefaultInteractions];
+        }
+        
+        // Set log level depending on loggingEnabled and logLevel
+        NRLogLevels logLevel = NRLogLevelWarning;
+        NSDictionary *logDict = @{
+            @"ERROR": [NSNumber numberWithInt:NRLogLevelError],
+            @"WARNING": [NSNumber numberWithInt:NRLogLevelWarning],
+            @"INFO": [NSNumber numberWithInt:NRLogLevelInfo],
+            @"VERBOSE": [NSNumber numberWithInt:NRLogLevelVerbose],
+            @"AUDIT": [NSNumber numberWithInt:NRLogLevelAudit],
+        };
+        if ([logDict objectForKey:[config[@"log_level"] uppercaseString]]) {
+            NSString* configLogLevel = [config[@"log_level"] uppercaseString];
+            NSNumber* newLogLevel = [logDict valueForKey:configLogLevel];
+            logLevel = [newLogLevel intValue];
+        }
+        if ([self shouldDisableFeature:config[@"logging_enabled"]]) {
+            logLevel = NRLogLevelNone;
+        }
+        [NRLogger setLogLevels:logLevel];
+        
+        
+        NSString* collectorAddress = config[@"collector_address"];
+        NSString* crashCollectorAddress = config[@"crash_collector_address"];
+        
         [NewRelic setPlatform:NRMAPlatform_Cordova];
-        [NewRelic setPlatformVersion:platformVersion];
-        [NewRelic startWithApplicationToken:applicationToken];
+        [NewRelic setPlatformVersion:config[@"platform_version"]];
+
+        if ([self isEmptyConfigParameter:collectorAddress] && [self isEmptyConfigParameter:crashCollectorAddress]) {
+            [NewRelic startWithApplicationToken:applicationToken];
+        } else {
+            // Set to default collector endpoints if only one of two addresses was set
+            if ([self isEmptyConfigParameter:collectorAddress]) {
+                collectorAddress = @"mobile-collector.newrelic.com";
+            }
+            if ([self isEmptyConfigParameter:crashCollectorAddress]) {
+                crashCollectorAddress = @"mobile-crash.newrelic.com";
+            }
+            
+            [NewRelic startWithApplicationToken:applicationToken
+                            andCollectorAddress:collectorAddress
+                       andCrashCollectorAddress:crashCollectorAddress];
+        }
     }
+}
+
+- (BOOL)isEmptyConfigParameter:(NSString *)param {
+    return param == nil || ([param isEqualToString:@""] || [param isEqualToString:@"x"]);
+}
+
+- (BOOL)shouldDisableFeature:(NSString *)flag {
+    return [[flag lowercaseString] isEqualToString:@"false"];
 }
 
 - (void)recordBreadCrumb:(CDVInvokedUrlCommand *)command {

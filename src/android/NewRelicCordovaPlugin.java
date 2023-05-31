@@ -16,6 +16,7 @@ import com.newrelic.agent.android.analytics.AnalyticsAttribute;
 import com.newrelic.agent.android.distributedtracing.TraceContext;
 import com.newrelic.agent.android.distributedtracing.TraceHeader;
 import com.newrelic.agent.android.harvest.DeviceInformation;
+import com.newrelic.agent.android.logging.AgentLog;
 import com.newrelic.agent.android.stats.StatsEngine;
 import com.newrelic.agent.android.metric.MetricUnit;
 import com.newrelic.agent.android.util.NetworkFailure;
@@ -52,7 +53,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
         String appToken = preferences.getString("ANDROID_APP_TOKEN", null);
 
-        if (appToken == null || appToken.isEmpty() || "x".equals(appToken)) {
+        if (isEmptyConfigParameter(appToken)) {
             Log.e(TAG, "Failed to load application token! The Android agent is not configured for Cordova.");
 
         } else {
@@ -60,15 +61,64 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             final String pluginVersion = preferences.getString("PLUGIN_VERSION", "undefined");
             final DeviceInformation devInfo = Agent.getDeviceInformation();
 
-            NewRelic.withApplicationToken(appToken)
-                    .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
-                    .withLoggingEnabled(true)
-                    .start(this.cordova.getActivity().getApplication());
+            if (preferences.getString("CRASH_REPORTING_ENABLED", "true").equalsIgnoreCase("false")) {
+              NewRelic.disableFeature(FeatureFlag.CrashReporting);
+            }
+            if (preferences.getString("DISTRIBUTED_TRACING_ENABLED", "true").equalsIgnoreCase("false")) {
+              NewRelic.disableFeature(FeatureFlag.DistributedTracing);
+            }
+            if (preferences.getString("INTERACTION_TRACING_ENABLED", "true").equalsIgnoreCase("false")) {
+              NewRelic.disableFeature(FeatureFlag.InteractionTracing);
+            }
+            if (preferences.getString("DEFAULT_INTERACTIONS_ENABLED", "true").equalsIgnoreCase("false")) {
+              NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
+            }
+
+            Map<String, Integer> strToLogLevel = new HashMap<>();
+            strToLogLevel.put("ERROR", AgentLog.ERROR);
+            strToLogLevel.put("WARNING", AgentLog.WARN);
+            strToLogLevel.put("INFO", AgentLog.INFO);
+            strToLogLevel.put("VERBOSE", AgentLog.VERBOSE);
+            strToLogLevel.put("AUDIT", AgentLog.AUDIT);
+
+            int logLevel = AgentLog.INFO;
+            String configLogLevel = preferences.getString("LOG_LEVEL", "INFO").toUpperCase();
+            if (strToLogLevel.containsKey(configLogLevel)) {
+              logLevel = strToLogLevel.get(configLogLevel);
+            }
+
+            String collectorAddress = preferences.getString("COLLECTOR_ADDRESS", null);
+            String crashCollectorAddress = preferences.getString("CRASH_COLLECTOR_ADDRESS", null);
+
+            NewRelic newRelic =  NewRelic.withApplicationToken(appToken)
+              .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
+              .withLoggingEnabled(preferences.getString("LOGGING_ENABLED", "true").toLowerCase().equals("true"))
+              .withLogLevel(logLevel);
+
+            if (isEmptyConfigParameter(collectorAddress) && isEmptyConfigParameter(crashCollectorAddress)) {
+              newRelic.start(this.cordova.getActivity().getApplication());
+            } else {
+              // Set missing collector addresses (if any)
+              if (collectorAddress == null) {
+                collectorAddress = "mobile-collector.newrelic.com";
+              }
+              if (crashCollectorAddress == null) {
+                crashCollectorAddress = "mobile-crash.newrelic.com";
+              }
+              newRelic.usingCollectorAddress(collectorAddress);
+              newRelic.usingCrashCollectorAddress(crashCollectorAddress);
+              newRelic.start(this.cordova.getActivity().getApplication());
+            }
+
+            newRelic.start(this.cordova.getActivity().getApplication());
 
             NewRelic.setAttribute(AnalyticsAttribute.APPLICATION_PLATFORM_VERSION_ATTRIBUTE, pluginVersion);
         }
-
     }
+
+    public boolean isEmptyConfigParameter(String parameter) {
+        return parameter == null || parameter.isEmpty() || parameter.equals("x");
+      }
 
     public StackTraceElement[] parseStackTrace(String stack) {
         String[] lines = stack.split("\n");
