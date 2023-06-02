@@ -172,10 +172,13 @@
         }
         
         NSMutableDictionary* stackTraceElement = [NSMutableDictionary new];
-        stackTraceElement[@"method"] = [line substringWithRange:[result[0] rangeAtIndex:1]];
-        stackTraceElement[@"file"] = [line substringWithRange:[result[0] rangeAtIndex:3]];
-        NSNumber* lineNum = @([[line substringWithRange:[result[0] rangeAtIndex:4]] intValue]);
-        stackTraceElement[@"line"] = lineNum;
+        NSRange methodRange = [result[0] rangeAtIndex:1];
+        NSRange fileRange = [result[0] rangeAtIndex:3];
+        NSRange lineNumRange = [result[0] rangeAtIndex:4];
+        
+        stackTraceElement[@"method"] = methodRange.length == 0 ? @" " : [line substringWithRange:methodRange];
+        stackTraceElement[@"file"] = fileRange.length == 0 ? @" " : [line substringWithRange:fileRange];
+        stackTraceElement[@"line"] = lineNumRange.length == 0 ? [NSNumber numberWithInt:1] : @([[line substringWithRange:lineNumRange] intValue]);
         
         [stackFramesArr addObject:stackTraceElement];
     }
