@@ -121,10 +121,12 @@ exports.defineAutoTests = () => {
       spyOn(cordova, "exec").and.callThrough();
       spyOn(window.console, "warn").and.callThrough();
 
+      // should parse errors with missing fields
       let exampleError = new Error();
       exampleError.name = 'fakeErrorName';
       exampleError.message = 'fakeMsg';
-      exampleError.stack = 'fakeStack';
+      exampleError.stack = 'ionic://com.example.app.poc:8100/plugins/newrelic-cordova-plugin/www/js/missingmethod.js:123:45\nmissingfile@:1:2345\nmissinglinenum@ionic://com.example.app.poc:8100/example.js::\nregularstackline@ionic://com.example.app.poc:8100/example.js:1:23456';
+      // will crash if unable to execute
       window.NewRelic.recordError(exampleError);
       window.NewRelic.recordError(new TypeError);
       window.NewRelic.recordError(new EvalError);
@@ -141,6 +143,10 @@ exports.defineAutoTests = () => {
       let numOfNativeCalls = cordova.exec.calls.count() - window.console.warn.calls.count();
       expect(numOfNativeCalls).toBe(6);
       expect(window.NewRelic.recordError).toHaveBeenCalledTimes(10);
+    });
+
+    it('should parse JS error with missing fields', () => {
+
     });
 
     it('should have currentSessionId', () => {
