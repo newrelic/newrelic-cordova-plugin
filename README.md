@@ -36,6 +36,8 @@ cordova plugin add https://github.com/newrelic/newrelic-cordova-plugin.git --var
 ```
 
 ### Agent Configuration Options
+***These options are only available on Cordova plugin v6.2.1 and above.***
+
 The `--variable` argument can also be used to add optional configuration options on agent start to the plugin. 
 ```
 # Disable Crash Reporting
@@ -58,6 +60,8 @@ Currently, the plugin supports the following agent configuration options:
     * Defaults to `INFO` on Android and `WARNING` on iOS.
 * `COLLECTOR_ADDRESS`: Specifies the URI authority component of the harvest data upload endpoint.
 * `CRASH_COLLECTOR_ADDRESS`: Specifies the authority component of the crash data upload URI.
+* `FEDRAMP_ENABLED`: Enable or disable reporting data using different endpoints for US government clients.
+    * Possible values are `true` and `false`. Defaults to `false`.
 
 # Updating the plugin
 Update the New Relic Cordova plugin to the latest released version easily via the following command:
