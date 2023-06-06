@@ -27,6 +27,7 @@
   <preference name="LOG_LEVEL" default="default" />
   <preference name="COLLECTOR_ADDRESS" default="x" />
   <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
+  <preference name="FEDRAMP_ENABLED" default="false" />
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
@@ -47,6 +48,7 @@
         <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
         <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
         <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
+        <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
     </config-file>
@@ -64,7 +66,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="7.4.4" />
+        <pod name="NewRelicAgent" spec="7.4.5" />
       </pods>
     </podspec>
 
@@ -100,6 +102,7 @@
       <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
       <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
       <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
+      <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
     </config-file>
 
     <source-file src="src/android/NewRelicCordovaPlugin.java"

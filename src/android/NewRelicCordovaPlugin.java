@@ -73,6 +73,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             if (preferences.getString("DEFAULT_INTERACTIONS_ENABLED", "true").equalsIgnoreCase("false")) {
               NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
             }
+            if (preferences.getString("FEDRAMP_ENABLED", "false").equalsIgnoreCase("true")) {
+                NewRelic.enableFeature(FeatureFlag.FedRampEnabled);
+            }
 
             Map<String, Integer> strToLogLevel = new HashMap<>();
             strToLogLevel.put("ERROR", AgentLog.ERROR);

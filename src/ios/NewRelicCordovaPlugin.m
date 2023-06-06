@@ -49,6 +49,9 @@
         if ([self shouldDisableFeature:config[@"default_interactions_enabled"]]) {
             [NewRelic disableFeatures:NRFeatureFlag_DefaultInteractions];
         }
+        if (![self shouldDisableFeature:config[@"fedramp_enabled"]]) {
+            [NewRelic enableFeatures:NRFeatureFlag_FedRampEnabled];
+        }
         
         // Set log level depending on loggingEnabled and logLevel
         NRLogLevels logLevel = NRLogLevelWarning;
