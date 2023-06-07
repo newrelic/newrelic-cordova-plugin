@@ -58,6 +58,8 @@ Currently, the plugin supports the following agent configuration options:
 * `LOG_LEVEL`: Specifies the log level.
     * Possible values are `ERROR` (least verbose), `WARNING` `INFO`, `VERBOSE`, `DEBUG`, `AUDIT` (most verbose).
     * Defaults to `INFO` on Android and `WARNING` on iOS.
+* `WEB_VIEW_INSTRUMENTATION` (iOS ONLY): Enable (default) or disable automatic WKWebView instrumentation.
+    * Possible values are `true` and `false`. Defaults to `true`.
 * `COLLECTOR_ADDRESS`: Specifies the URI authority component of the harvest data upload endpoint.
 * `CRASH_COLLECTOR_ADDRESS`: Specifies the authority component of the crash data upload URI.
 * `FEDRAMP_ENABLED`: Enable or disable reporting data using different endpoints for US government clients.

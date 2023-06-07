@@ -25,6 +25,7 @@
   <preference name="DEFAULT_INTERACTIONS_ENABLED" default="true" />
   <preference name="LOGGING_ENABLED" default="true" />
   <preference name="LOG_LEVEL" default="default" />
+  <preference name="WEB_VIEW_INSTRUMENTATION" default="true" />
   <preference name="COLLECTOR_ADDRESS" default="x" />
   <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
   <preference name="FEDRAMP_ENABLED" default="false" />
@@ -46,6 +47,7 @@
         <preference name="DEFAULT_INTERACTIONS_ENABLED" value="$DEFAULT_INTERACTIONS_ENABLED" />
         <preference name="LOGGING_ENABLED" value="$LOGGING_ENABLED" />
         <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
+        <preference name="WEB_VIEW_INSTRUMENTATION" value="$WEB_VIEW_INSTRUMENTATION" />
         <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
         <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
         <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
@@ -100,6 +102,7 @@
       <preference name="DEFAULT_INTERACTIONS_ENABLED" value="$DEFAULT_INTERACTIONS_ENABLED" />
       <preference name="LOGGING_ENABLED" value="$LOGGING_ENABLED" />
       <preference name="LOG_LEVEL" value="$LOG_LEVEL" />
+      <preference name="WEB_VIEW_INSTRUMENTATION" value="$WEB_VIEW_INSTRUMENTATION" />
       <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
       <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
       <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
