@@ -49,6 +49,9 @@
         if ([self shouldDisableFeature:config[@"default_interactions_enabled"]]) {
             [NewRelic disableFeatures:NRFeatureFlag_DefaultInteractions];
         }
+        if ([self shouldDisableFeature:config[@"web_view_instrumentation"]]) {
+            [NewRelic disableFeatures:NRFeatureFlag_WebViewInstrumentation];
+        }
         if (![self shouldDisableFeature:config[@"fedramp_enabled"]]) {
             [NewRelic enableFeatures:NRFeatureFlag_FedRampEnabled];
         }
