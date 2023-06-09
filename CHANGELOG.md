@@ -1,5 +1,14 @@
 # Changelog
 
+# 6.2.1
+
+### New in this release
+* Upgrade native iOS agent to v7.4.5
+* Added agent configuration options when adding the plugin to your project.
+
+### Fixed in this release
+* Fixed an issue where certain JS errors were improperly parsed on iOS.
+
 # 6.2.0
 
 ### New in this release
