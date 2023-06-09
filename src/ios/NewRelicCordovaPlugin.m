@@ -80,7 +80,7 @@
         NSString* crashCollectorAddress = config[@"crash_collector_address"];
         
         [NewRelic setPlatform:NRMAPlatform_Cordova];
-        [NewRelic setPlatformVersion:config[@"platform_version"]];
+        [NewRelic setPlatformVersion:config[@"plugin_version"]];
 
         if ([self isEmptyConfigParameter:collectorAddress] && [self isEmptyConfigParameter:crashCollectorAddress]) {
             [NewRelic startWithApplicationToken:applicationToken];
