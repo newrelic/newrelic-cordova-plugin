@@ -125,8 +125,13 @@ var NewRelic = {
     /**
      * Records JavaScript errors for Cordova.
      * @param {Error} err The error to record.
+     * @param {Map<string, string|number>} attributes Optional attributes that will be appended to the handled exception event created in insights.
      */
-    recordError: function(err, cb, fail) {
+    recordError: function(err, attributes={}, cb, fail) {
+        let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
+        if (attributes === null) {
+            errorAttributes = {};
+        }
         if (err) {
             var error;
 
@@ -139,7 +144,7 @@ var NewRelic = {
             }
 
             if(error !== undefined) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
             } else {
                 window.console.warn('Undefined error in NewRelic.recordError');
             }
