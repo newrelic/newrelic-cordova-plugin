@@ -208,12 +208,20 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     final String errorMessage = args.getString(1);
                     final String errorStack = args.getString(2);
                     final Boolean isFatal = args.getBoolean(3);
+                    final JSONObject attributesAsJson = args.getJSONObject(4);
 
                     HashMap<String, Object> exceptionMap = new HashMap<>();
                     try {
                         exceptionMap.put("name", errorName);
                         exceptionMap.put("message", errorMessage);
                         exceptionMap.put("isFatal", isFatal);
+                        if (attributesAsJson != null) {
+                            final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesAsJson),
+                                Map.class);
+                            for (String key : attributes.keySet()) {
+                                exceptionMap.put(key, attributes.get(key));
+                            }
+                        }
                     } catch (IllegalArgumentException e) {
                         Log.w("NRMA", e.getMessage());
                     }
