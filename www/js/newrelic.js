@@ -125,7 +125,7 @@ var NewRelic = {
     /**
      * Records JavaScript errors for Cordova.
      * @param {Error} err The error to record.
-     * @param {Map<string, string|number>} attributes Optional attributes that will be appended to the handled exception event created in insights.
+     * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
      */
     recordError: function(err, attributes={}, cb, fail) {
         let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
