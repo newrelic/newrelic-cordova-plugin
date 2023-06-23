@@ -137,7 +137,8 @@ exports.defineAutoTests = () => {
       // should parse errors with non-empty custom attributes
       let errorAttributes = new Map([
         ["errorKey1", "errorValue1"],
-        ["errorKey2", "errorValue2"]
+        ["errorKey2", 2],
+        ["errorKey3", true]
       ]);
       window.NewRelic.recordError(exampleError, errorAttributes);
 
