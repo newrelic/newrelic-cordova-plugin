@@ -147,223 +147,196 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
          * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
          * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
      */
-        recordError: function(err, attributes={}, attributes={}, cb, fail) {
-            let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
-            if (attributes === null) {
-                errorAttributes = {};
-            }
-            let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
-        if (attributes === null) {
-            errorAttributes = {};
-        }
+    recordError: function(err, cb, fail) {
         if (err) {
-                var error;
-    
-                if (err instanceof Error) {
-                    error = err;
-                }
-    
-                if (typeof err === 'string') {
-                    error = new Error(err || '');
-                }
-    
-                if(error !== undefined) {
-                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes, errorAttributes]);
-                } else {
-                    window.console.warn('Undefined error in NewRelic.recordError');
-                }
-    
-            } else {
-                window.console.warn('Error is required in NewRelic.recordError');
+            var error;
+
+            if (err instanceof Error) {
+                error = err;
             }
-        },
-    
-        /**
-         * Throws a demo run-time exception to test New Relic crash reporting.
-         * @param {string} message An optional argument attached to the exception.
-         */
-        crashNow: function (message = '', cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "crashNow", [message]);
-        },
-    
-        /**
-         * Returns the current session ID as a parameter to the successful callback function.
-         * This method is useful for consolidating monitoring of app data (not just New Relic data) based on a single session definition and identifier.
-         * @param {function} cb A success callback function.
-         * @returns {Promise} A promise containing the current session ID.
-         */
-        currentSessionId: function (cb, fail) {
-            return new Promise(function (cb, fail) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "currentSessionId");
-            });
-        },
-    
-        /**
-         * Increments the count of an attribute with a specified name.
-         * When called, it overwrites its previous value and type each time.
-         * If attribute does not exist, it creates an attribute with a value of 1.
-         * The incremented attribute is shared by multiple Mobile event types.
-         * @param {string} name The name of the attribute.
-         * @param {number} value Optional argument that increments the attribute by this value.
-         */
-        incrementAttribute: function(name, value=1, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
-        },
-    
-        /**
-         * Records network failures.
-         * If a network request fails, use this method to record details about the failure.
-         * In most cases, place this call inside exception handlers.
-         * @param {string} url The URL of the request.
-         * @param {string} httpMethod The HTTP method used, such as GET or POST.
-         * @param {number} startTime The start time of the request in milliseconds since the epoch.
-         * @param {number} endTime The end time of the request in milliseconds since the epoch.
-         * @param {string} failure The name of the network failure. Possible values are 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'.
-         */
-        noticeNetworkFailure: function (url, httpMethod, startTime, endTime, failure, cb, fail) {
-            const failureNames = new Set(['Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed']);
-            if (!failureNames.has(failure)) {
-                window.console.error("NewRelic.noticeNetworkFailure: Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
+
+            if (typeof err === 'string') {
+                error = new Error(err || '');
+            }
+
+            if(error !== undefined) {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
+            } else {
+                window.console.warn('Undefined error in NewRelic.recordError');
+            }
+
+        } else {
+            window.console.warn('Error is required in NewRelic.recordError');
+        }
+    },
+
+    /**
+     * Throws a demo run-time exception to test New Relic crash reporting.
+     * @param {string} message An optional argument attached to the exception.
+     */
+    crashNow: function (message = '', cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "crashNow", [message]);
+    },
+
+    /**
+     * Returns the current session ID as a parameter to the successful callback function.
+     * This method is useful for consolidating monitoring of app data (not just New Relic data) based on a single session definition and identifier.
+     * @param {function} cb A success callback function.
+     * @returns {Promise} A promise containing the current session ID.
+     */
+    currentSessionId: function (cb, fail) {
+        return new Promise(function (cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "currentSessionId");
+        });
+    },
+
+    /**
+     * Increments the count of an attribute with a specified name.
+     * When called, it overwrites its previous value and type each time.
+     * If attribute does not exist, it creates an attribute with a value of 1.
+     * The incremented attribute is shared by multiple Mobile event types.
+     * @param {string} name The name of the attribute.
+     * @param {number} value Optional argument that increments the attribute by this value.
+     */
+    incrementAttribute: function(name, value=1, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
+    },
+
+    /**
+     * Records network failures.
+     * If a network request fails, use this method to record details about the failure.
+     * In most cases, place this call inside exception handlers.
+     * @param {string} url The URL of the request.
+     * @param {string} httpMethod The HTTP method used, such as GET or POST.
+     * @param {number} startTime The start time of the request in milliseconds since the epoch.
+     * @param {number} endTime The end time of the request in milliseconds since the epoch.
+     * @param {string} failure The name of the network failure. Possible values are 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'.
+     */
+    noticeNetworkFailure: function (url, httpMethod, startTime, endTime, failure, cb, fail) {
+        const failureNames = new Set(['Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed']);
+        if (!failureNames.has(failure)) {
+            window.console.error("NewRelic.noticeNetworkFailure: Network failure name has to be one of: 'Unknown', 'BadURL', 'TimedOut', 'CannotConnectToHost', 'DNSLookupFailed', 'BadServerResponse', 'SecureConnectionFailed'");
+            return;
+        }
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
+    },
+
+    /**
+     * 
+     * @param {string} name The name for the custom metric.
+     * @param {string} category The metric category name.
+     * @param {number} value Optional. The value of the metric. Value should be a non-zero positive number.
+     * @param {string} countUnit Optional (but requires value and valueUnit to be set). Unit of measurement for the metric count. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'.
+     * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'. 
+     */
+    recordMetric: function (name, category, value = -1, countUnit = null, valueUnit = null, cb, fail) {
+        const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
+        if (value < 0) {
+            if (countUnit !== null || valueUnit !== null) {
+                window.console.error('NewRelic.recordMetric: value must be set in recordMetric if countUnit and valueUnit are set');
                 return;
             }
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
-        },
-    
-        /**
-         * 
-         * @param {string} name The name for the custom metric.
-         * @param {string} category The metric category name.
-         * @param {number} value Optional. The value of the metric. Value should be a non-zero positive number.
-         * @param {string} countUnit Optional (but requires value and valueUnit to be set). Unit of measurement for the metric count. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'.
-         * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'. 
-         */
-        recordMetric: function (name, category, value = -1, countUnit = null, valueUnit = null, cb, fail) {
-            const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
-            if (value < 0) {
-                if (countUnit !== null || valueUnit !== null) {
-                    window.console.error('NewRelic.recordMetric: value must be set in recordMetric if countUnit and valueUnit are set');
+        } else {
+            if ((countUnit !== null && valueUnit == null) || (countUnit == null && valueUnit !== null)) {
+                window.console.error('NewRelic.recordMetric: countUnit and valueUnit in recordMetric must both be null or set');
+                return;
+            } else if (countUnit !== null && valueUnit !== null) {
+                if (!metricUnits.has(countUnit) || !metricUnits.has(valueUnit)) {
+                    window.console.error("NewRelic.recordMetric: countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
                     return;
-                }
-            } else {
-                if ((countUnit !== null && valueUnit == null) || (countUnit == null && valueUnit !== null)) {
-                    window.console.error('NewRelic.recordMetric: countUnit and valueUnit in recordMetric must both be null or set');
-                    return;
-                } else if (countUnit !== null && valueUnit !== null) {
-                    if (!metricUnits.has(countUnit) || !metricUnits.has(valueUnit)) {
-                        window.console.error("NewRelic.recordMetric: countUnit or valueUnit in recordMetric has to be one of 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS'");
-                        return;
-                    }
                 }
             }
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordMetric", [name, category, value, countUnit, valueUnit]);
-        },
-    
-        /**
-         * Removes all attributes from the session..
-         */
-        removeAllAttributes: function (cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAllAttributes");
-        },
-    
-        /**
-         * Sets the event harvest cycle length.
-         * Default is 600 seconds (10 minutes).
-         * Minimum value cannot be less than 60 seconds.
-         * Maximum value should not be greater than 600 seconds.
-         * @param {number} maxBufferTimeInSeconds The maximum time (in seconds) that the agent should store events in memory.
-         */
-        setMaxEventBufferTime: function (maxBufferTimeInSeconds, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventBufferTime", [maxBufferTimeInSeconds]);
-        },
-    
-        /**
-         * Sets the maximum size of the event pool stored in memory until the next harvest cycle.
-         * When the pool size limit is reached, the agent will start sampling events, discarding some new and old, until the pool of events is sent in the next harvest cycle.
-         * Default is a maximum of 1000 events per event harvest cycle.
-         * @param {number} maxPoolSize The maximum number of events per harvest cycle.
-         */
-        setMaxEventPoolSize: function (maxPoolSize, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
-        },
-    
-        /**
-         * FOR ANDROID ONLY.
-         * Enable or disable collection of event data.
-         * @param {boolean} enabled Boolean value for enabling analytics events.
-         */
-        analyticsEventEnabled: function (enabled, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
-        },
-    
-        /**
-         * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
-         * @param {boolean} enabled Boolean value for enable successful HTTP requests.
-         */
-        networkRequestEnabled: function (enabled, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
-        },
-    
-        /**
-         * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
-         * @param {boolean} enabled Boolean value for enabling network request errors.
-         */
-        networkErrorRequestEnabled: function (enabled, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
-        },
-    
-        /**
-         * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
-         * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
-         */
-        httpRequestBodyCaptureEnabled: function (enabled, cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
-        },
-    
-        /**
-         * Shut down the agent within the current application lifecycle during runtime.
-         * Once the agent has shut down, it cannot be restarted within the current application lifecycle.
-         */
-        shutdown: function (cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "shutdown");
-        },
-    
-        addHTTPHeadersTrackingFor: function (headers,cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "addHTTPHeadersTrackingFor",[headers]);
-        },
-    
-        getHTTPHeadersTrackingFor: function (cb, fail) {
-    
-            return new Promise(function (cb, fail) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "getHTTPHeadersTrackingFor");
-            });
-        },
-    
-        generateDistributedTracingHeaders: function (cb, fail) {
-    
-            return new Promise(function (cb, fail) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "generateDistributedTracingHeaders");
-            });
-        },
-    
-    }
-    
-    networkRequest = {};
-    var originalXhrOpen = XMLHttpRequest.prototype.open;
-    var originalXHRSend = XMLHttpRequest.prototype.send;
+        }
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordMetric", [name, category, value, countUnit, valueUnit]);
+    },
 
-    window.XMLHttpRequest.prototype.open = function (method, url) {
-        // Keep track of the method and url
-        // start time is tracked by the `send` method
-    
-        // eslint-disable-next-line prefer-rest-params
-    
-        networkRequest.url = url;
-        networkRequest.method = method;
-        networkRequest.bytesSent = 0;
-        networkRequest.startTime = Date.now();
-        return originalXhrOpen.apply(this, arguments)
-    
-    }
+    /**
+     * Removes all attributes from the session..
+     */
+    removeAllAttributes: function (cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAllAttributes");
+    },
+
+    /**
+     * Sets the event harvest cycle length.
+     * Default is 600 seconds (10 minutes).
+     * Minimum value cannot be less than 60 seconds.
+     * Maximum value should not be greater than 600 seconds.
+     * @param {number} maxBufferTimeInSeconds The maximum time (in seconds) that the agent should store events in memory.
+     */
+    setMaxEventBufferTime: function (maxBufferTimeInSeconds, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventBufferTime", [maxBufferTimeInSeconds]);
+    },
+
+    /**
+     * Sets the maximum size of the event pool stored in memory until the next harvest cycle.
+     * When the pool size limit is reached, the agent will start sampling events, discarding some new and old, until the pool of events is sent in the next harvest cycle.
+     * Default is a maximum of 1000 events per event harvest cycle.
+     * @param {number} maxPoolSize The maximum number of events per harvest cycle.
+     */
+    setMaxEventPoolSize: function (maxPoolSize, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
+    },
+
+    /**
+     * FOR ANDROID ONLY.
+     * Enable or disable collection of event data.
+     * @param {boolean} enabled Boolean value for enabling analytics events.
+     */
+    analyticsEventEnabled: function (enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
+    },
+
+    /**
+     * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
+     * @param {boolean} enabled Boolean value for enable successful HTTP requests.
+     */
+    networkRequestEnabled: function (enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
+    },
+
+    /**
+     * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
+     * @param {boolean} enabled Boolean value for enabling network request errors.
+     */
+    networkErrorRequestEnabled: function (enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
+    },
+
+    /**
+     * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
+     * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
+     */
+    httpRequestBodyCaptureEnabled: function (enabled, cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
+    },
+
+    /**
+     * Shut down the agent within the current application lifecycle during runtime.
+     * Once the agent has shut down, it cannot be restarted within the current application lifecycle.
+     */
+    shutdown: function (cb, fail) {
+        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "shutdown");
+    },
+
+}
+
+networkRequest = {};
+var originalXhrOpen = XMLHttpRequest.prototype.open;
+var originalXHRSend = XMLHttpRequest.prototype.send;
+window.XMLHttpRequest.prototype.open = function (method, url) {
+    // Keep track of the method and url
+    // start time is tracked by the `send` method
+
+    // eslint-disable-next-line prefer-rest-params
+
+    networkRequest.url = url;
+    networkRequest.method = method;
+    networkRequest.bytesSent = 0;
+    networkRequest.startTime = Date.now();
+    return originalXhrOpen.apply(this, arguments)
+
+}
 
 
     window.XMLHttpRequest.prototype.send = function (data) {
