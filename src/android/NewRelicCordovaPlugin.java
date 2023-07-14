@@ -232,7 +232,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                         exceptionMap.put("isFatal", isFatal);
                         if (attributesAsJson != null) {
                             final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesAsJson),
-                                    Map.class);
+                                Map.class);
                             for (String key : attributes.keySet()) {
                                 exceptionMap.put(key, attributes.get(key));
                             }
