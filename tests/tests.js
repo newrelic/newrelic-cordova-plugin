@@ -134,6 +134,20 @@ exports.defineAutoTests = () => {
       window.NewRelic.recordError(new ReferenceError);
       window.NewRelic.recordError(new Error);
 
+      // should parse errors with non-empty custom attributes
+      let errorAttributes = new Map([
+        ["errorKey1", "errorValue1"],
+        ["errorKey2", 2],
+        ["errorKey3", true]
+      ]);
+      window.NewRelic.recordError(exampleError, errorAttributes);
+
+      // should parse errors with null custom attributes
+      window.NewRelic.recordError(exampleError, null);
+
+      // should parse errors with empty custom attributes
+      window.NewRelic.recordError(exampleError, {});
+
       // Bad arguments
       window.NewRelic.recordError(undefined);
       window.NewRelic.recordError(null);
@@ -141,8 +155,8 @@ exports.defineAutoTests = () => {
       window.NewRelic.recordError(true);
 
       let numOfNativeCalls = cordova.exec.calls.count() - window.console.warn.calls.count();
-      expect(numOfNativeCalls).toBe(6);
-      expect(window.NewRelic.recordError).toHaveBeenCalledTimes(10);
+      expect(numOfNativeCalls).toBe(9);
+      expect(window.NewRelic.recordError).toHaveBeenCalledTimes(13);
     });
 
     it('should parse JS error with missing fields', () => {
