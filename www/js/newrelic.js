@@ -145,13 +145,18 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
          * Records JavaScript errors for Cordova.
          * @param {Error} err The error to record.
          * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
-         */
-        recordError: function(err, attributes={}, cb, fail) {
+         * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
+     */
+        recordError: function(err, attributes={}, attributes={}, cb, fail) {
             let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
             if (attributes === null) {
                 errorAttributes = {};
             }
-            if (err) {
+            let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
+        if (attributes === null) {
+            errorAttributes = {};
+        }
+        if (err) {
                 var error;
     
                 if (err instanceof Error) {
@@ -163,7 +168,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
                 }
     
                 if(error !== undefined) {
-                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
+                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes, errorAttributes]);
                 } else {
                     window.console.warn('Undefined error in NewRelic.recordError');
                 }
