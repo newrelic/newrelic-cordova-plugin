@@ -351,8 +351,13 @@ window.XMLHttpRequest.prototype.send = function (data) {
                 if (this.readyState === this.DONE) {
                     networkRequest.endTime = Date.now();
                     networkRequest.status = this.status;
+                    if(this.responseText !== undefined) {
                     networkRequest.bytesreceived = this.responseText.length;
                     networkRequest.body = this.responseText;
+                    } else {
+                        networkRequest.bytesreceived = 0;
+                        networkRequest.body = "";
+                    }
 
 
                     NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body);
