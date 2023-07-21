@@ -197,6 +197,7 @@
     NSString* errorMessage = [command.arguments objectAtIndex:1];
     NSString* errorStack = [command.arguments objectAtIndex:2];
     NSString* isFatal = @"false";
+    NSDictionary* errorAttributes = [command.arguments objectAtIndex:4];
 
     if ([[command.arguments objectAtIndex:3] boolValue] == YES) {
         isFatal = @"true";
@@ -207,6 +208,11 @@
     attributes[@"cause"] = errorMessage;
     attributes[@"reason"] = errorMessage;
     attributes[@"fatal"] = isFatal;
+    if (errorAttributes != nil && ![errorAttributes isKindOfClass:[NSNull class]]) {
+        for(id key in errorAttributes) {
+            attributes[key] = errorAttributes[key];
+        }
+    }
     
     NSMutableArray* stackTraceArr = [self parseStackTrace:errorStack];
     attributes[@"stackTraceElements"] = stackTraceArr;

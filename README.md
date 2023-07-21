@@ -244,7 +244,7 @@ By default, these configurations are already set to true on agent start.
 ```
 
 ## Error Reporting
-### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)) : void;
+### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error), attributes?: {[key: string]: boolean | number | string}) : void;
 Records JavaScript errors for Cordova. It is useful to add this method by adding it to the error handler of the framework that you are using. Here are some examples below:
 
 ### Angular

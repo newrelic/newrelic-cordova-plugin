@@ -1,5 +1,11 @@
 # Changelog
 
+# 6.2.2
+
+### New in this release
+* Fixes the issue where the response body appears empty for HTTP requests.
+* Upgraded native Android agent to v7.0.0
+
 # 6.2.1
 
 ### New in this release

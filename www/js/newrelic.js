@@ -125,8 +125,13 @@ var NewRelic = {
     /**
      * Records JavaScript errors for Cordova.
      * @param {Error} err The error to record.
+     * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
      */
-    recordError: function(err, cb, fail) {
+    recordError: function(err, attributes={}, cb, fail) {
+        let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
+        if (attributes === null) {
+            errorAttributes = {};
+        }
         if (err) {
             var error;
 
@@ -139,7 +144,7 @@ var NewRelic = {
             }
 
             if(error !== undefined) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
             } else {
                 window.console.warn('Undefined error in NewRelic.recordError');
             }
@@ -346,8 +351,13 @@ window.XMLHttpRequest.prototype.send = function (data) {
                 if (this.readyState === this.DONE) {
                     networkRequest.endTime = Date.now();
                     networkRequest.status = this.status;
+                    if(this.responseText !== undefined) {
                     networkRequest.bytesreceived = this.responseText.length;
                     networkRequest.body = this.responseText;
+                    } else {
+                        networkRequest.bytesreceived = 0;
+                        networkRequest.body = "";
+                    }
 
 
                     NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body);
