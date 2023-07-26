@@ -1,6 +1,6 @@
 name: Update Agent Version
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       VERSION_NUMBER:
         required: true
