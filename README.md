@@ -64,7 +64,8 @@ Currently, the plugin supports the following agent configuration options:
 * `CRASH_COLLECTOR_ADDRESS`: Specifies the authority component of the crash data upload URI.
 * `FEDRAMP_ENABLED`: Enable or disable reporting data using different endpoints for US government clients.
     * Possible values are `true` and `false`. Defaults to `false`.
-
+* `CONSOLE_LOGS_ENABLED`: Enable or disable reporting javascript console logs as custom events.
+    * Possible values are `true` and `false`. Defaults to `false`.
 # Updating the plugin
 Update the New Relic Cordova plugin to the latest released version easily via the following command:
 ```
@@ -378,6 +379,51 @@ You can also build dashboard for errors using this query:
   ```sql
   SELECT jsAppVersion,name,Message,errorStack,isFatal FROM `JS Errors` SINCE 24 hours ago
   ```
+
+## Uploading dSYM files
+
+Our iOS agent includes a Swift script intended to be run from a build script in your target's build phases in XCode. The script automatically uploads dSYM files in the background (or converts your dSYM to the New Relic map file format), and then performs a background upload of the files needed for crash symbolication to New Relic.
+
+To invoke this script during an XCode build:
+1. Copy the dsym-upload-tools folder from this repository: https://github.com/newrelic/newrelic-ios-agent-spm, to your projects SRCROOT folder first. 
+1. In Xcode, select your project in the navigator, then click on the application target.
+1. Select the Build Phases tab in the settings editor.
+1. Click the + icon above Target Dependencies and choose New Run Script Build Phase. Ensure the new build script is the very last build script.
+1. Add the following lines of code to the new phase and replace `APP_TOKEN` with your iOS application token.
+    1. If there is a checkbox below Run script that says "Run script: Based on Dependency analysis" please make sure it is not checked.
+
+### Cordova Plugin 6.2.4 or higher
+```
+ARTIFACT_DIR="${BUILD_DIR%Build/*}"
+SCRIPT=`/usr/bin/find "${SRCROOT}" "${ARTIFACT_DIR}" -type f -name run-symbol-tool | head -n 1`
+/bin/sh "${SCRIPT}" "APP_TOKEN"
+```
+### Cordova Plugin 6.2.3 or lower
+```
+SCRIPT=`/usr/bin/find "${SRCROOT}" -name newrelic_postbuild.sh | head -n 1`
+
+if [ -z "${SCRIPT}"]; then
+ ARTIFACT_DIR="${BUILD_DIR%Build/*}SourcePackages/artifacts"
+ SCRIPT=`/usr/bin/find "${ARTIFACT_DIR}" -name newrelic_postbuild.sh | head -n 1`
+fi
+
+/bin/sh "${SCRIPT}" "APP_TOKEN"
+```
+
+#### Note: The automatic script requires bitcode to be disabled. You should clean and rebuild your app after adding the script. 
+
+### Missing dSYMs
+The automatic script will create an `upload_dsym_results.log` file in your project's iOS directory, which contains information about any failures that occur during symbol upload.
+
+If dSYM files are missing, you may need to check Xcode build settings to ensure the file is being generated. Frameworks which are built locally have separate build settings and may need to be updated as well.
+
+Build settings:
+```
+Debug Information Format : Dwarf with dSYM File
+Deployment Postprocessing: Yes
+Strip Linked Product: Yes
+Strip Debug Symbols During Copy : Yes
+```
 
 # Contributing Code
 

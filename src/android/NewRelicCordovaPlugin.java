@@ -58,22 +58,22 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
         } else {
 
-            final String pluginVersion = preferences.getString("PLUGIN_VERSION", "undefined");
+            final String pluginVersion = preferences.getString("plugin_version", "undefined");
             final DeviceInformation devInfo = Agent.getDeviceInformation();
 
-            if (preferences.getString("CRASH_REPORTING_ENABLED", "true").equalsIgnoreCase("false")) {
+            if (preferences.getString("crash_reporting_enabled", "true").equalsIgnoreCase("false")) {
               NewRelic.disableFeature(FeatureFlag.CrashReporting);
             }
-            if (preferences.getString("DISTRIBUTED_TRACING_ENABLED", "true").equalsIgnoreCase("false")) {
+            if (preferences.getString("distributed_tracing_enabled", "true").equalsIgnoreCase("false")) {
               NewRelic.disableFeature(FeatureFlag.DistributedTracing);
             }
-            if (preferences.getString("INTERACTION_TRACING_ENABLED", "true").equalsIgnoreCase("false")) {
+            if (preferences.getString("interaction_tracing_enabled", "true").equalsIgnoreCase("false")) {
               NewRelic.disableFeature(FeatureFlag.InteractionTracing);
             }
-            if (preferences.getString("DEFAULT_INTERACTIONS_ENABLED", "true").equalsIgnoreCase("false")) {
+            if (preferences.getString("default_interactions_enabled", "true").equalsIgnoreCase("false")) {
               NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
             }
-            if (preferences.getString("FEDRAMP_ENABLED", "false").equalsIgnoreCase("true")) {
+            if (preferences.getString("fedramp_enabled", "false").equalsIgnoreCase("true")) {
                 NewRelic.enableFeature(FeatureFlag.FedRampEnabled);
             }
 
@@ -85,17 +85,17 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             strToLogLevel.put("AUDIT", AgentLog.AUDIT);
 
             int logLevel = AgentLog.INFO;
-            String configLogLevel = preferences.getString("LOG_LEVEL", "INFO").toUpperCase();
+            String configLogLevel = preferences.getString("loglevel", "INFO").toUpperCase();
             if (strToLogLevel.containsKey(configLogLevel)) {
               logLevel = strToLogLevel.get(configLogLevel);
             }
 
-            String collectorAddress = preferences.getString("COLLECTOR_ADDRESS", null);
-            String crashCollectorAddress = preferences.getString("CRASH_COLLECTOR_ADDRESS", null);
+            String collectorAddress = preferences.getString("collector_address", null);
+            String crashCollectorAddress = preferences.getString("crash_collector_address", null);
 
             NewRelic newRelic =  NewRelic.withApplicationToken(appToken)
               .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
-              .withLoggingEnabled(preferences.getString("LOGGING_ENABLED", "true").toLowerCase().equals("true"))
+              .withLoggingEnabled(preferences.getString("logging_enabled", "true").toLowerCase().equals("true"))
               .withLogLevel(logLevel);
 
             if (isEmptyConfigParameter(collectorAddress) && isEmptyConfigParameter(crashCollectorAddress)) {
@@ -185,6 +185,17 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     NewRelic.recordCustomEvent(eventType, eventName, attributes);
 
                     break;
+                }
+                case "recordLogs": {
+                 if (preferences.getString("console_logs_enabled", "true").equalsIgnoreCase("true")) {
+                    final String eventType = args.getString(0);
+                    final String eventName = args.getString(1);
+                    final JSONObject attributesASJson = args.getJSONObject(2);
+                    final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesASJson),
+                            Map.class);
+                    NewRelic.recordCustomEvent(eventType, eventName, attributes);
+                    break;
+                 }
                 }
                 case "setAttribute": {
                     final String name = args.getString(0);

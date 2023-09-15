@@ -123,6 +123,18 @@
     [NewRelic recordCustomEvent:eventType name:eventName attributes:attributes];
 }
 
+- (void)recordLogs:(CDVInvokedUrlCommand *)command {
+    NSDictionary* config = self.commandDelegate.settings;
+   if (![self shouldDisableFeature:config[@"console_logs_enabled"]]) {
+           
+    NSString* eventType = [command.arguments objectAtIndex:0];
+    NSString* eventName = [command.arguments objectAtIndex:1];
+    NSDictionary *attributes = [command.arguments objectAtIndex:2];
+
+    [NewRelic recordCustomEvent:eventType name:eventName attributes:attributes];
+   }
+}
+
 - (void)setAttribute:(CDVInvokedUrlCommand *)command {
     NSString* name = [command.arguments objectAtIndex:0];
     NSString* value = [command.arguments objectAtIndex:1];
