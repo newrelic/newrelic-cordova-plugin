@@ -15,6 +15,8 @@
 
 - (void)recordCustomEvent:(CDVInvokedUrlCommand *)command;
 
+- (void)recordLogs:(CDVInvokedUrlCommand *)command;
+
 - (void)setAttribute:(CDVInvokedUrlCommand *)command;
 
 - (void)removeAttribute:(CDVInvokedUrlCommand *)command;

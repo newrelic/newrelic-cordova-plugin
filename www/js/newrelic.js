@@ -87,6 +87,24 @@ var NewRelic = {
         });
     },
 
+        /**
+     * Creates and records log as custom Events, for use in New Relic Insights.
+     * The event includes a list of attributes, specified as a map.
+     * @param {string} eventType The type of event.
+     * @param {string} eventName The name of the event.
+     * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
+     */
+        recordLogs: function (eventType, eventName, attributes, cb, fail) {
+            const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
+            customEvent.attributes.isValid(() => {
+                if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
+                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordLogs", [eventType, eventName, customEvent.attributes.value]);
+                } else {
+                    window.console.error("Invalid event name or type in recordCustomEvent");
+                }
+            });
+        },
+
     /**
      * Track a method as an interaction.
      * @param {string} actionName The name of the action.
@@ -119,7 +137,7 @@ var NewRelic = {
             argsStr[String(key)] = String(args[key]);
         });
 
-        this.recordCustomEvent("consoleEvents", name, args);
+        this.recordLogs("consoleEvents", name, args);
     },
 
     /**
