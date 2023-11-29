@@ -418,6 +418,50 @@ try {
     // do nothing -- addEventListener is not supported
 }
 
+const oldFetch = window.fetch;
+
+window.fetch = async function fetch() {
+  var _arguments = arguments;
+  var urlOrRequest = arguments[0];
+  var options = arguments[1];
+
+  networkRequest.startTime = Date.now();
+  if (urlOrRequest && typeof urlOrRequest === 'object') {
+    networkRequest.url = urlOrRequest.url;
+
+    if (options && 'method' in options) {
+     networkRequest. method = options.method;
+    } else if (urlOrRequest && 'method' in urlOrRequest) {
+      networkRequest.method = urlOrRequest.method;
+    }
+  } else {
+    networkRequest.url = urlOrRequest;
+
+    if (options && 'method' in options) {
+      networkRequest.method = options.method;
+    }
+  }
+
+  if (networkRequest.method === undefined || networkRequest.method === "" ) {
+    networkRequest.method = 'GET';
+  }
+
+  return new Promise(function (resolve, reject) {
+    // pass through to native fetch
+    oldFetch.apply(void 0, _arguments).then(function (response) {
+      handleFetchSuccess(response, networkRequest.method, networkRequest.url,networkRequest.startTime);
+      resolve(response);
+    })["catch"](function (error) {
+        NewRelic.recordError(error);
+      reject(error);
+    });
+  });
+
+};
+
+function handleFetchSuccess(response, method, url, startTime) {
+    NewRelic.noticeHttpTransaction(url, method,response.status,startTime, Date.now(),0, 0, "");
+}
 
 const defaultLog = window.console.log;
 const defaultWarn = window.console.warn;

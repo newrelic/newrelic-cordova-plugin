@@ -41,3 +41,4 @@ typings/
 .idea
 
 package-lock.json
+.vscode/
