@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.2.3" />
+  <preference name="PLUGIN_VERSION" default="6.2.4" />
   <preference name="CRASH_REPORTING_ENABLED" default="true" />
   <preference name="DISTRIBUTED_TRACING_ENABLED" default="true" />
   <preference name="INTERACTION_TRACING_ENABLED" default="true" />
