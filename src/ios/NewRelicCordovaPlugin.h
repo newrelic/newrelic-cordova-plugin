@@ -59,4 +59,10 @@
 
 - (void)shutdown:(CDVInvokedUrlCommand *) command;
 
+- (void)addHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command;
+
+- (void)getHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command;
+
+- (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command;
+
 @end
