@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0 
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.newrelic.cordova.plugin;
@@ -11,10 +11,12 @@ import android.util.Log;
 
 import com.newrelic.agent.android.Agent;
 import com.newrelic.agent.android.ApplicationFramework;
+import com.newrelic.agent.android.HttpHeaders;
 import com.newrelic.agent.android.NewRelic;
 import com.newrelic.agent.android.analytics.AnalyticsAttribute;
 import com.newrelic.agent.android.distributedtracing.TraceContext;
 import com.newrelic.agent.android.distributedtracing.TraceHeader;
+import com.newrelic.agent.android.distributedtracing.TracePayload;
 import com.newrelic.agent.android.harvest.DeviceInformation;
 import com.newrelic.agent.android.logging.AgentLog;
 import com.newrelic.agent.android.stats.StatsEngine;
@@ -22,6 +24,7 @@ import com.newrelic.agent.android.metric.MetricUnit;
 import com.newrelic.agent.android.util.NetworkFailure;
 import com.newrelic.agent.android.FeatureFlag;
 import com.newrelic.com.google.gson.Gson;
+import com.newrelic.com.google.gson.JsonArray;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -33,6 +36,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,11 +45,11 @@ import java.util.regex.Pattern;
 public class NewRelicCordovaPlugin extends CordovaPlugin {
     private final static String TAG = NewRelicCordovaPlugin.class.getSimpleName();
     private final Pattern chromeStackTraceRegex =
-    Pattern.compile("^\\s*at (.*?) ?\\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\\/|[a-z]:\\\\|\\\\\\\\).*?)(?::(\\d+))?(?::(\\d+))?\\)?\\s*$",
-      Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^\\s*at (.*?) ?\\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\\/|[a-z]:\\\\|\\\\\\\\).*?)(?::(\\d+))?(?::(\\d+))?\\)?\\s*$",
+                    Pattern.CASE_INSENSITIVE);
     private final Pattern nodeStackTraceRegex =
-    Pattern.compile("^\\s*at (?:((?:\\[object object\\])?[^\\\\/]+(?: \\[as \\S+\\])?) )?\\(?(.*?):(\\d+)(?::(\\d+))?\\)?\\s*$",
-      Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^\\s*at (?:((?:\\[object object\\])?[^\\\\/]+(?: \\[as \\S+\\])?) )?\\(?(.*?):(\\d+)(?::(\\d+))?\\)?\\s*$",
+                    Pattern.CASE_INSENSITIVE);
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -62,16 +66,16 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             final DeviceInformation devInfo = Agent.getDeviceInformation();
 
             if (preferences.getString("crash_reporting_enabled", "true").equalsIgnoreCase("false")) {
-              NewRelic.disableFeature(FeatureFlag.CrashReporting);
+                NewRelic.disableFeature(FeatureFlag.CrashReporting);
             }
             if (preferences.getString("distributed_tracing_enabled", "true").equalsIgnoreCase("false")) {
-              NewRelic.disableFeature(FeatureFlag.DistributedTracing);
+                NewRelic.disableFeature(FeatureFlag.DistributedTracing);
             }
             if (preferences.getString("interaction_tracing_enabled", "true").equalsIgnoreCase("false")) {
-              NewRelic.disableFeature(FeatureFlag.InteractionTracing);
+                NewRelic.disableFeature(FeatureFlag.InteractionTracing);
             }
             if (preferences.getString("default_interactions_enabled", "true").equalsIgnoreCase("false")) {
-              NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
+                NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
             }
             if (preferences.getString("fedramp_enabled", "false").equalsIgnoreCase("true")) {
                 NewRelic.enableFeature(FeatureFlag.FedRampEnabled);
@@ -87,30 +91,30 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             int logLevel = AgentLog.INFO;
             String configLogLevel = preferences.getString("loglevel", "INFO").toUpperCase();
             if (strToLogLevel.containsKey(configLogLevel)) {
-              logLevel = strToLogLevel.get(configLogLevel);
+                logLevel = strToLogLevel.get(configLogLevel);
             }
 
             String collectorAddress = preferences.getString("collector_address", null);
             String crashCollectorAddress = preferences.getString("crash_collector_address", null);
 
             NewRelic newRelic =  NewRelic.withApplicationToken(appToken)
-              .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
-              .withLoggingEnabled(preferences.getString("logging_enabled", "true").toLowerCase().equals("true"))
-              .withLogLevel(logLevel);
+                    .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
+                    .withLoggingEnabled(preferences.getString("logging_enabled", "true").toLowerCase().equals("true"))
+                    .withLogLevel(logLevel);
 
             if (isEmptyConfigParameter(collectorAddress) && isEmptyConfigParameter(crashCollectorAddress)) {
-              newRelic.start(this.cordova.getActivity().getApplication());
+                newRelic.start(this.cordova.getActivity().getApplication());
             } else {
-              // Set missing collector addresses (if any)
-              if (collectorAddress == null) {
-                collectorAddress = "mobile-collector.newrelic.com";
-              }
-              if (crashCollectorAddress == null) {
-                crashCollectorAddress = "mobile-crash.newrelic.com";
-              }
-              newRelic.usingCollectorAddress(collectorAddress);
-              newRelic.usingCrashCollectorAddress(crashCollectorAddress);
-              newRelic.start(this.cordova.getActivity().getApplication());
+                // Set missing collector addresses (if any)
+                if (collectorAddress == null) {
+                    collectorAddress = "mobile-collector.newrelic.com";
+                }
+                if (crashCollectorAddress == null) {
+                    crashCollectorAddress = "mobile-crash.newrelic.com";
+                }
+                newRelic.usingCollectorAddress(collectorAddress);
+                newRelic.usingCrashCollectorAddress(crashCollectorAddress);
+                newRelic.start(this.cordova.getActivity().getApplication());
             }
 
             newRelic.start(this.cordova.getActivity().getApplication());
@@ -121,30 +125,30 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
     public boolean isEmptyConfigParameter(String parameter) {
         return parameter == null || parameter.isEmpty() || parameter.equals("x");
-      }
+    }
 
     public StackTraceElement[] parseStackTrace(String stack) {
         String[] lines = stack.split("\n");
         ArrayList<StackTraceElement> stackTraceList = new ArrayList<>();
-    
+
         for (String line : lines) {
-          Matcher chromeMatcher = chromeStackTraceRegex.matcher(line);
-          Matcher nodeMatcher = nodeStackTraceRegex.matcher(line);
-          if (chromeMatcher.matches() || nodeMatcher.matches()) {
-            Matcher matcher = chromeMatcher.matches() ? chromeMatcher : nodeMatcher;
-            try {
-              String method = matcher.group(1) == null ? " " : matcher.group(1);
-              String file = matcher.group(2) == null ? " " : matcher.group(2);
-              int lineNumber = matcher.group(3) == null ? 1 : Integer.parseInt(matcher.group(3));
-              stackTraceList.add(new StackTraceElement("", method, file, lineNumber));
-            } catch (Exception e) {
-              NewRelic.recordHandledException(e);
-              return new StackTraceElement[0];
+            Matcher chromeMatcher = chromeStackTraceRegex.matcher(line);
+            Matcher nodeMatcher = nodeStackTraceRegex.matcher(line);
+            if (chromeMatcher.matches() || nodeMatcher.matches()) {
+                Matcher matcher = chromeMatcher.matches() ? chromeMatcher : nodeMatcher;
+                try {
+                    String method = matcher.group(1) == null ? " " : matcher.group(1);
+                    String file = matcher.group(2) == null ? " " : matcher.group(2);
+                    int lineNumber = matcher.group(3) == null ? 1 : Integer.parseInt(matcher.group(3));
+                    stackTraceList.add(new StackTraceElement("", method, file, lineNumber));
+                } catch (Exception e) {
+                    NewRelic.recordHandledException(e);
+                    return new StackTraceElement[0];
+                }
             }
-          }
         }
         return stackTraceList.toArray(new StackTraceElement[0]);
-      }
+    }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -187,15 +191,15 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     break;
                 }
                 case "recordLogs": {
-                 if (preferences.getString("console_logs_enabled", "true").equalsIgnoreCase("true")) {
-                    final String eventType = args.getString(0);
-                    final String eventName = args.getString(1);
-                    final JSONObject attributesASJson = args.getJSONObject(2);
-                    final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesASJson),
-                            Map.class);
-                    NewRelic.recordCustomEvent(eventType, eventName, attributes);
-                    break;
-                 }
+                    if (preferences.getString("console_logs_enabled", "true").equalsIgnoreCase("true")) {
+                        final String eventType = args.getString(0);
+                        final String eventName = args.getString(1);
+                        final JSONObject attributesASJson = args.getJSONObject(2);
+                        final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesASJson),
+                                Map.class);
+                        NewRelic.recordCustomEvent(eventType, eventName, attributes);
+                        break;
+                    }
                 }
                 case "setAttribute": {
                     final String name = args.getString(0);
@@ -228,7 +232,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                         exceptionMap.put("isFatal", isFatal);
                         if (attributesAsJson != null) {
                             final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesAsJson),
-                                Map.class);
+                                    Map.class);
                             for (String key : attributes.keySet()) {
                                 exceptionMap.put(key, attributes.get(key));
                             }
@@ -238,9 +242,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     }
 
                     if(errorStack == null) {
-                      NewRelic.recordBreadcrumb("JS Errors", exceptionMap);
-                      StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
-                      break;
+                        NewRelic.recordBreadcrumb("JS Errors", exceptionMap);
+                        StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
+                        break;
                     }
 
                     StackTraceElement[] stackTraceElements = parseStackTrace(errorStack);
@@ -259,24 +263,50 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     final int bytesSent = args.getInt(5);
                     final int bytesReceived = args.getInt(6);
                     final String body = args.getString(7);
+                    final Object traceAttributes = args.get(9);
+                    Map<String,Object> traceHeadersMap = new HashMap<String, Object>();
+                    if (traceAttributes instanceof JSONObject) {
+                        traceHeadersMap = new Gson().fromJson(String.valueOf(traceAttributes), Map.class);
+                    }
+
+                    JSONObject params = args.getJSONObject(8);
+                    Map<String,String> paramsMap = new HashMap<>();
+                    if (params != null) {
+                        paramsMap = new Gson().fromJson(String.valueOf(params), Map.class);
+                    }
 
                     NewRelic.noticeHttpTransaction(url, method, status, startTime, endTime, bytesSent, bytesReceived,
-                            body);
+                            body,paramsMap,"",traceHeadersMap);
                     break;
                 }
-                case "noticeDistributedTrace": {
+                case "generateDistributedTracingHeaders": {
 
                     cordova.getThreadPool().execute(new Runnable() {
                         public void run() {
                             try {
+
+                                JSONObject dtHeaders = new JSONObject();
                                 TraceContext traceContext = NewRelic.noticeDistributedTrace(null);
+                                TracePayload tracePayload = traceContext.getTracePayload();
 
-                                Map<String, Object> traceAttributes = new HashMap<>(traceContext.asTraceAttributes());
-                                for (TraceHeader header : traceContext.getHeaders()) {
-                                    traceAttributes.put(header.getHeaderName(), header.getHeaderValue());
-                                }
+                                String headerName = tracePayload.getHeaderName();
+                                String headerValue = tracePayload.getHeaderValue();
+                                String spanId = tracePayload.getSpanId();
+                                String traceId = tracePayload.getTraceId();
+                                String parentId = traceContext.getParentId();
+                                String vendor = traceContext.getVendor();
+                                String accountId = traceContext.getAccountId();
+                                String applicationId = traceContext.getApplicationId();
 
-                                callbackContext.success(new JSONObject(traceAttributes));
+                                dtHeaders.put(headerName, headerValue);
+                                dtHeaders.put(NRTraceConstants.TRACE_PARENT, "00-" + traceId + "-" + parentId + "-00");
+                                dtHeaders.put(NRTraceConstants.TRACE_STATE, vendor + "=0-2-" + accountId + "-" + applicationId + "-" + parentId + "----" + System.currentTimeMillis());
+                                dtHeaders.put(NRTraceConstants.TRACE_ID, traceId);
+                                dtHeaders.put(NRTraceConstants.ID, spanId);
+                                dtHeaders.put(NRTraceConstants.GUID, spanId);
+
+
+                                callbackContext.success(dtHeaders);
 
                             } catch (Exception e) {
                                 NewRelic.recordHandledException(e);
@@ -418,7 +448,29 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     NewRelic.shutdown();
                     break;
                 }
-                
+                case "addHTTPHeadersTrackingFor": {
+                    final JSONArray headers = args.getJSONArray(0);
+
+                    List<String> headerList = new ArrayList<>();
+                    if (headers != null) {
+                        for (int i = 0; i < headers.length(); i++) {
+                            headerList.add(headers.getString(i));
+                        }
+                    }
+                    NewRelic.addHTTPHeadersTrackingFor(headerList);
+                    break;
+                }
+                case "getHTTPHeadersTrackingFor": {
+                    JSONObject headers = new JSONObject();
+                    List<String> arr = new ArrayList<>(HttpHeaders.getInstance().getHttpHeaders());
+                    JsonArray array = new JsonArray();
+                    for (int i = 0; i < arr.size(); i++) {
+                        array.add(arr.get(i));
+                    }
+                    headers.put("headersList", array);
+                    callbackContext.success(headers);
+                }
+
             }
         } catch (Exception e) {
             NewRelic.recordHandledException(e);
@@ -427,6 +479,14 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
         return true;
 
+    }
+
+    protected static final class NRTraceConstants {
+        public static final String TRACE_PARENT = "traceparent";
+        public static final String TRACE_STATE = "tracestate";
+        public static final String TRACE_ID = "trace.id";
+        public static final String GUID = "guid";
+        public static final String ID = "id";
     }
 
 }

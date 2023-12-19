@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="6.2.4">
+  id="newrelic-cordova-plugin" version="6.2.5">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.2.3" />
+  <preference name="PLUGIN_VERSION" default="6.2.5" />
   <preference name="CRASH_REPORTING_ENABLED" default="true" />
   <preference name="DISTRIBUTED_TRACING_ENABLED" default="true" />
   <preference name="INTERACTION_TRACING_ENABLED" default="true" />
@@ -26,8 +26,8 @@
   <preference name="LOGGING_ENABLED" default="true" />
   <preference name="LOG_LEVEL" default="default" />
   <preference name="WEB_VIEW_INSTRUMENTATION" default="true" />
-  <preference name="COLLECTOR_ADDRESS" default="mobile-collector.newrelic.com" />
-  <preference name="CRASH_COLLECTOR_ADDRESS" default="mobile-crash.newrelic.com" />
+  <preference name="COLLECTOR_ADDRESS" default="x" />
+  <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
   <preference name="FEDRAMP_ENABLED" default="false" />
   <preference name="CONSOLE_LOGS_ENABLED" default="true" />
 
@@ -71,7 +71,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="7.4.6" />
+        <pod name="NewRelicAgent" spec="7.4.8" />
       </pods>
     </podspec>
 
@@ -81,7 +81,7 @@
 
   <platform name="android">
     <preference name="ANDROID_APP_TOKEN" default="x" />
-    <preference name="ANDROID_AGENT_VER" default="7.0.0" />
+    <preference name="ANDROID_AGENT_VER" default="7.2.0" />
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />

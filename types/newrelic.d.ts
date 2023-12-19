@@ -107,3 +107,6 @@ export function httpRequestBodyCaptureEnabled(
   cb: any,
   fail: any
 ): void;
+export function addHTTPHeadersTrackingFor(name: string, cb: any, fail: any,headers:string[]): void;
+export function getHTTPHeadersTrackingFor(name: string, cb: any, fail: any): Promise<any>;
+export function generateDistributedTracingHeaders(name: string, cb: any, fail: any): Promise<any>;

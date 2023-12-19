@@ -238,6 +238,12 @@ By default, these configurations are already set to true on agent start.
     NewRelic.shutdown();
 ```
 
+### [addHTTPHeadersTrackingFor(...)](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile/mobile-sdk/add-tracked-headers/)
+> This API allows you to add any header field strings to a list that gets recorded as attributes with networking request events. After header fields have been added using this function, if the headers are in a network call they will be included in networking events in NR1.
+```js
+  NewRelic.addHTTPHeadersTrackingFor(["Car"]);
+```
+
 ### [httpRequestBodyCaptureEnabled](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile-android/android-sdk-api/android-agent-configuration-feature-flags/#ff-withHttpResponseBodyCaptureEnabled)(enabled: boolean) : void;
 > Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
 ```js

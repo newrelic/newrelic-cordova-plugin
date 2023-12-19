@@ -389,4 +389,31 @@
     [NewRelic shutdown];
 }
 
+- (void)addHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command{
+    NSArray* headers = [command.arguments objectAtIndex:0];
+    [NewRelic addHTTPHeaderTrackingFor:headers];
+
+}
+
+- (void)getHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command{
+    
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"headersList": @"[]"}];
+     
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+}
+
+- (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command {
+    
+    CDVPluginResult* pluginResult = nil;
+
+    NSDictionary<NSString*,NSString*>* headers =  [NewRelic generateDistributedTracingHeaders];
+    
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:headers];
+     
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+}
+
 @end
