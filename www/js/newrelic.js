@@ -1,4 +1,3 @@
-cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, module) {
     /*
      * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
      * SPDX-License-Identifier: Apache-2.0
@@ -402,7 +401,9 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
                           networkRequest.body = "";
                         }
 
+                        if(isValidURL(networkRequest.url)) {   
                         NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
+                        }
                        }
                 },
                 false
@@ -479,7 +480,10 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
             }
           });
         } else {
-          options = {headers:{}};
+           if(options === undefined) {
+                  options = {};
+           }
+          options['headers'] = {};
           options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
@@ -514,6 +518,8 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
 
     function handleFetchSuccess(response, method, url, startTime,headers,params) {
         response.text().then((v)=>{
+        
+        if(isValidURL(url)) {    
         NewRelic.noticeHttpTransaction(
           url,
           method,
@@ -526,9 +532,19 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
           params,
           headers
          );
+        }
     
         });
     }
+
+    function isValidURL(url) {
+        try {
+          const newUrl = new URL(url);
+          return newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
+        } catch (err) {
+          return false;
+        }
+      }
     
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
@@ -666,5 +682,4 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
     
     module.exports = NewRelic;
     
-    });
     
