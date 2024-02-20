@@ -288,7 +288,7 @@
         analyticsEventEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
         },
-
+    
         /**
          * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
          * @param {boolean} enabled Boolean value for enable successful HTTP requests.
@@ -296,7 +296,7 @@
         networkRequestEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
         },
-
+    
         /**
          * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
          * @param {boolean} enabled Boolean value for enabling network request errors.
@@ -304,15 +304,15 @@
         networkErrorRequestEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
         },
-
+    
         /**
          * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
-         * @param {boolean} enabled Boolean value for enabling HTTP response bodies.
+         * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
          */
         httpRequestBodyCaptureEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
         },
-
+    
         /**
          * Shut down the agent within the current application lifecycle during runtime.
          * Once the agent has shut down, it cannot be restarted within the current application lifecycle.
@@ -320,27 +320,27 @@
         shutdown: function (cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "shutdown");
         },
-
+    
         addHTTPHeadersTrackingFor: function (headers,cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "addHTTPHeadersTrackingFor",[headers]);
         },
-
+    
         getHTTPHeadersTrackingFor: function (cb, fail) {
-
+    
             return new Promise(function (cb, fail) {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "getHTTPHeadersTrackingFor");
             });
         },
-
+    
         generateDistributedTracingHeaders: function (cb, fail) {
-
+    
             return new Promise(function (cb, fail) {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "generateDistributedTracingHeaders");
             });
         },
-
+    
     }
-
+    
     networkRequest = {};
     var originalXhrOpen = XMLHttpRequest.prototype.open;
     var originalXHRSend = XMLHttpRequest.prototype.send;
@@ -348,15 +348,15 @@
     window.XMLHttpRequest.prototype.open = function (method, url) {
         // Keep track of the method and url
         // start time is tracked by the `send` method
-
+    
         // eslint-disable-next-line prefer-rest-params
-
+    
         networkRequest.url = url;
         networkRequest.method = method;
         networkRequest.bytesSent = 0;
         networkRequest.startTime = Date.now();
         return originalXhrOpen.apply(this, arguments)
-
+    
     }
 
 
@@ -401,7 +401,7 @@
                           networkRequest.body = "";
                         }
 
-                        if(isValidURL(networkRequest.url)) {   
+                        if(isValidURL(networkRequest.url)) {
                         NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
                         }
                        }
@@ -480,10 +480,7 @@
             }
           });
         } else {
-           if(options === undefined) {
-                  options = {};
-           }
-          options['headers'] = {};
+          options = {headers:{}};
           options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
@@ -518,8 +515,8 @@
 
     function handleFetchSuccess(response, method, url, startTime,headers,params) {
         response.text().then((v)=>{
-        
-        if(isValidURL(url)) {    
+
+        if(isValidURL(url)) {
         NewRelic.noticeHttpTransaction(
           url,
           method,
@@ -533,7 +530,7 @@
           headers
          );
         }
-    
+
         });
     }
 
@@ -545,7 +542,7 @@
           return false;
         }
       }
-    
+
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
     const defaultError = window.console.error;
@@ -681,5 +678,4 @@
     };
     
     module.exports = NewRelic;
-    
-    
+

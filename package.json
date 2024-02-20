@@ -1,6 +1,6 @@
 {
   "name": "newrelic-cordova-plugin",
-  "version": "6.2.5",
+  "version": "6.2.6",
   "description": "New Relic Cordova Plugin for iOS and Android",
   "repo": "https://github.com/newrelic/newrelic-cordova-plugin/",
   "scripts": {
