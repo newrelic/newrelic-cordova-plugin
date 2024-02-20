@@ -1,4 +1,3 @@
-cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, module) {
     /*
      * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
      * SPDX-License-Identifier: Apache-2.0
@@ -153,26 +152,26 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
             }
             if (err) {
                 var error;
-    
+
                 if (err instanceof Error) {
                     error = err;
                 }
-    
+
                 if (typeof err === 'string') {
                     error = new Error(err || '');
                 }
-    
+
                 if(error !== undefined) {
                     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
                 } else {
                     window.console.warn('Undefined error in NewRelic.recordError');
                 }
-    
+
             } else {
                 window.console.warn('Error is required in NewRelic.recordError');
             }
         },
-    
+
         /**
          * Throws a demo run-time exception to test New Relic crash reporting.
          * @param {string} message An optional argument attached to the exception.
@@ -180,7 +179,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         crashNow: function (message = '', cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "crashNow", [message]);
         },
-    
+
         /**
          * Returns the current session ID as a parameter to the successful callback function.
          * This method is useful for consolidating monitoring of app data (not just New Relic data) based on a single session definition and identifier.
@@ -192,7 +191,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "currentSessionId");
             });
         },
-    
+
         /**
          * Increments the count of an attribute with a specified name.
          * When called, it overwrites its previous value and type each time.
@@ -204,7 +203,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         incrementAttribute: function(name, value=1, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "incrementAttribute", [name, value]);
         },
-    
+
         /**
          * Records network failures.
          * If a network request fails, use this method to record details about the failure.
@@ -223,14 +222,14 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
             }
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeNetworkFailure", [url, httpMethod, startTime, endTime, failure]);
         },
-    
+
         /**
-         * 
+         *
          * @param {string} name The name for the custom metric.
          * @param {string} category The metric category name.
          * @param {number} value Optional. The value of the metric. Value should be a non-zero positive number.
          * @param {string} countUnit Optional (but requires value and valueUnit to be set). Unit of measurement for the metric count. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'.
-         * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'. 
+         * @param {string} valueUnit Optional (but requires value and countUnit to be set). Unit of measurement for the metric value. Supported values are 'PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', or 'OPERATIONS'.
          */
         recordMetric: function (name, category, value = -1, countUnit = null, valueUnit = null, cb, fail) {
             const metricUnits = new Set(['PERCENT', 'BYTES', 'SECONDS', 'BYTES_PER_SECOND', 'OPERATIONS']);
@@ -252,14 +251,14 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
             }
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordMetric", [name, category, value, countUnit, valueUnit]);
         },
-    
+
         /**
          * Removes all attributes from the session..
          */
         removeAllAttributes: function (cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAllAttributes");
         },
-    
+
         /**
          * Sets the event harvest cycle length.
          * Default is 600 seconds (10 minutes).
@@ -270,7 +269,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         setMaxEventBufferTime: function (maxBufferTimeInSeconds, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventBufferTime", [maxBufferTimeInSeconds]);
         },
-    
+
         /**
          * Sets the maximum size of the event pool stored in memory until the next harvest cycle.
          * When the pool size limit is reached, the agent will start sampling events, discarding some new and old, until the pool of events is sent in the next harvest cycle.
@@ -280,7 +279,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         setMaxEventPoolSize: function (maxPoolSize, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
         },
-    
+
         /**
          * FOR ANDROID ONLY.
          * Enable or disable collection of event data.
@@ -289,7 +288,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         analyticsEventEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "analyticsEventEnabled", [enabled]);
         },
-    
+
         /**
          * Enable or disable reporting sucessful HTTP request to the MobileRequest event type.
          * @param {boolean} enabled Boolean value for enable successful HTTP requests.
@@ -297,7 +296,7 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         networkRequestEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkRequestEnabled", [enabled]);
         },
-    
+
         /**
          * Enable or disable reporting network and HTTP request errors to the MobileRequestError event type.
          * @param {boolean} enabled Boolean value for enabling network request errors.
@@ -305,15 +304,15 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         networkErrorRequestEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "networkErrorRequestEnabled", [enabled]);
         },
-    
+
         /**
          * Enable or disable capture of HTTP response bodies for HTTP error traces, and MobileRequestError events.
-         * @param {boolean} enabled Boolean value for enabling HTTP response bodies. 
+         * @param {boolean} enabled Boolean value for enabling HTTP response bodies.
          */
         httpRequestBodyCaptureEnabled: function (enabled, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "httpRequestBodyCaptureEnabled", [enabled]);
         },
-    
+
         /**
          * Shut down the agent within the current application lifecycle during runtime.
          * Once the agent has shut down, it cannot be restarted within the current application lifecycle.
@@ -321,27 +320,27 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
         shutdown: function (cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "shutdown");
         },
-    
+
         addHTTPHeadersTrackingFor: function (headers,cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "addHTTPHeadersTrackingFor",[headers]);
         },
-    
+
         getHTTPHeadersTrackingFor: function (cb, fail) {
-    
+
             return new Promise(function (cb, fail) {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "getHTTPHeadersTrackingFor");
             });
         },
-    
+
         generateDistributedTracingHeaders: function (cb, fail) {
-    
+
             return new Promise(function (cb, fail) {
                 cordova.exec(cb, fail, "NewRelicCordovaPlugin", "generateDistributedTracingHeaders");
             });
         },
-    
+
     }
-    
+
     networkRequest = {};
     var originalXhrOpen = XMLHttpRequest.prototype.open;
     var originalXHRSend = XMLHttpRequest.prototype.send;
@@ -349,15 +348,15 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
     window.XMLHttpRequest.prototype.open = function (method, url) {
         // Keep track of the method and url
         // start time is tracked by the `send` method
-    
+
         // eslint-disable-next-line prefer-rest-params
-    
+
         networkRequest.url = url;
         networkRequest.method = method;
         networkRequest.bytesSent = 0;
         networkRequest.startTime = Date.now();
         return originalXhrOpen.apply(this, arguments)
-    
+
     }
 
 
@@ -402,7 +401,9 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
                           networkRequest.body = "";
                         }
 
+                        if(isValidURL(networkRequest.url)) {   
                         NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
+                        }
                        }
                 },
                 false
@@ -479,7 +480,10 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
             }
           });
         } else {
-          options = {headers:{}};
+           if(options === undefined) {
+                  options = {};
+           }
+          options['headers'] = {};
           options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
@@ -514,6 +518,8 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
 
     function handleFetchSuccess(response, method, url, startTime,headers,params) {
         response.text().then((v)=>{
+        
+        if(isValidURL(url)) {    
         NewRelic.noticeHttpTransaction(
           url,
           method,
@@ -526,9 +532,19 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
           params,
           headers
          );
+        }
     
         });
     }
+
+    function isValidURL(url) {
+        try {
+          const newUrl = new URL(url);
+          return newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
+        } catch (err) {
+          return false;
+        }
+      }
     
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
@@ -666,5 +682,4 @@ cordova.define("newrelic-cordova-plugin.NewRelic", function(require, exports, mo
     
     module.exports = NewRelic;
     
-    });
     
