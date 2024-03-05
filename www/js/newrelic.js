@@ -409,7 +409,7 @@
                           networkRequest.body = "";
                         }
 
-                        if(isValidURL(networkRequest.url)) {   
+                        if(isValidURL(networkRequest.url)) {
                         NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
                         }
                        }
@@ -526,8 +526,8 @@
 
     function handleFetchSuccess(response, method, url, startTime,headers,params) {
         response.text().then((v)=>{
-        
-        if(isValidURL(url)) {    
+
+        if(isValidURL(url)) {
         NewRelic.noticeHttpTransaction(
           url,
           method,
@@ -541,7 +541,7 @@
           headers
          );
         }
-    
+
         });
     }
 
@@ -553,7 +553,7 @@
           return false;
         }
       }
-    
+
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
     const defaultError = window.console.error;
