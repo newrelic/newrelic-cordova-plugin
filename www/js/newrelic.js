@@ -1,139 +1,157 @@
-/*
- * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
- */
-
-var exec = require("cordova/exec");
-
-var NewRelic = {
-
-    /**
-     * 
-     * @param {string} url The URL of the request.
-     * @param {string} method The HTTP method used, such as GET or POST.
-     * @param {number} status The statusCode of the HTTP response, such as 200 for OK.
-     * @param {number} startTime The start time of the request in milliseconds since the epoch.
-     * @param {number} endTime The end time of the request in milliseconds since the epoch.
-     * @param {number} bytesSent The number of bytes sent in the request.
-     * @param {number} bytesReceived The number of bytes received in the response.
-     * @param {string} body Optional. The response body of the HTTP response. The response body will be truncated and included in an HTTP Error metric if the HTTP transaction is an error.
+    /*
+     * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
+     * SPDX-License-Identifier: Apache-2.0
      */
-    noticeHttpTransaction: function (url, method, status, startTime, endTime, bytesSent, bytesReceived, body, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeHttpTransaction", [url, method, status, startTime, endTime, bytesSent, bytesReceived, body]);
-    },
-
-    noticeDistributedTrace: function (cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeDistributedTrace");
-    },
     
-    /**
-     * Sets a custom user identifier value to associate mobile user
-     * @param {string} userId The user identifier string.
-     */
-    setUserId: function (userId, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setUserId", [userId]);
-    },
-
-    /**
-     * Creates a custom attribute with a specified name and value.
-     * When called, it overwrites its previous value and type.
-     * The created attribute is shared by multiple Mobile event types.
-     * @param {string} attributeName Name of the attribute.
-     * @param {number} value Value of the attribute.
-     */
-    setAttribute: function (attributeName, value, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [attributeName, value]);
-    },
-
-    /**
-     * Remove a custom attribute with a specified name and value.
-     * When called, it removes the attribute specified by the name string.
-     * The removed attribute is shared by multiple Mobile event types.
-     * @param {string} name Name of the attribute. 
-     */
-    removeAttribute: function (name, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAttribute", [name]);
-    },
-
-    /**
-     * Creates and records a MobileBreadcrumb event.
-     * @param {string} eventName The name you want to give to a breadcrumb event.
-     * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
-     */
-    recordBreadcrumb: function (eventName, attributes, cb, fail) {
-        const crumb = new BreadCrumb({ eventName, attributes });
-        crumb.attributes.isValid(() => {
-            crumb.eventName.isValid(() => {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [eventName, crumb.attributes.value]);
+    var exec = require("cordova/exec");
+    
+    var NewRelic = {
+    
+        /**
+         * 
+         * @param {string} url The URL of the request.
+         * @param {string} method The HTTP method used, such as GET or POST.
+         * @param {number} status The statusCode of the HTTP response, such as 200 for OK.
+         * @param {number} startTime The start time of the request in milliseconds since the epoch.
+         * @param {number} endTime The end time of the request in milliseconds since the epoch.
+         * @param {number} bytesSent The number of bytes sent in the request.
+         * @param {number} bytesReceived The number of bytes received in the response.
+         * @param {string} body Optional. The response body of the HTTP response. The response body will be truncated and included in an HTTP Error metric if the HTTP transaction is an error.
+         */
+        noticeHttpTransaction: function (url, method, status, startTime, endTime, bytesSent, bytesReceived, body,params,traceAttributes, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeHttpTransaction", [url, method, status, startTime, endTime, bytesSent, bytesReceived, body,params,traceAttributes]);
+        },
+    
+        noticeDistributedTrace: function (cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "noticeDistributedTrace");
+        },
+        
+        /**
+         * Sets a custom user identifier value to associate mobile user
+         * @param {string} userId The user identifier string.
+         */
+        setUserId: function (userId, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setUserId", [userId]);
+        },
+    
+        /**
+         * Creates a custom attribute with a specified name and value.
+         * When called, it overwrites its previous value and type.
+         * The created attribute is shared by multiple Mobile event types.
+         * @param {string} attributeName Name of the attribute.
+         * @param {number} value Value of the attribute.
+         */
+        setAttribute: function (attributeName, value, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setAttribute", [attributeName, value]);
+        },
+    
+        /**
+         * Remove a custom attribute with a specified name and value.
+         * When called, it removes the attribute specified by the name string.
+         * The removed attribute is shared by multiple Mobile event types.
+         * @param {string} name Name of the attribute. 
+         */
+        removeAttribute: function (name, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "removeAttribute", [name]);
+        },
+    
+        /**
+         * Creates and records a MobileBreadcrumb event.
+         * @param {string} eventName The name you want to give to a breadcrumb event.
+         * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
+         */
+        recordBreadcrumb: function (eventName, attributes, cb, fail) {
+            const crumb = new BreadCrumb({ eventName, attributes });
+            crumb.attributes.isValid(() => {
+                crumb.eventName.isValid(() => {
+                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordBreadCrumb", [eventName, crumb.attributes.value]);
+                });
             });
-        });
-    },
-
-    /**
-     * Creates and records a custom event, for use in New Relic Insights.
-     * The event includes a list of attributes, specified as a map.
-     * @param {string} eventType The type of event.
-     * @param {string} eventName The name of the event.
-     * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
-     */
-    recordCustomEvent: function (eventType, eventName, attributes, cb, fail) {
-        const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
-        customEvent.attributes.isValid(() => {
-            if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, customEvent.attributes.value]);
-            } else {
-                window.console.error("Invalid event name or type in recordCustomEvent");
+        },
+    
+        /**
+         * Creates and records a custom event, for use in New Relic Insights.
+         * The event includes a list of attributes, specified as a map.
+         * @param {string} eventType The type of event.
+         * @param {string} eventName The name of the event.
+         * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
+         */
+        recordCustomEvent: function (eventType, eventName, attributes, cb, fail) {
+            const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
+            customEvent.attributes.isValid(() => {
+                if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
+                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordCustomEvent", [eventType, eventName, customEvent.attributes.value]);
+                } else {
+                    window.console.error("Invalid event name or type in recordCustomEvent");
+                }
+            });
+        },
+    
+            /**
+         * Creates and records log as custom Events, for use in New Relic Insights.
+         * The event includes a list of attributes, specified as a map.
+         * @param {string} eventType The type of event.
+         * @param {string} eventName The name of the event.
+         * @param {Map<string, string|number>} attributes A map that includes a list of attributes.
+         */
+            recordLogs: function (eventType, eventName, attributes, cb, fail) {
+                const customEvent = new NewRelicEvent({ eventType, eventName, attributes });
+                customEvent.attributes.isValid(() => {
+                    if (customEvent.eventName.isValid() && customEvent.eventType.isValid()) {
+                        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordLogs", [eventType, eventName, customEvent.attributes.value]);
+                    } else {
+                        window.console.error("Invalid event name or type in recordCustomEvent");
+                    }
+                });
+            },
+    
+        /**
+         * Track a method as an interaction.
+         * @param {string} actionName The name of the action.
+         * @param {function} cb A success callback function.
+         * @returns {Promise} A promise containing the interactionId.
+         */
+        startInteraction: function (actionName, cb, fail) {
+            return new Promise(function (cb, fail) {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "startInteraction", [actionName]);
+            });
+        },
+    
+        /**
+         * End an interaction
+         * @param {string} interactionId The string ID for the interaction you want to end. This string is returned when you use startInteraction().
+         */
+        endInteraction: function (interactionId, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "endInteraction", [interactionId]);
+        },
+    
+        sendConsole(type, args) {
+            const argsStr = JSON.stringify(args, getCircularReplacer());
+            this.send('MobileJSConsole', { consoleType: type, args: argsStr });
+        },
+    
+        send(name, args) {
+            const nameStr = String(name);
+            const argsStr = {};
+            Object.keys(args).forEach(key => {
+                argsStr[String(key)] = String(args[key]);
+            });
+    
+            this.recordLogs("consoleEvents", name, args);
+        },
+    
+        /**
+         * Records JavaScript errors for Cordova.
+         * @param {Error} err The error to record.
+         * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
+         */
+        recordError: function(err, attributes={}, cb, fail) {
+            let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
+            if (attributes === null) {
+                errorAttributes = {};
             }
-        });
-    },
-
-    /**
-     * Track a method as an interaction.
-     * @param {string} actionName The name of the action.
-     * @param {function} cb A success callback function.
-     * @returns {Promise} A promise containing the interactionId.
-     */
-    startInteraction: function (actionName, cb, fail) {
-        return new Promise(function (cb, fail) {
-            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "startInteraction", [actionName]);
-        });
-    },
-
-    /**
-     * End an interaction
-     * @param {string} interactionId The string ID for the interaction you want to end. This string is returned when you use startInteraction().
-     */
-    endInteraction: function (interactionId, cb, fail) {
-        cordova.exec(cb, fail, "NewRelicCordovaPlugin", "endInteraction", [interactionId]);
-    },
-
-    sendConsole(type, args) {
-        const argsStr = JSON.stringify(args, getCircularReplacer());
-        this.send('MobileJSConsole', { consoleType: type, args: argsStr });
-    },
-
-    send(name, args) {
-        const nameStr = String(name);
-        const argsStr = {};
-        Object.keys(args).forEach(key => {
-            argsStr[String(key)] = String(args[key]);
-        });
-
-        this.recordCustomEvent("consoleEvents", name, args);
-    },
-
-    /**
-     * Records JavaScript errors for Cordova.
-     * @param {Error} err The error to record.
-     * @param {Map<string, boolean|number|string>} attributes Optional attributes that will be appended to the handled exception event created in insights.
-     */
-    recordError: function(err, attributes={}, cb, fail) {
-        let errorAttributes = attributes instanceof Map ? Object.fromEntries(attributes) : attributes;
-        if (attributes === null) {
-            errorAttributes = {};
-        }
-        if (err) {
-            var error;
+            if (err) {
+                var error;
 
                 if (err instanceof Error) {
                     error = err;
@@ -142,13 +160,13 @@ var NewRelic = {
                 if (typeof err === 'string') {
                     error = new Error(err || '');
                 }
-    
+
                 if(error !== undefined) {
                     cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
                 } else {
                     window.console.warn('Undefined error in NewRelic.recordError');
                 }
-    
+
             } else {
                 window.console.warn('Error is required in NewRelic.recordError');
             }
@@ -383,7 +401,9 @@ var NewRelic = {
                           networkRequest.body = "";
                         }
 
+                        if(isValidURL(networkRequest.url)) {   
                         NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
+                        }
                        }
                 },
                 false
@@ -460,7 +480,10 @@ var NewRelic = {
             }
           });
         } else {
-          options = {headers:{}};
+           if(options === undefined) {
+                  options = {};
+           }
+          options['headers'] = {};
           options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
@@ -495,6 +518,8 @@ var NewRelic = {
 
     function handleFetchSuccess(response, method, url, startTime,headers,params) {
         response.text().then((v)=>{
+        
+        if(isValidURL(url)) {    
         NewRelic.noticeHttpTransaction(
           url,
           method,
@@ -507,9 +532,19 @@ var NewRelic = {
           params,
           headers
          );
+        }
     
         });
     }
+
+    function isValidURL(url) {
+        try {
+          const newUrl = new URL(url);
+          return newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
+        } catch (err) {
+          return false;
+        }
+      }
     
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
@@ -647,5 +682,4 @@ var NewRelic = {
     
     module.exports = NewRelic;
     
-    });
     
