@@ -1,6 +1,7 @@
 # Changelog
 
-# 6.2.6
+
+# 6.2.7
 
 ### New in this release
 In this release, we are introducing several new features and updates:
@@ -9,8 +10,16 @@ In this release, we are introducing several new features and updates:
 * Introduced setMaxOfflineStorageSize API: This new API allows the user to determine the maximum volume of data that can be stored locally. This aids in better management and control of local data storage.
 * Updated native iOS Agent: We've upgraded the native iOS agent to version 7.4.9, which includes performance improvements and bug fixes.
 * Updated native Android Agent: We've also upgraded the native Android agent to version 7.3.0 bringing benefits like improved stability and enhanced features. 
+* Resolved an issue in the fetch instrumentation where the absence of a body led to failure in recording network requests by the agent.
 
 These enhancements help to improve overall user experience and application performance.
+
+# 6.2.6
+
+### New in this release
+* Fixed a bug in the fetch instrumentation where customer options were inadvertently removed when no headers were specified. Now, options will be preserved even when headers are absent.
+* Addressed an issue that resulted in app crashes when an invalid URL was encountered in the capacitor plugin. To mitigate this, a valid URL checker has been implemented to ensure that mobilerequest events are created only with valid URLs.
+
 
 # 6.2.5
 
