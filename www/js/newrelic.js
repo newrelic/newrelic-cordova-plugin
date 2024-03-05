@@ -280,6 +280,14 @@
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxEventPoolSize", [maxPoolSize]);
         },
 
+         /**
+         * Sets the maximum size of total data that can be stored for offline storage..
+         * @param {number} maxPoolSize The Maximum size in megaBytes that can be stored in the file system.
+         */
+         setMaxOfflineStorageSize: function (megaBytes, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "setMaxOfflineStorageSize", [megaBytes]);
+        },
+
         /**
          * FOR ANDROID ONLY.
          * Enable or disable collection of event data.
@@ -490,14 +498,14 @@
           _arguments[1] = options;
         }
     
-        if(options && 'body' in options) {
-          networkRequest.bytesSent = options.body.length;
+        if (options && 'body' in options && options.body !== undefined) {
+            networkRequest.bytesSent = options.body.length;
         } else {
-          networkRequest.bytesSent = 0;
+            networkRequest.bytesSent = 0;
         }
-      
-        if (networkRequest.method === undefined || networkRequest.method === "" ) {
-           networkRequest.method = 'GET';
+
+        if (networkRequest.method === undefined || networkRequest.method === "") {
+            networkRequest.method = 'GET';
         }
         return new Promise(function (resolve, reject) {
           // pass through to native fetch
@@ -681,5 +689,4 @@
     };
     
     module.exports = NewRelic;
-    
     

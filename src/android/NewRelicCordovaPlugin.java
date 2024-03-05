@@ -77,6 +77,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             if (preferences.getString("default_interactions_enabled", "true").equalsIgnoreCase("false")) {
                 NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
             }
+             if (preferences.getString("offline_storage_enabled", "true").equalsIgnoreCase("true")) {
+                NewRelic.enableFeature(FeatureFlag.OfflineStorage);
+            }
             if (preferences.getString("fedramp_enabled", "false").equalsIgnoreCase("true")) {
                 NewRelic.enableFeature(FeatureFlag.FedRampEnabled);
             }
@@ -401,6 +404,11 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 case "setMaxEventBufferTime": {
                     final int maxEventBufferTimeInSeconds = args.getInt(0);
                     NewRelic.setMaxEventBufferTime(maxEventBufferTimeInSeconds);
+                    break;
+                }
+                case "setMaxOfflineStorageSize": {
+                    final int megabytes = args.getInt(0);
+                    NewRelic.setMaxOfflineStorageSize(megabytes);
                     break;
                 }
                 case "setMaxEventPoolSize": {

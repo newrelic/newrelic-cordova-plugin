@@ -55,6 +55,9 @@
         if (![self shouldDisableFeature:config[@"fedramp_enabled"]]) {
             [NewRelic enableFeatures:NRFeatureFlag_FedRampEnabled];
         }
+        if (![self shouldDisableFeature:config[@"offline_storage_enabled"]]) {
+            [NewRelic enableFeatures:NRFeatureFlag_OfflineStorage];
+        }
         
         // Set log level depending on loggingEnabled and logLevel
         NRLogLevels logLevel = NRLogLevelWarning;
@@ -354,6 +357,12 @@
     NSNumber* maxPoolSize = [command.arguments objectAtIndex:0];
     unsigned int uint_maxPoolSize = maxPoolSize.unsignedIntValue;
     [NewRelic setMaxEventPoolSize:uint_maxPoolSize];
+}
+
+- (void)setMaxOfflineStorageSize:(CDVInvokedUrlCommand *)command {
+    NSNumber* megaBytes = [command.arguments objectAtIndex:0];
+    unsigned int uint_megaBytes = megaBytes.unsignedIntValue;
+    [NewRelic setMaxOfflineStorageSize:uint_megaBytes];
 }
 
 - (void)analyticsEventEnabled:(CDVInvokedUrlCommand *)command {
