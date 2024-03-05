@@ -142,13 +142,13 @@ var NewRelic = {
                 if (typeof err === 'string') {
                     error = new Error(err || '');
                 }
-
-            if(error !== undefined) {
-                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false]);
-            } else {
-                window.console.warn('Undefined error in NewRelic.recordError');
-            }
-
+    
+                if(error !== undefined) {
+                    cordova.exec(cb, fail, "NewRelicCordovaPlugin", "recordError", [error.name, error.message, error.stack, false, errorAttributes]);
+                } else {
+                    window.console.warn('Undefined error in NewRelic.recordError');
+                }
+    
             } else {
                 window.console.warn('Error is required in NewRelic.recordError');
             }
