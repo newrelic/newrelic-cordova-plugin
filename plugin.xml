@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="6.2.5">
+  id="newrelic-cordova-plugin" version="6.2.6">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.2.5" />
+  <preference name="PLUGIN_VERSION" default="6.2.6" />
   <preference name="CRASH_REPORTING_ENABLED" default="true" />
   <preference name="DISTRIBUTED_TRACING_ENABLED" default="true" />
   <preference name="INTERACTION_TRACING_ENABLED" default="true" />
@@ -29,6 +29,7 @@
   <preference name="COLLECTOR_ADDRESS" default="x" />
   <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
   <preference name="FEDRAMP_ENABLED" default="false" />
+  <preference name="OFFLINE_STORAGE_ENABLED" default="true" />
   <preference name="CONSOLE_LOGS_ENABLED" default="true" />
 
 
@@ -53,6 +54,7 @@
         <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
         <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
         <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
+        <preference name="OFFLINE_STORAGE_ENABLED" value="$OFFLINE_STORAGE_ENABLED" />
         <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
@@ -71,7 +73,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="7.4.8" />
+        <pod name="NewRelicAgent" spec="7.4.9" />
       </pods>
     </podspec>
 
@@ -81,7 +83,7 @@
 
   <platform name="android">
     <preference name="ANDROID_APP_TOKEN" default="x" />
-    <preference name="ANDROID_AGENT_VER" default="7.2.0" />
+    <preference name="ANDROID_AGENT_VER" default="7.3.0" />
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
@@ -109,6 +111,7 @@
       <preference name="COLLECTOR_ADDRESS" value="$COLLECTOR_ADDRESS" />
       <preference name="CRASH_COLLECTOR_ADDRESS" value="$CRASH_COLLECTOR_ADDRESS" />
       <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
+      <preference name="OFFLINE_STORAGE_ENABLED" value="$OFFLINE_STORAGE_ENABLED" />
       <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
     </config-file>
 

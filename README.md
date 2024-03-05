@@ -66,6 +66,8 @@ Currently, the plugin supports the following agent configuration options:
     * Possible values are `true` and `false`. Defaults to `false`.
 * `CONSOLE_LOGS_ENABLED`: Enable or disable reporting javascript console logs as custom events.
     * Possible values are `true` and `false`. Defaults to `false`.
+* `OFFLINE_STORAGE_ENABLED`: Enable or disable offline data storage when no internet connection is available. .
+    * Possible values are `true` and `false`. Defaults to `true`.
 # Updating the plugin
 Update the New Relic Cordova plugin to the latest released version easily via the following command:
 ```
@@ -209,6 +211,12 @@ Our plugin uses the same APIs as our native agents. See the examples below for u
 > Sets the maximum size of the event pool stored in memory until the next harvest cycle. Default is a maximum of 1000 events per event harvest cycle. When the pool size limit is reached, the agent will start sampling events, discarding some new and old, until the pool of events is sent in the next harvest cycle.
 ```js
     NewRelic.setMaxEventPoolSize(2000);
+```
+
+### [setMaxOfflineStorageSize](https://docs.newrelic.com/docs/mobile-monitoring/new-relic-mobile/mobile-sdk/set-max-offline-storage)(megaBytes: number): void;
+> Sets the maximum size of total data that can be stored for offline storage.By default, mobile monitoring can collect a maximum of 100 megaBytes of offline storage. When a data payload fails to send because the device doesn't have an internet connection, it can be stored in the file system until an internet connection has been made. After a typical harvest payload has been successfully sent, all offline data is sent to New Relic and cleared from storage.
+```js
+    NewRelic.setMaxOfflineStorageSize(200);
 ```
 
 ### The following methods allow you to set some agent configurations *after* the agent has started:
