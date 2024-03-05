@@ -49,6 +49,8 @@
 
 - (void)setMaxEventPoolSize:(CDVInvokedUrlCommand *)command;
 
+- (void)setMaxOfflineStorageSize:(CDVInvokedUrlCommand *)command;
+
 - (void)analyticsEventEnabled:(CDVInvokedUrlCommand *) command;
 
 - (void)networkRequestEnabled:(CDVInvokedUrlCommand *) command;
