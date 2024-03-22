@@ -1,5 +1,9 @@
 # Changelog
 
+# 6.2.8
+* 
+* Updated native iOS Agent: We've upgraded the native iOS agent to version 7.4.10, which includes performance improvements and bug fixes.
+
 
 # 6.2.7
 
