@@ -264,11 +264,30 @@
     NSNumber* bytesreceived = [command.arguments objectAtIndex:6];
     NSString* body = [command.arguments objectAtIndex:7];
     
+    NSDictionary* params;
+    if([command.arguments objectAtIndex:8] == [NSNull null] ){
+        params = nil;
+    }
+    else {params = [command.arguments objectAtIndex:8];
+    }
+    
+    NSDictionary* traceAttributes;
+    if([command.arguments objectAtIndex:9] == [NSNull null] ){
+        traceAttributes = nil;
+    }
+    else {
+        traceAttributes = [command.arguments objectAtIndex:9];
+    }
 
     NSURL *nsurl = [NSURL URLWithString:url];
-    NSData* data = [body dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data;
+    if (body == [NSNull null]) {
+        data = nil;
+    } else {
+        data = [body dataUsingEncoding:NSUTF8StringEncoding];
+    }
 
-   [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:nil andParams:nil];
+    [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:params];
 }
 
 - (void)crashNow:(CDVInvokedUrlCommand *)command {
