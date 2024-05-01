@@ -1,5 +1,11 @@
 # Changelog
 
+# 6.2.9
+* A crash issue in the iOS app has been resolved when the Cordova agent receives responses in the form of blobs or array buffers.
+* The native iOS agent has been updated to version 7.4.11, which brings performance enhancements and bug fixes.
+* Similarly, the native Android agent has been upgraded to version 7.3.1, improving stability and introducing new features.
+
+
 # 6.2.8
 * 
 * Updated native iOS Agent: We've upgraded the native iOS agent to version 7.4.10, which includes performance improvements and bug fixes.

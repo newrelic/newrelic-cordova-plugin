@@ -272,9 +272,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                         traceHeadersMap = new Gson().fromJson(String.valueOf(traceAttributes), Map.class);
                     }
 
-                    JSONObject params = args.getJSONObject(8);
+                    Object params = args.get(8);
                     Map<String,String> paramsMap = new HashMap<>();
-                    if (params != null) {
+                    if (params instanceof JSONObject) {
                         paramsMap = new Gson().fromJson(String.valueOf(params), Map.class);
                     }
 
