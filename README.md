@@ -68,6 +68,11 @@ Currently, the plugin supports the following agent configuration options:
     * Possible values are `true` and `false`. Defaults to `false`.
 * `OFFLINE_STORAGE_ENABLED`: Enable or disable offline data storage when no internet connection is available. .
     * Possible values are `true` and `false`. Defaults to `true`.
+* `NEW_EVENT_SYSTEM_ENABLED`: Enable or disable to use our new, more stable, event system for iOS agent.
+    * Possible values are `true` and `false`. Defaults to `true`.
+* `BACKGROUND_REPORTING_ENABLED`: Enable or disable Background Events Reporting when the app is in the background.
+    * Possible values are `true` and `false`. Defaults to `false`.
+
 # Updating the plugin
 Update the New Relic Cordova plugin to the latest released version easily via the following command:
 ```
