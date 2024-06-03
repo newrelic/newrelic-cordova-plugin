@@ -1,5 +1,17 @@
 # Changelog
 
+# 6.2.10
+
+* Improvements
+
+The native iOS Agent has been updated to version 7.4.12, bringing performance enhancements and bug fixes.
+
+* New Features
+
+A new backgroundReportingEnabled feature flag has been introduced to enable background reporting functionality.
+A new newEventSystemEnabled feature flag has been added to enable the new event system.
+
+
 # 6.2.9
 * A crash issue in the iOS app has been resolved when the Cordova agent receives responses in the form of blobs or array buffers.
 * The native iOS agent has been updated to version 7.4.11, which brings performance enhancements and bug fixes.

@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="6.2.9">
+  id="newrelic-cordova-plugin" version="6.2.10">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -31,7 +31,8 @@
   <preference name="FEDRAMP_ENABLED" default="false" />
   <preference name="OFFLINE_STORAGE_ENABLED" default="true" />
   <preference name="CONSOLE_LOGS_ENABLED" default="true" />
-
+  <preference name="NEW_EVENT_SYSTEM_ENABLED" default="true" />
+  <preference name="BACKGROUND_REPORTING_ENABLED" default="false" />
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
@@ -56,6 +57,8 @@
         <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
         <preference name="OFFLINE_STORAGE_ENABLED" value="$OFFLINE_STORAGE_ENABLED" />
         <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
+        <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
+        <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
     </config-file>
@@ -73,7 +76,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="7.4.11" />
+        <pod name="NewRelicAgent" spec="7.4.12" />
       </pods>
     </podspec>
 
@@ -113,6 +116,9 @@
       <preference name="FEDRAMP_ENABLED" value="$FEDRAMP_ENABLED" />
       <preference name="OFFLINE_STORAGE_ENABLED" value="$OFFLINE_STORAGE_ENABLED" />
       <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
+      <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
+      <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
+
     </config-file>
 
     <source-file src="src/android/NewRelicCordovaPlugin.java"

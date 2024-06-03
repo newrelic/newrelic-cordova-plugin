@@ -58,6 +58,14 @@
         if (![self shouldDisableFeature:config[@"offline_storage_enabled"]]) {
             [NewRelic enableFeatures:NRFeatureFlag_OfflineStorage];
         }
+
+        if (![self shouldDisableFeature:config[@"background_reporting_enabled"]]) {
+            [NewRelic enableFeatures:NRFeatureFlag_BackgroundReporting];
+        }
+
+        if (![self shouldDisableFeature:config[@"new_event_system_enabled"]]) {
+             [NewRelic enableFeatures:NRFeatureFlag_NewEventSystem];
+        }
         
         // Set log level depending on loggingEnabled and logLevel
         NRLogLevels logLevel = NRLogLevelWarning;
