@@ -124,10 +124,27 @@
         endInteraction: function (interactionId, cb, fail) {
             cordova.exec(cb, fail, "NewRelicCordovaPlugin", "endInteraction", [interactionId]);
         },
-    
+
+        /**
+         * Send a message to the New Relic Mobile agent logs.
+         * @param type A string that represents the type of the console log. It can be 'error', 'warn', 'log', 'debug', or 'assert'.
+         * @param args An array of arguments that are passed to the console log.
+         */
         sendConsole(type, args) {
             const argsStr = JSON.stringify(args, getCircularReplacer());
             this.send('MobileJSConsole', { consoleType: type, args: argsStr });
+
+            if(type === 'error') {
+              this.logError(argsStr);
+            } else if(type === 'warn') {
+                this.logWarn(argsStr);
+            } else if(type === 'log') {
+                this.logInfo(argsStr);
+            } else if(type === 'debug') {
+                this.logDebug(argsStr);
+            } else if(type === 'assert') {
+                this.logVerbose(argsStr);
+            }
         },
     
         send(name, args) {
@@ -347,6 +364,110 @@
             });
         },
 
+        /**
+         * Logs an informational message using the NewRelicCordovaPlugin.
+         *
+         * @param {string} message - The message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logInfo method.
+         * @param {function} fail - The callback function to be executed if the logInfo method fails.
+         */
+        logInfo: function (message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logInfo", [message]);
+        },
+
+
+        /**
+         * Logs an error message using the NewRelicCordovaPlugin.
+         *
+         * @param {string} message - The error message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logError method.
+         * @param {function} fail - The callback function to be executed if the logError method fails.
+         */
+        logError: function (message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logError", [message]);
+        },
+
+        /**
+         * Logs a warning message using the NewRelicCordovaPlugin.
+         *
+         * @param {string} message - The warning message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logWarn method.
+         * @param {function} fail - The callback function to be executed if the logWarn method fails.
+         */
+        logWarn: function (message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logWarn", [message]);
+        },
+
+        /**
+         * Logs a debug message using the NewRelicCordovaPlugin.
+         *
+         * @param {string} message - The debug message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logDebug method.
+         * @param {function} fail - The callback function to be executed if the logDebug method fails.
+         */
+        logDebug: function (message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logDebug", [message]);
+        },
+
+        /**
+         * Logs a verbose message using the NewRelicCordovaPlugin.
+         *
+         * @param {string} message - The verbose message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logVerbose method.
+         * @param {function} fail - The callback function to be executed if the logVerbose method fails.
+         */
+        logVerbose: function (message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logVerbose", [message]);
+        },
+
+        /**
+         * Logs a message with a specified log level using the NewRelicCordovaPlugin.
+         *
+         * @param {string} logLevel - The log level of the message to be logged.
+         * @param {string} message - The message to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the log method.
+         * @param {function} fail - The callback function to be executed if the log method fails.
+         */
+        log:function (logLevel, message, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "log", [logLevel, message]);
+        },
+
+        /**
+         * Logs attributes using the NewRelicCordovaPlugin.
+         *
+         * @param {Map<string, string|number>} attributes - The attributes to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logAttributes method.
+         * @param {function} fail - The callback function to be executed if the logAttributes method fails.
+         */
+        logAttributes: function (attributes, cb, fail) {
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logAttributes", [attributes]);
+        },
+
+        /**
+         * Logs all attributes using the NewRelicCordovaPlugin.
+         *
+         * @param {Error} err The error to record.
+         * * @param {Map<string, string|number>} attributes - The attributes to be logged.
+         * @param {function} cb - The callback function to be executed upon successful execution of the logAll method.
+         * @param {function} fail - The callback function to be executed if the logAll method fails.
+         */
+        logAll:function (err,attributes = {}, cb, fail) {
+            if (attributes === null) {
+                attributes = {};
+            }
+            if (err) {
+                var error;
+
+                if (err instanceof Error) {
+                    error = err;
+                }
+
+                if (typeof err === 'string') {
+                    error = new Error(err || '');
+                }
+            }
+            cordova.exec(cb, fail, "NewRelicCordovaPlugin", "logAll", [error.message,attributes]);
+        }
     }
 
     networkRequest = {};
@@ -557,7 +678,11 @@
     const defaultLog = window.console.log;
     const defaultWarn = window.console.warn;
     const defaultError = window.console.error;
-    
+    const defaultDebug = window.console.debug;
+    const defaultAssert = window.console.assert;
+
+
+
     console.log = function () {
         NewRelic.sendConsole('log', arguments);
         defaultLog.apply(console, arguments);
@@ -569,6 +694,16 @@
     console.error = function () {
         NewRelic.sendConsole('error', arguments);
         defaultError.apply(console, arguments);
+    };
+
+    console.debug = function () {
+        NewRelic.sendConsole('debug', arguments);
+        defaultDebug.apply(console, arguments);
+    };
+
+    console.assert = function () {
+        NewRelic.sendConsole('assert', arguments);
+        defaultAssert.apply(console, arguments);
     };
     
     class Utils {

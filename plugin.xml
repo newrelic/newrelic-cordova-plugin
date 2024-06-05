@@ -33,6 +33,8 @@
   <preference name="CONSOLE_LOGS_ENABLED" default="true" />
   <preference name="NEW_EVENT_SYSTEM_ENABLED" default="true" />
   <preference name="BACKGROUND_REPORTING_ENABLED" default="false" />
+  <preference name="LOG_REPORTING_ENABLED" default="true" />
+
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
@@ -59,6 +61,7 @@
         <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
         <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
         <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
+        <preference name="LOG_REPORTING_ENABLED" value="$LOG_REPORTING_ENABLED" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
     </config-file>
@@ -118,7 +121,7 @@
       <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
       <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
       <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
-
+      <preference name="LOG_REPORTING_ENABLED" value="$LOG_REPORTING_ENABLED" />
     </config-file>
 
     <source-file src="src/android/NewRelicCordovaPlugin.java"

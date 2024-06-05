@@ -66,6 +66,12 @@
         if (![self shouldDisableFeature:config[@"new_event_system_enabled"]]) {
              [NewRelic enableFeatures:NRFeatureFlag_NewEventSystem];
         }
+
+          if (![self shouldDisableFeature:config[@"log_reporting_enabled"]]) {
+                  [NewRelic enableFeatures:NRFeatureFlag_LogReporting];
+          } else {
+                   [NewRelic disableFeatures:NRFeatureFlag_LogReporting];
+          }
         
         // Set log level depending on loggingEnabled and logLevel
         NRLogLevels logLevel = NRLogLevelWarning;
@@ -92,6 +98,8 @@
         
         [NewRelic setPlatform:NRMAPlatform_Cordova];
         [NewRelic setPlatformVersion:config[@"plugin_version"]];
+        [NRLogger setLogTargets: NRLogTargetFile];
+        [NRLogger setLogEntityGuid:@"MXxNT0JJTEV8QVBQTElDQVRJT058NjAxMzQ0MTMy"];
 
         if ([self isEmptyConfigParameter:collectorAddress] && [self isEmptyConfigParameter:crashCollectorAddress]) {
             [NewRelic startWithApplicationToken:applicationToken];
@@ -450,6 +458,79 @@
      
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
+}
+- (void)logInfo:(CDVInvokedUrlCommand *)command {
+    NSString* message = [command.arguments objectAtIndex:0];
+    [NewRelic logInfo:message];
+
+}
+
+- (void)logError:(CDVInvokedUrlCommand *)command {
+    NSString* message = [command.arguments objectAtIndex:0];
+    [NewRelic logError:message];
+}
+
+- (void)logWarn:(CDVInvokedUrlCommand *)command {
+    NSString* message = [command.arguments objectAtIndex:0];
+    [NewRelic logWarning:message];
+}
+
+- (void)logDebug:(CDVInvokedUrlCommand *)command {
+    NSString* message = [command.arguments objectAtIndex:0];
+    [NewRelic logDebug:message];
+}
+
+- (void)logVerbose:(CDVInvokedUrlCommand *)command {
+    NSString* message = [command.arguments objectAtIndex:0];
+    [NewRelic logVerbose:message];
+}
+
+- (void)log:(CDVInvokedUrlCommand *)command {
+    NSString* level =  [command.arguments objectAtIndex:0];
+    NSString* message = [command.arguments objectAtIndex:1];
+
+    if(message == nil || message.length == 0) {
+        return;
+    }
+
+    if(level == nil || level.length == 0) {
+        return;
+    }
+
+    NRLogLevels logLevel = NRLogLevelWarning;
+    NSDictionary *logDict = @{
+        @"ERROR": [NSNumber numberWithInt:NRLogLevelError],
+        @"WARNING": [NSNumber numberWithInt:NRLogLevelWarning],
+        @"INFO": [NSNumber numberWithInt:NRLogLevelInfo],
+        @"VERBOSE": [NSNumber numberWithInt:NRLogLevelVerbose],
+        @"AUDIT": [NSNumber numberWithInt:NRLogLevelAudit],
+    };
+    if ([logDict objectForKey:[level uppercaseString]]) {
+        NSString* configLogLevel = [level uppercaseString];
+        NSNumber* newLogLevel = [logDict valueForKey:configLogLevel];
+        logLevel = [newLogLevel intValue];
+    }
+
+    [NewRelic log:message level:logLevel];
+}
+
+- (void)logAttributes:(CDVInvokedUrlCommand *)command {
+    NSDictionary *attributes = [command.arguments objectAtIndex:0];
+
+    [NewRelic logAll:attributes];
+
+}
+
+- (void)logAll:(CDVInvokedUrlCommand *)command {
+
+    NSString* message = [command.arguments objectAtIndex:0];
+    NSDictionary *attributes = [command.arguments objectAtIndex:1];
+
+    NSMutableDictionary *mutableDictionary = [attributes mutableCopy];     //Make the dictionary mutable to change/add
+
+    mutableDictionary[@"message"] = message;
+
+    [NewRelic logAll:mutableDictionary];
 }
 
 @end
