@@ -15,17 +15,18 @@ import com.newrelic.agent.android.HttpHeaders;
 import com.newrelic.agent.android.NewRelic;
 import com.newrelic.agent.android.analytics.AnalyticsAttribute;
 import com.newrelic.agent.android.distributedtracing.TraceContext;
-import com.newrelic.agent.android.distributedtracing.TraceHeader;
 import com.newrelic.agent.android.distributedtracing.TracePayload;
 import com.newrelic.agent.android.harvest.DeviceInformation;
 import com.newrelic.agent.android.logging.AgentLog;
+import com.newrelic.agent.android.logging.LogLevel;
+import com.newrelic.agent.android.logging.LogReporting;
 import com.newrelic.agent.android.stats.StatsEngine;
 import com.newrelic.agent.android.metric.MetricUnit;
 import com.newrelic.agent.android.util.NetworkFailure;
 import com.newrelic.agent.android.FeatureFlag;
 import com.newrelic.com.google.gson.Gson;
 import com.newrelic.com.google.gson.JsonArray;
-import com.newrelic.agent.android.logging.LogLevel;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -33,7 +34,6 @@ import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.newrelic.agent.android.logging.LogReporting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +60,6 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
         if (isEmptyConfigParameter(appToken)) {
             Log.e(TAG, "Failed to load application token! The Android agent is not configured for Cordova.");
-
         } else {
 
             final String pluginVersion = preferences.getString("plugin_version", "undefined");
@@ -78,18 +77,18 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
             if (preferences.getString("default_interactions_enabled", "true").equalsIgnoreCase("false")) {
                 NewRelic.disableFeature(FeatureFlag.DefaultInteractions);
             }
-             if (preferences.getString("offline_storage_enabled", "true").equalsIgnoreCase("true")) {
+            if (preferences.getString("offline_storage_enabled", "true").equalsIgnoreCase("true")) {
                 NewRelic.enableFeature(FeatureFlag.OfflineStorage);
             }
             if (preferences.getString("fedramp_enabled", "false").equalsIgnoreCase("true")) {
                 NewRelic.enableFeature(FeatureFlag.FedRampEnabled);
             }
 
-                if (preferences.getString("log_reporting_enabled", "true").equalsIgnoreCase("true")) {
-                          NewRelic.enableFeature(FeatureFlag.LogReporting);
-                  } else {
-                          NewRelic.disableFeature(FeatureFlag.LogReporting);
-                  }
+            if (preferences.getString("background_reporting_enabled", "true").equalsIgnoreCase("true")) {
+                NewRelic.enableFeature(FeatureFlag.BackgroundReporting);
+            } else {
+                NewRelic.disableFeature(FeatureFlag.BackgroundReporting);
+            }
 
             Map<String, Integer> strToLogLevel = new HashMap<>();
             strToLogLevel.put("ERROR", AgentLog.ERROR);
@@ -106,9 +105,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
 
             String collectorAddress = preferences.getString("collector_address", null);
             String crashCollectorAddress = preferences.getString("crash_collector_address", null);
+
             LogReporting.setLogLevel(LogLevel.VERBOSE);
-            NewRelic.setEntityGuid("MXxNT0JJTEV8QVBQTElDQVRJT058NjAxMzQ0MTMy");
-            NewRelic newRelic =  NewRelic.withApplicationToken(appToken)
+            NewRelic newRelic = NewRelic.withApplicationToken(appToken)
                     .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
                     .withLoggingEnabled(preferences.getString("logging_enabled", "true").toLowerCase().equals("true"))
                     .withLogLevel(logLevel);
@@ -203,14 +202,19 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 }
                 case "recordLogs": {
                     if (preferences.getString("console_logs_enabled", "true").equalsIgnoreCase("true")) {
-                        final String eventType = args.getString(0);
-                        final String eventName = args.getString(1);
-                        final JSONObject attributesASJson = args.getJSONObject(2);
-                        final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesASJson),
-                                Map.class);
-                        NewRelic.recordCustomEvent(eventType, eventName, attributes);
-                        break;
+                        cordova.getThreadPool().execute(() -> {
+                            try {
+                                final String eventType = args.getString(0);
+                                final String eventName = args.getString(1);
+                                final JSONObject attributesASJson = args.getJSONObject(2);
+                                final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesASJson), Map.class);
+                                NewRelic.recordCustomEvent(eventType, eventName, attributes);
+                            } catch (JSONException e) {
+                                NewRelic.recordHandledException(e);
+                            }
+                        });
                     }
+                    break;
                 }
                 case "setAttribute": {
                     final String name = args.getString(0);
@@ -230,39 +234,43 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     break;
                 }
                 case "recordError": {
-                    final String errorName = args.getString(0);
-                    final String errorMessage = args.getString(1);
-                    final String errorStack = args.getString(2);
-                    final Boolean isFatal = args.getBoolean(3);
-                    final JSONObject attributesAsJson = args.getJSONObject(4);
+                    cordova.getThreadPool().execute(() -> {
+                        try {
+                            final String errorName = args.getString(0);
+                            final String errorMessage = args.getString(1);
+                            final String errorStack = args.getString(2);
+                            final Boolean isFatal = args.getBoolean(3);
+                            final JSONObject attributesAsJson = args.getJSONObject(4);
 
-                    HashMap<String, Object> exceptionMap = new HashMap<>();
-                    try {
-                        exceptionMap.put("name", errorName);
-                        exceptionMap.put("message", errorMessage);
-                        exceptionMap.put("isFatal", isFatal);
-                        if (attributesAsJson != null) {
-                            final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesAsJson),
-                                    Map.class);
-                            for (String key : attributes.keySet()) {
-                                exceptionMap.put(key, attributes.get(key));
+                            HashMap<String, Object> exceptionMap = new HashMap<>();
+                            try {
+                                exceptionMap.put("name", errorName);
+                                exceptionMap.put("message", errorMessage);
+                                exceptionMap.put("isFatal", isFatal);
+                                if (attributesAsJson != null) {
+                                    final Map<String, Object> attributes = new Gson().fromJson(String.valueOf(attributesAsJson),
+                                            Map.class);
+                                    for (String key : attributes.keySet()) {
+                                        exceptionMap.put(key, attributes.get(key));
+                                    }
+                                }
+                            } catch (IllegalArgumentException e) {
+                                Log.w("NRMA", e.getMessage());
                             }
+
+                            if (errorStack == null) {
+                                NewRelic.recordBreadcrumb("JS Errors", exceptionMap);
+                                StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
+                            }
+
+                            StackTraceElement[] stackTraceElements = parseStackTrace(errorStack);
+                            NewRelicCordovaException exception = new NewRelicCordovaException(errorMessage, stackTraceElements);
+                            exception.setStackTrace(stackTraceElements);
+                            NewRelic.recordHandledException(exception, exceptionMap);
+                        } catch (JSONException e) {
+                            NewRelic.recordHandledException(e);
                         }
-                    } catch (IllegalArgumentException e) {
-                        Log.w("NRMA", e.getMessage());
-                    }
-
-                    if(errorStack == null) {
-                        NewRelic.recordBreadcrumb("JS Errors", exceptionMap);
-                        StatsEngine.get().inc("Supportability/Mobile/Cordova/JSError");
-                        break;
-                    }
-
-                    StackTraceElement[] stackTraceElements = parseStackTrace(errorStack);
-                    NewRelicCordovaException exception = new NewRelicCordovaException(errorMessage, stackTraceElements);
-                    exception.setStackTrace(stackTraceElements);
-                    NewRelic.recordHandledException(exception, exceptionMap);
-
+                    });
                     break;
                 }
                 case "noticeHttpTransaction": {
@@ -275,19 +283,19 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     final int bytesReceived = args.getInt(6);
                     final String body = args.getString(7);
                     final Object traceAttributes = args.get(9);
-                    Map<String,Object> traceHeadersMap = new HashMap<String, Object>();
+                    Map<String, Object> traceHeadersMap = new HashMap<String, Object>();
                     if (traceAttributes instanceof JSONObject) {
                         traceHeadersMap = new Gson().fromJson(String.valueOf(traceAttributes), Map.class);
                     }
 
                     Object params = args.get(8);
-                    Map<String,String> paramsMap = new HashMap<>();
+                    Map<String, String> paramsMap = new HashMap<>();
                     if (params instanceof JSONObject) {
                         paramsMap = new Gson().fromJson(String.valueOf(params), Map.class);
                     }
 
                     NewRelic.noticeHttpTransaction(url, method, status, startTime, endTime, bytesSent, bytesReceived,
-                            body,paramsMap,"",traceHeadersMap);
+                            body, paramsMap, "", traceHeadersMap);
                     break;
                 }
                 case "generateDistributedTracingHeaders": {
@@ -426,7 +434,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 }
                 case "analyticsEventEnabled": {
                     final boolean enabled = args.getBoolean(0);
-                    if(enabled) {
+                    if (enabled) {
                         NewRelic.enableFeature(FeatureFlag.AnalyticsEvents);
                     } else {
                         NewRelic.disableFeature(FeatureFlag.AnalyticsEvents);
@@ -435,7 +443,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 }
                 case "networkRequestEnabled": {
                     final boolean enabled = args.getBoolean(0);
-                    if(enabled) {
+                    if (enabled) {
                         NewRelic.enableFeature(FeatureFlag.NetworkRequests);
                     } else {
                         NewRelic.disableFeature(FeatureFlag.NetworkRequests);
@@ -444,7 +452,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 }
                 case "networkErrorRequestEnabled": {
                     final boolean enabled = args.getBoolean(0);
-                    if(enabled) {
+                    if (enabled) {
                         NewRelic.enableFeature(FeatureFlag.NetworkErrorRequests);
                     } else {
                         NewRelic.disableFeature(FeatureFlag.NetworkErrorRequests);
@@ -453,7 +461,7 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 }
                 case "httpRequestBodyCaptureEnabled": {
                     final boolean enabled = args.getBoolean(0);
-                    if(enabled) {
+                    if (enabled) {
                         NewRelic.enableFeature(FeatureFlag.HttpResponseBodyCapture);
                     } else {
                         NewRelic.disableFeature(FeatureFlag.HttpResponseBodyCapture);
@@ -487,68 +495,69 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     callbackContext.success(headers);
                     break;
                 }
-                 case "logInfo": {
-                                    final String message = args.getString(0);
-                                    NewRelic.logInfo(message);
-                                    break;
-                                }
-                                case "logError": {
-                                    final String message = args.getString(0);
-                                    NewRelic.logError(message);
-                                    break;
-                                }
-                                case "logWarn": {
-                                    final String message = args.getString(0);
-                                    NewRelic.logWarning(message);
-                                    break;
-                                }
-                                case "logVerbose": {
-                                    final String message = args.getString(0);
-                                    NewRelic.logVerbose(message);
-                                    break;
-                                }
-                                case "logDebug": {
-                                    final String message = args.getString(0);
-                                    NewRelic.logDebug(message);
-                                    break;
-                                }
-                                case "log" : {
-                                    final String message = args.getString(0);
-                                    final String level = args.getString(1);
+                case "logInfo": {
+                    final String message = args.getString(0);
+                    NewRelic.logInfo(message);
+                    break;
+                }
+                case "logError": {
+                    final String message = args.getString(0);
+                    NewRelic.logError(message);
+                    break;
+                }
+                case "logWarn": {
+                    final String message = args.getString(0);
+                    NewRelic.logWarning(message);
+                    break;
+                }
+                case "logVerbose": {
+                    final String message = args.getString(0);
+                    NewRelic.logVerbose(message);
+                    break;
+                }
+                case "logDebug": {
+                    final String message = args.getString(0);
+                    NewRelic.logDebug(message);
+                    break;
+                }
+                case "log": {
+                    final String message = args.getString(0);
+                    final String level = args.getString(1);
 
-                                    if(message == null || message.isEmpty()) {
-                                        Log.w(TAG, "Empty message given to log");
-                                        return false;
-                                    }
+                    if (message == null || message.isEmpty()) {
+                        Log.w(TAG, "Empty message given to log");
+                        return false;
+                    }
 
-                                    if(level == null) {
-                                        Log.w(TAG, "Null logLevel given to log");
-                                        return false;
-                                    }
+                    if (level == null) {
+                        Log.w(TAG, "Null logLevel given to log");
+                        return false;
+                    }
 
-                                    Map<String, LogLevel> strToLogLevel = new HashMap<>();
-                                    strToLogLevel.put("ERROR", LogLevel.ERROR);
-                                    strToLogLevel.put("WARNING", LogLevel.WARN);
-                                    strToLogLevel.put("INFO", LogLevel.INFO);
-                                    strToLogLevel.put("VERBOSE", LogLevel.VERBOSE);
-                                    strToLogLevel.put("AUDIT", LogLevel.DEBUG);
+                    Map<String, LogLevel> strToLogLevel = new HashMap<>();
+                    strToLogLevel.put("ERROR", LogLevel.ERROR);
+                    strToLogLevel.put("WARNING", LogLevel.WARN);
+                    strToLogLevel.put("INFO", LogLevel.INFO);
+                    strToLogLevel.put("VERBOSE", LogLevel.VERBOSE);
+                    strToLogLevel.put("AUDIT", LogLevel.DEBUG);
 
-                                    LogLevel logLevel = strToLogLevel.get(level);
+                    LogLevel logLevel = strToLogLevel.get(level);
 
-                                    NewRelic.log(logLevel, message);
-                                    break;
-                                }
-                                case "logAll": {
-                                    final String message = args.getString(0);
-                                    final JSONObject attributesASJson = args.getJSONObject(1);
-                                    logAttributesFromJson(attributesASJson, message);
-                                    break;
-                                }
-                                case "logAttributes": {
-                                    final JSONObject attributesASJson = args.getJSONObject(0);
-                                    logAttributesFromJson(attributesASJson, null);
-                                    break;
-                                }
+                    assert logLevel != null;
+                    NewRelic.log(logLevel, message);
+                    break;
+                }
+                case "logAll": {
+                    final String message = args.getString(0);
+                    final JSONObject attributesASJson = args.getJSONObject(1);
+                    logAttributesFromJson(attributesASJson, message);
+                    break;
+                }
+                case "logAttributes": {
+                    final JSONObject attributesASJson = args.getJSONObject(0);
+                    logAttributesFromJson(attributesASJson, null);
+                    break;
+                }
 
 
             }
@@ -560,17 +569,18 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
         return true;
 
     }
-        private void logAttributesFromJson(JSONObject attributesAsJson, String message) {
-            final Map attributes = new Gson().fromJson(String.valueOf(attributesAsJson), Map.class);
-            if(attributes == null) {
-                Log.e(TAG,"Null attributes given to logAttributes");
-                return;
-            }
-            if (message != null) {
-                attributes.put("message", message);
-            }
-            NewRelic.logAttributes(attributes);
+
+    private void logAttributesFromJson(JSONObject attributesAsJson, String message) {
+        final Map attributes = new Gson().fromJson(String.valueOf(attributesAsJson), Map.class);
+        if (attributes == null) {
+            Log.e(TAG, "Null attributes given to logAttributes");
+            return;
         }
+        if (message != null) {
+            attributes.put("message", message);
+        }
+        NewRelic.logAttributes(attributes);
+    }
 
 
     protected static final class NRTraceConstants {

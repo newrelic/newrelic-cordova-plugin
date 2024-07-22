@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2022-present New Relic Corporation. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0 
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #import "NewRelicCordovaPlugin.h"
@@ -12,7 +12,7 @@
 @implementation NewRelicCordovaPlugin {
     NSRegularExpression* jscRegex;
     NSRegularExpression* geckoRegex;
-    NSRegularExpression* nodeRegex;   
+    NSRegularExpression* nodeRegex;
 }
 
 
@@ -21,13 +21,13 @@
     NSString* applicationToken = [self.commandDelegate.settings objectForKey:@"ios_app_token"];
     
     NSDictionary* config = self.commandDelegate.settings;
-
+    
     jscRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*(?:([^@]*)(?:\\((.*?)\\))?@)?(\\S.*?):(\\d+)(?::(\\d+))?\\s*$"
                                                          options:NSRegularExpressionCaseInsensitive
                                                            error:nil];
     geckoRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*(.*?)(?:\\((.*?)\\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\\[native).*?|[^@]*bundle)(?::(\\d+))?(?::(\\d+))?\\s*$"
-                                                              options:NSRegularExpressionCaseInsensitive
-                                                                error:nil];
+                                                           options:NSRegularExpressionCaseInsensitive
+                                                             error:nil];
     nodeRegex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*at (?:((?:\\[object object\\])?[^\\/]+(?: \\[as \\S+\\])?) )?\\(?(.*?):(\\d+)(?::(\\d+))?\\)?\\s*$"
                                                           options:NSRegularExpressionCaseInsensitive
                                                             error:nil];
@@ -58,20 +58,11 @@
         if (![self shouldDisableFeature:config[@"offline_storage_enabled"]]) {
             [NewRelic enableFeatures:NRFeatureFlag_OfflineStorage];
         }
-
-        if (![self shouldDisableFeature:config[@"background_reporting_enabled"]]) {
-            [NewRelic enableFeatures:NRFeatureFlag_BackgroundReporting];
-        }
-
+        
         if (![self shouldDisableFeature:config[@"new_event_system_enabled"]]) {
-             [NewRelic enableFeatures:NRFeatureFlag_NewEventSystem];
+            [NewRelic enableFeatures:NRFeatureFlag_NewEventSystem];
         }
-
-          if (![self shouldDisableFeature:config[@"log_reporting_enabled"]]) {
-                  [NewRelic enableFeatures:NRFeatureFlag_LogReporting];
-          } else {
-                   [NewRelic disableFeatures:NRFeatureFlag_LogReporting];
-          }
+        
         
         // Set log level depending on loggingEnabled and logLevel
         NRLogLevels logLevel = NRLogLevelWarning;
@@ -98,9 +89,8 @@
         
         [NewRelic setPlatform:NRMAPlatform_Cordova];
         [NewRelic setPlatformVersion:config[@"plugin_version"]];
-        [NRLogger setLogTargets: NRLogTargetFile];
-        [NRLogger setLogEntityGuid:@"MXxNT0JJTEV8QVBQTElDQVRJT058NjAxMzQ0MTMy"];
-
+        
+        
         if ([self isEmptyConfigParameter:collectorAddress] && [self isEmptyConfigParameter:crashCollectorAddress]) {
             [NewRelic startWithApplicationToken:applicationToken];
         } else {
@@ -138,20 +128,20 @@
     NSString* eventType = [command.arguments objectAtIndex:0];
     NSString* eventName = [command.arguments objectAtIndex:1];
     NSDictionary *attributes = [command.arguments objectAtIndex:2];
-
+    
     [NewRelic recordCustomEvent:eventType name:eventName attributes:attributes];
 }
 
 - (void)recordLogs:(CDVInvokedUrlCommand *)command {
     NSDictionary* config = self.commandDelegate.settings;
-   if (![self shouldDisableFeature:config[@"console_logs_enabled"]]) {
-           
-    NSString* eventType = [command.arguments objectAtIndex:0];
-    NSString* eventName = [command.arguments objectAtIndex:1];
-    NSDictionary *attributes = [command.arguments objectAtIndex:2];
-
-    [NewRelic recordCustomEvent:eventType name:eventName attributes:attributes];
-   }
+    if (![self shouldDisableFeature:config[@"console_logs_enabled"]]) {
+        
+        NSString* eventType = [command.arguments objectAtIndex:0];
+        NSString* eventName = [command.arguments objectAtIndex:1];
+        NSDictionary *attributes = [command.arguments objectAtIndex:2];
+        
+        [NewRelic recordCustomEvent:eventType name:eventName attributes:attributes];
+    }
 }
 
 - (void)setAttribute:(CDVInvokedUrlCommand *)command {
@@ -178,12 +168,12 @@
     NSString* interactionId = [NewRelic startInteractionWithName:(NSString * _Null_unspecified)actionName];
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:interactionId];
-
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 -  (void)endInteraction:(CDVInvokedUrlCommand *)command {
-
+    
     CDVPluginResult* pluginResult = nil;
     NSString* actionName = [command.arguments objectAtIndex:0];
     [NewRelic stopCurrentInteraction:actionName];
@@ -229,7 +219,7 @@
     NSString* errorStack = [command.arguments objectAtIndex:2];
     NSString* isFatal = @"false";
     NSDictionary* errorAttributes = [command.arguments objectAtIndex:4];
-
+    
     if ([[command.arguments objectAtIndex:3] boolValue] == YES) {
         isFatal = @"true";
     }
@@ -261,13 +251,13 @@
 - (void)noticeDistributedTrace:(CDVInvokedUrlCommand *)command {
     
     CDVPluginResult* pluginResult = nil;
-
+    
     NSDictionary<NSString*,NSString*>* headers =  [NewRelic generateDistributedTracingHeaders];
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:headers];
-     
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-
+    
 }
 
 - (void)noticeHttpTransaction:(CDVInvokedUrlCommand *)command {
@@ -294,7 +284,7 @@
     else {
         traceAttributes = [command.arguments objectAtIndex:9];
     }
-
+    
     NSURL *nsurl = [NSURL URLWithString:url];
     NSData* data;
     if (body == [NSNull null]) {
@@ -302,7 +292,7 @@
     } else {
         data = [body dataUsingEncoding:NSUTF8StringEncoding];
     }
-
+    
     [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:params];
 }
 
@@ -337,14 +327,14 @@
     NSURL *nsurl = [NSURL URLWithString:url];
     
     NSDictionary *dict = @{
-            @"Unknown": [NSNumber numberWithInt:NRURLErrorUnknown],
-            @"BadURL": [NSNumber numberWithInt:NRURLErrorBadURL],
-            @"TimedOut": [NSNumber numberWithInt:NRURLErrorTimedOut],
-            @"CannotConnectToHost": [NSNumber numberWithInt:NRURLErrorCannotConnectToHost],
-            @"DNSLookupFailed": [NSNumber numberWithInt:NRURLErrorDNSLookupFailed],
-            @"BadServerResponse": [NSNumber numberWithInt:NRURLErrorBadServerResponse],
-            @"SecureConnectionFailed": [NSNumber numberWithInt:NRURLErrorSecureConnectionFailed],
-        };
+        @"Unknown": [NSNumber numberWithInt:NRURLErrorUnknown],
+        @"BadURL": [NSNumber numberWithInt:NRURLErrorBadURL],
+        @"TimedOut": [NSNumber numberWithInt:NRURLErrorTimedOut],
+        @"CannotConnectToHost": [NSNumber numberWithInt:NRURLErrorCannotConnectToHost],
+        @"DNSLookupFailed": [NSNumber numberWithInt:NRURLErrorDNSLookupFailed],
+        @"BadServerResponse": [NSNumber numberWithInt:NRURLErrorBadServerResponse],
+        @"SecureConnectionFailed": [NSNumber numberWithInt:NRURLErrorSecureConnectionFailed],
+    };
     NSInteger iOSFailureCode = [[dict valueForKey:failure] integerValue];
     [NewRelic noticeNetworkFailureForURL:nsurl httpMethod:httpMethod startTime:[startTime doubleValue] endTime:[endTime doubleValue] andFailureCode:iOSFailureCode];
 }
@@ -436,33 +426,33 @@
 - (void)addHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command{
     NSArray* headers = [command.arguments objectAtIndex:0];
     [NewRelic addHTTPHeaderTrackingFor:headers];
-
+    
 }
 
 - (void)getHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command{
     
     CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"headersList": @"[]"}];
-     
+    NSArray<NSString*>* headers =  [NewRelic httpHeadersAddedForTracking];
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"headersList": headers}];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-
+    
 }
 
 - (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command {
     
     CDVPluginResult* pluginResult = nil;
-
+    
     NSDictionary<NSString*,NSString*>* headers =  [NewRelic generateDistributedTracingHeaders];
     
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:headers];
-     
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-
+    
 }
 - (void)logInfo:(CDVInvokedUrlCommand *)command {
     NSString* message = [command.arguments objectAtIndex:0];
     [NewRelic logInfo:message];
-
+    
 }
 
 - (void)logError:(CDVInvokedUrlCommand *)command {
@@ -488,15 +478,15 @@
 - (void)log:(CDVInvokedUrlCommand *)command {
     NSString* level =  [command.arguments objectAtIndex:0];
     NSString* message = [command.arguments objectAtIndex:1];
-
+    
     if(message == nil || message.length == 0) {
         return;
     }
-
+    
     if(level == nil || level.length == 0) {
         return;
     }
-
+    
     NRLogLevels logLevel = NRLogLevelWarning;
     NSDictionary *logDict = @{
         @"ERROR": [NSNumber numberWithInt:NRLogLevelError],
@@ -510,27 +500,27 @@
         NSNumber* newLogLevel = [logDict valueForKey:configLogLevel];
         logLevel = [newLogLevel intValue];
     }
-
+    
     [NewRelic log:message level:logLevel];
 }
 
 - (void)logAttributes:(CDVInvokedUrlCommand *)command {
     NSDictionary *attributes = [command.arguments objectAtIndex:0];
-
-    [NewRelic logAll:attributes];
-
+    
+    [NewRelic logAttributes :attributes];
+    
 }
 
 - (void)logAll:(CDVInvokedUrlCommand *)command {
-
+    
     NSString* message = [command.arguments objectAtIndex:0];
     NSDictionary *attributes = [command.arguments objectAtIndex:1];
-
+    
     NSMutableDictionary *mutableDictionary = [attributes mutableCopy];     //Make the dictionary mutable to change/add
-
+    
     mutableDictionary[@"message"] = message;
-
-    [NewRelic logAll:mutableDictionary];
+    
+    [NewRelic logAttributes:mutableDictionary];
 }
 
 @end

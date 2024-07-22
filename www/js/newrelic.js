@@ -132,19 +132,24 @@
          */
         sendConsole(type, args) {
             const argsStr = JSON.stringify(args, getCircularReplacer());
-            this.send('MobileJSConsole', { consoleType: type, args: argsStr });
 
-            if(type === 'error') {
-              this.logError(argsStr);
-            } else if(type === 'warn') {
-                this.logWarn(argsStr);
-            } else if(type === 'log') {
-                this.logInfo(argsStr);
-            } else if(type === 'debug') {
-                this.logDebug(argsStr);
-            } else if(type === 'assert') {
-                this.logVerbose(argsStr);
-            }
+            switch (type) {
+                case 'error':
+                  this.logError(`[CONSOLE][ERROR]${argsStr}`);
+                  break;
+                case 'warn':
+                  this.logWarn(`[CONSOLE][WARN]${argsStr}`);
+                  break;
+                case 'log':
+                  this.logInfo(`[CONSOLE][LOG]${argsStr}`);
+                  break;
+                case 'debug':
+                  this.logDebug(`[CONSOLE][DEBUG]${argsStr}`);
+                  break;
+                case 'assert':
+                  this.logVerbose(`[CONSOLE][ASSERT]${argsStr}`);
+                  break;
+              }
         },
     
         send(name, args) {
@@ -824,4 +829,3 @@
     };
     
     module.exports = NewRelic;
-
