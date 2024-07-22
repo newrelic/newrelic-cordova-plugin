@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="6.2.10">
+  id="newrelic-cordova-plugin" version="7.0.0">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -18,7 +18,7 @@
     <engine name="cordova-android" version=">=5.0.0" />
   </engines>
 
-  <preference name="PLUGIN_VERSION" default="6.2.9" />
+  <preference name="PLUGIN_VERSION" default="7.0.0" />
   <preference name="CRASH_REPORTING_ENABLED" default="true" />
   <preference name="DISTRIBUTED_TRACING_ENABLED" default="true" />
   <preference name="INTERACTION_TRACING_ENABLED" default="true" />
@@ -33,6 +33,8 @@
   <preference name="CONSOLE_LOGS_ENABLED" default="true" />
   <preference name="NEW_EVENT_SYSTEM_ENABLED" default="true" />
   <preference name="BACKGROUND_REPORTING_ENABLED" default="false" />
+  <preference name="LOG_REPORTING_ENABLED" default="true" />
+
 
   <platform name="ios">
     <preference name="IOS_APP_TOKEN" default="x" />
@@ -59,6 +61,7 @@
         <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
         <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
         <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
+        <preference name="LOG_REPORTING_ENABLED" value="$LOG_REPORTING_ENABLED" />
         <param name="ios-package" value="NewRelicCordovaPlugin" onload="true" />
       </feature>
     </config-file>
@@ -76,7 +79,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="7.4.12" />
+        <pod name="NewRelicAgent" spec="7.5.0" />
       </pods>
     </podspec>
 
@@ -86,7 +89,7 @@
 
   <platform name="android">
     <preference name="ANDROID_APP_TOKEN" default="x" />
-    <preference name="ANDROID_AGENT_VER" default="7.3.1" />
+    <preference name="ANDROID_AGENT_VER" default="7.5.0" />
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
@@ -118,7 +121,7 @@
       <preference name="CONSOLE_LOGS_ENABLED" value="$CONSOLE_LOGS_ENABLED" />
       <preference name="NEW_EVENT_SYSTEM_ENABLED" value="$NEW_EVENT_SYSTEM_ENABLED" />
       <preference name="BACKGROUND_REPORTING_ENABLED" value="$BACKGROUND_REPORTING_ENABLED" />
-
+      <preference name="LOG_REPORTING_ENABLED" value="$LOG_REPORTING_ENABLED" />
     </config-file>
 
     <source-file src="src/android/NewRelicCordovaPlugin.java"

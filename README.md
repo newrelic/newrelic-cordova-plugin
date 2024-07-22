@@ -263,6 +263,51 @@ By default, these configurations are already set to true on agent start.
     NewRelic.httpRequestBodyCaptureEnabled(true);
 ```
 
+## [logInfo] (message: string): void;
+> Logs an informational message.
+```js
+NewRelic.logInfo("User logged in successfully");
+```
+## [logDebug] (message: string): void;
+> Logs a debug message.
+```js
+NewRelic.logDebug("Debug message");
+```
+
+## [logVerbose] (message: string): void;
+> Logs a verbose message, typically used for extensive informational events that are useful in tracing the application's execution in a more detailed manner.
+```js
+NewRelic.logVerbose("Verbose message detailing step-by-step execution");
+```
+
+## [logWarn] (message: string): void;
+> Logs a warning message. Warning messages are typically used to indicate a potential issue or to highlight situations that are not necessarily errors, but which may require attention or could lead to errors if ignored.
+```js
+NewRelic.logWarn("Warning message indicating a potential issue");
+```
+
+## [logError] (message: string): void;
+> Logs an error message. Error messages are used to indicate a failure or problem that has occurred in the application. These are critical messages that usually require immediate attention.
+```js
+NewRelic.logError("Error message indicating a failure");
+```
+## [log] (level: string, message: string): void;
+> Logs a message with a specified level. The level indicates the severity or importance of the message. Common levels include "info", "warn", "error", "debug", and "verbose".
+```js
+NewRelic.log("INFO", "User logged in successfully");
+```
+## [logAttributes] (attributes: {[key: string]: boolean | number | string}): void;
+> Logs multiple attributes at once by passing a map of key-value pairs. This method allows for the efficient addition of contextual information to logs, enhancing the diagnostic capability of logged events.
+```js
+NewRelic.logAttributes({
+  "userID": 12345,
+  "sessionID": "abcde12345",
+  "isLoggedIn": true,
+  "message":"this is test",
+  "level":"INFO"
+});
+```
+
 ## Error Reporting
 ### recordError(err: [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error), attributes?: {[key: string]: boolean | number | string}) : void;
 Records JavaScript errors for Cordova. It is useful to add this method by adding it to the error handler of the framework that you are using. Here are some examples below:

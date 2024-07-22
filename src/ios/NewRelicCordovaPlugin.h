@@ -67,4 +67,22 @@
 
 - (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command;
 
+- (void)logInfo:(CDVInvokedUrlCommand *)command;
+
+- (void)logError:(CDVInvokedUrlCommand *)command;
+
+- (void)logWarn:(CDVInvokedUrlCommand *)command;
+
+- (void)logDebug:(CDVInvokedUrlCommand *)command;
+
+- (void)logVerbose:(CDVInvokedUrlCommand *)command;
+
+- (void)log:(CDVInvokedUrlCommand *)command;
+
+- (void)logAttributes:(CDVInvokedUrlCommand *)command;
+
+- (void)logAll:(CDVInvokedUrlCommand *)command;
+
+
+
 @end
