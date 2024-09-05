@@ -65,6 +65,8 @@
 
 - (void)getHTTPHeadersTrackingFor:(CDVInvokedUrlCommand *) command;
 
+- (void)getConsoleLogFeatureFlag:(CDVInvokedUrlCommand *) command;
+
 - (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command;
 
 - (void)logInfo:(CDVInvokedUrlCommand *)command;

@@ -438,6 +438,14 @@
     
 }
 
+- (void)getConsoleLogFeatureFlag:(CDVInvokedUrlCommand *) command{
+    NSDictionary* config = self.commandDelegate.settings;
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"consoleLogEnabled": config[@"console_logs_enabled"]}];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+}
+
 - (void)generateDistributedTracingHeaders:(CDVInvokedUrlCommand *)command {
     
     CDVPluginResult* pluginResult = nil;

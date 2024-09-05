@@ -495,6 +495,12 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     callbackContext.success(headers);
                     break;
                 }
+                case "getConsoleLogFeatureFlag": {
+                    JSONObject consoleLogEnabled = new JSONObject();
+                    consoleLogEnabled.put("consoleLogEnabled",preferences.getString("console_logs_enabled", "true"));
+                    callbackContext.success(consoleLogEnabled);
+                    break;
+                }
                 case "logInfo": {
                     final String message = args.getString(0);
                     NewRelic.logInfo(message);
