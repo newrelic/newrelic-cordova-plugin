@@ -131,6 +131,10 @@
          * @param args An array of arguments that are passed to the console log.
          */
         sendConsole(type, args) {
+
+            NewRelic.getConsoleLogFeatureFlag().then((flag) => {
+
+            if(flag.consoleLogEnabled === 'true') {
             const argsStr = JSON.stringify(args, getCircularReplacer());
 
             switch (type) {
@@ -149,7 +153,8 @@
                 case 'assert':
                   this.logVerbose(`[CONSOLE][ASSERT]${argsStr}`);
                   break;
-              }
+              }}
+              });
         },
     
         send(name, args) {
@@ -362,6 +367,13 @@
             });
         },
 
+        getConsoleLogFeatureFlag: function (cb, fail) {
+
+         return new Promise(function (cb, fail) {
+                cordova.exec(cb, fail, "NewRelicCordovaPlugin", "getConsoleLogFeatureFlag");
+         });
+        },
+
         generateDistributedTracingHeaders: function (cb, fail) {
 
             return new Promise(function (cb, fail) {
@@ -504,8 +516,6 @@
     
                     if (this.readyState === this.HEADERS_RECEIVED) {
                         const contentTypeString = this.getResponseHeader('Content-Type');
-    
-    
                         if (this.getAllResponseHeaders()) {
                             const responseHeaders = this.getAllResponseHeaders().split('\r\n');
                             const responseHeadersDictionary = {};
@@ -582,7 +592,6 @@
       var options = arguments[1];
     
      return NewRelic.getHTTPHeadersTrackingFor().then((trackingHeadersList)=>{
-      console.log(trackingHeadersList);
       return NewRelic.generateDistributedTracingHeaders().then((headers) => {
         console.log(headers);
         networkRequest.startTime = Date.now();
