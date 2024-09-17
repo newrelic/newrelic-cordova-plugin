@@ -433,7 +433,18 @@
     
     CDVPluginResult* pluginResult = nil;
     NSArray<NSString*>* headers =  [NewRelic httpHeadersAddedForTracking];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"headersList": headers}];
+    
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:headers options:NSJSONWritingPrettyPrinted error:&error];
+    NSString *jsonString = @"[]";
+    if (!jsonData) {
+        NSLog(@"Got an error: %@", error);
+    } else {
+        jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        NSLog(@"%@", jsonString);
+    }
+    
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary: @{@"headersList": jsonString}];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     
 }

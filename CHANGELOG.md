@@ -1,5 +1,15 @@
 # Changelog
 
+# 7.0.2
+
+## Bug Fixes
+Fixed an issue with the getHttpHeaderforTracking function, which was causing problems with fetch instrumentation. This fix ensures proper tracking of HTTP requests.
+
+## Updates
+Updated the underlying native Android agent to version 7.6.0. This update brings improved performance, stability, and compatibility with the latest Android environments.
+
+
+
 # 7.0.1
 
 ## New Features and Improvements
