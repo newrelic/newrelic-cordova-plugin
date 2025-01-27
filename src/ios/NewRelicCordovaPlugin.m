@@ -463,8 +463,36 @@
     
     NSDictionary<NSString*,NSString*>* headers =  [NewRelic generateDistributedTracingHeaders];
     
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:headers];
-    
+    NSMutableDictionary *mutableDictionary = [headers mutableCopy];
+
+    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:headers[@"newrelic"] options:0];
+          
+    NSError *error = nil;
+    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:decodedData options:0 error:&error];
+
+          if (error) {
+              NSLog(@"Error parsing JSON: %@", error);
+          } else {
+              NSLog(@"JSON Object: %@", jsonObject);
+              // Access individual values from the JSON object
+              NSDictionary *dDictionary = jsonObject[@"d"];
+              NSString *acNumber = dDictionary[@"ac"];
+              NSString *apNumber = dDictionary[@"ap"];
+              NSString *tkNumber = dDictionary[@"tk"];
+
+              
+              
+              [mutableDictionary setObject:acNumber forKey:@"application.id"];
+              [mutableDictionary setObject:apNumber forKey:@"account.id"];
+              
+              if(tkNumber != nil) {
+                  [mutableDictionary setObject:tkNumber forKey:@"trust.account.key"];
+              } else {
+                  [mutableDictionary setObject:acNumber forKey:@"trust.account.key"];
+              }
+          }
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:mutableDictionary];
+        
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     
 }

@@ -4,6 +4,11 @@
      */
     
     var exec = require("cordova/exec");
+
+    var accountId = "";
+    var applicationId = "";
+    var trustAccountKey = "";
+    
     
     var NewRelic = {
     
@@ -501,8 +506,18 @@
         networkRequest.method = method;
         networkRequest.bytesSent = 0;
         networkRequest.startTime = Date.now();
-        return originalXhrOpen.apply(this, arguments)
-
+        try {
+            return originalXhrOpen.apply(this, arguments)
+            } catch (e) {
+                console.error(e);
+            } finally{
+                    var headers = generateTracePayload();
+                   
+            this.setRequestHeader("newrelic", headers['newrelic']);
+            this.setRequestHeader("traceparent", headers['traceparent']);
+            this.setRequestHeader("tracestate", headers['tracestate']);
+             networkRequest.params = headers;
+                }
     }
 
 
@@ -679,6 +694,94 @@
 
         });
     }
+
+    function generateTracePayload () {
+     
+        if (!accountId || !applicationId) {
+          return null
+        }
+    
+        var guid = generateSpanId()
+        var traceId = generateTraceId()
+        var timestamp = Date.now()
+    
+        var payload = {
+          guid,
+          traceId
+        }
+        payload.id = guid;
+        payload['trace.id'] = payload.traceId;
+    
+          payload.traceparent = generateTraceContextParentHeader(guid, traceId)
+          payload.tracestate = generateTraceContextStateHeader(guid, timestamp,
+            accountId, applicationId, trustAccountKey)
+
+          payload.newrelic = generateTraceHeader(guid, traceId, timestamp, accountId,
+            applicationId, trustAccountKey)
+        
+    
+        return payload
+      }
+
+      function generateSpanId() {
+        return generateRandomHexString(16);
+      }
+
+      function generateTraceId() {
+        return generateRandomHexString(32);
+      }
+
+    function generateRandomHexString(length) {
+        const chars = '0123456789abcdef';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+    
+      function generateTraceContextParentHeader (spanId, traceId) {
+        return '00-' + traceId + '-' + spanId + '-01'
+      }
+    
+      function generateTraceContextStateHeader (spanId, timestamp, accountId, appId, trustKey) {
+        var version = 0
+        var transactionId = ''
+        var parentType = 2
+        var sampled = ''
+        var priority = ''
+    
+        return trustKey + '@nr=' + version + '-' + parentType + '-' + accountId +
+          '-' + appId + '-' + spanId + '-' + transactionId + '-' + sampled + '-' + priority + '-' + timestamp
+      }
+    
+      function generateTraceHeader (spanId, traceId, timestamp, accountId, appId, trustKey) {
+    
+        var payload = {
+          v: [0, 2],
+          d: {
+            ty: 'Mobile',
+            ac: accountId,
+            ap: appId,
+            id: spanId,
+            tr: traceId,
+            ti: timestamp
+          }
+        }
+        if (trustKey && accountId !== trustKey) {
+          payload.d.tk = trustKey
+        }
+    
+        return btoa(JSON.stringify(payload))
+      }
+
+      document.addEventListener('deviceready', function () {
+        NewRelic.generateDistributedTracingHeaders().then((headers) => {
+            accountId = headers['account.id'];
+            applicationId = headers['application.id'];
+            trustAccountKey = headers['trust.account.key'];
+        });
+    });
 
     function isValidURL(url) {
         try {
