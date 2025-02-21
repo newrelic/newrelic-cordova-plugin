@@ -1,5 +1,13 @@
 # Changelog
 
+# 7.0.5
+
+## Improvements
+
+- Implemented Distributed Tracing support for `XMLHttpRequest`.
+- Updated the Native Android agent to version 7.6.4.
+
+
 # 7.0.4
 
 ## Improvements
