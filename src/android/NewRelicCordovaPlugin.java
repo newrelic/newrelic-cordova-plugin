@@ -323,6 +323,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                                 dtHeaders.put(NRTraceConstants.TRACE_ID, traceId);
                                 dtHeaders.put(NRTraceConstants.ID, spanId);
                                 dtHeaders.put(NRTraceConstants.GUID, spanId);
+                                dtHeaders.put(NRTraceConstants.ACCOUNT_ID,accountId);
+                                dtHeaders.put(NRTraceConstants.APPLICATION_ID,applicationId);
+                                dtHeaders.put(NRTraceConstants.TRUST_ACCOUNT_KEY,vendor.substring(0,vendor.indexOf("@")));
 
 
                                 callbackContext.success(dtHeaders);
@@ -595,6 +598,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
         public static final String TRACE_ID = "trace.id";
         public static final String GUID = "guid";
         public static final String ID = "id";
+        public static final String ACCOUNT_ID = "account.id";
+        public static final String APPLICATION_ID = "application.id";
+        public static final String TRUST_ACCOUNT_KEY = "trust.account.key";
     }
 
 }
