@@ -512,11 +512,19 @@
                 console.error(e);
             } finally{
                     var headers = generateTracePayload();
-                   
-            this.setRequestHeader("newrelic", headers['newrelic']);
-            this.setRequestHeader("traceparent", headers['traceparent']);
-            this.setRequestHeader("tracestate", headers['tracestate']);
-             networkRequest.params = headers;
+                    console.debug(headers);
+                    if (headers !== null) {
+                      if (headers['newrelic']) {
+                          this.setRequestHeader("newrelic", headers['newrelic']);
+                      }
+                      if (headers['traceparent']) {
+                      this.setRequestHeader("traceparent", headers['traceparent']);
+                      }
+                      if (headers['tracestate']) {
+                      this.setRequestHeader("tracestate", headers['tracestate']);
+                      }
+                      networkRequest.params = headers;
+                  }
                 }
     }
 
