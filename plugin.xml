@@ -6,7 +6,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-  id="newrelic-cordova-plugin" version="7.0.9">
+  id="newrelic-cordova-plugin" version="7.0.10">
   <name>NewRelic</name>
   <description>New Relic Cordova Plugin for iOS and Android</description>
   <author>New Relic</author>
@@ -79,7 +79,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="~>7.5.8" />
+        <pod name="NewRelicAgent" spec="~>7.5.11" />
       </pods>
     </podspec>
 
@@ -89,7 +89,7 @@
 
   <platform name="android">
     <preference name="ANDROID_APP_TOKEN" default="x" />
-    <preference name="ANDROID_AGENT_VER" default="7.6.8" />
+    <preference name="ANDROID_AGENT_VER" default="7.6.10" />
 
     <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.INTERNET" />
