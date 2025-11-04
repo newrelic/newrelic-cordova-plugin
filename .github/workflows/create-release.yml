@@ -96,12 +96,10 @@ jobs:
           echo "Created and pushed tag v${VERSION}"
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
-          release_name: Release v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
           body: |
             # New Relic Cordova Agent v${{ steps.get_version.outputs.version }}
 
@@ -117,6 +115,7 @@ jobs:
             ```
           draft: false
           prerelease: false
+          generate_release_notes: true
 
       - name: Summary
         run: |
@@ -205,26 +204,29 @@ jobs:
           VERSION="${{ steps.release_info.outputs.version }}"
           RELEASE_DATE="${{ steps.release_info.outputs.release_date }}"
           VERSION_NUMBER="${{ steps.release_info.outputs.version_number }}"
+          IMPROVEMENTS="${{ steps.parse_release_notes.outputs.improvements }}"
 
           # Create directory if it doesn't exist
           mkdir -p src/content/docs/release-notes/mobile-release-notes/cordova-release-notes
 
-          # Create the MDX file
-          cat > "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx" << 'MDXEOF'
+          # Create the MDX file (using EOF without quotes for variable expansion)
+          cat > "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx" << EOF
           ---
           subject: Cordova agent
-          releaseDate: '${{ steps.release_info.outputs.release_date }}'
-          version: ${{ steps.release_info.outputs.version }}
+          releaseDate: '${RELEASE_DATE}'
+          version: ${VERSION}
           downloadLink: 'https://github.com/newrelic/newrelic-cordova-plugin'
           ---
 
           ## Improvements
 
-          ${{ steps.parse_release_notes.outputs.improvements }}
-          MDXEOF
+          ${IMPROVEMENTS}
+          EOF
 
           echo "Created release notes file: cordova-agent-${VERSION_NUMBER}.mdx"
+          echo "--- File contents ---"
           cat "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx"
+          echo "--- End file contents ---"
 
       - name: Create branch and commit
         run: |
