@@ -1,0 +1,300 @@
+name: Create Release and Update Documentation
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (leave empty to use plugin.xml version)'
+        required: false
+        type: string
+
+jobs:
+  create-release:
+    # Only run if PR was merged (not just closed) and title contains "Update native agents"
+    # OR if manually triggered
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       contains(github.event.pull_request.title, 'Update native agents'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      release_notes: ${{ steps.parse_changelog.outputs.release_notes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Get version from plugin.xml
+        id: get_version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+            echo "Using provided version: $VERSION"
+          else
+            VERSION=$(grep 'id="newrelic-cordova-plugin"' plugin.xml | sed 's/.*version="\([^"]*\)".*/\1/')
+            echo "Extracted version from plugin.xml: $VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Parse CHANGELOG.md for latest release
+        id: parse_changelog
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          # Read from the version header until the next version header or end of file
+          RELEASE_NOTES=$(awk "/^# ${VERSION}/,/^# [0-9]/" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+
+          # If empty, try to get the first entry
+          if [ -z "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES=$(awk '/^# [0-9]/,/^# [0-9]/' CHANGELOG.md | head -n -1 | sed '1d')
+          fi
+
+          echo "Release notes:"
+          echo "$RELEASE_NOTES"
+
+          # Save to output using heredoc for multiline
+          {
+            echo 'release_notes<<EOF'
+            echo "$RELEASE_NOTES"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Get Android and iOS versions
+        id: agent_versions
+        run: |
+          ANDROID_VERSION=$(grep 'preference name="ANDROID_AGENT_VER"' plugin.xml | sed 's/.*default="\(.*\)".*/\1/')
+          IOS_VERSION=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\(.*\)".*/\1/')
+
+          echo "android_version=$ANDROID_VERSION" >> $GITHUB_OUTPUT
+          echo "ios_version=$IOS_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Android Agent Version: $ANDROID_VERSION"
+          echo "iOS Agent Version: $IOS_VERSION"
+
+      - name: Create Git Tag
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create annotated tag
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
+
+          echo "Created and pushed tag v${VERSION}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Release v${{ steps.get_version.outputs.version }}
+          body: |
+            # New Relic Cordova Agent v${{ steps.get_version.outputs.version }}
+
+            ${{ steps.parse_changelog.outputs.release_notes }}
+
+            ## Agent Versions
+            - Android Agent: ${{ steps.agent_versions.outputs.android_version }}
+            - iOS Agent: ${{ steps.agent_versions.outputs.ios_version }}
+
+            ## Installation
+            ```bash
+            cordova plugin add newrelic-cordova-plugin@${{ steps.get_version.outputs.version }}
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Summary
+        run: |
+          echo "## Release Created Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.get_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Android Agent:** ${{ steps.agent_versions.outputs.android_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**iOS Agent:** ${{ steps.agent_versions.outputs.ios_version }}" >> $GITHUB_STEP_SUMMARY
+
+  update-documentation:
+    needs: create-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout docs-website fork
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.DOCS_FORK_REPO || 'ndesai-newrelic/docs-website' }}
+          ref: develop
+          token: ${{ secrets.DOCS_WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync fork with upstream
+        run: |
+          # Add upstream remote if it doesn't exist
+          git remote add upstream https://github.com/newrelic/docs-website.git || true
+
+          # Fetch upstream
+          git fetch upstream
+
+          # Merge upstream/develop into local develop
+          git merge upstream/develop --no-edit || echo "No changes to sync"
+
+          # Push to fork
+          git push origin develop
+
+      - name: Get release information
+        id: release_info
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+
+          # Get current date in YYYY-MM-DD format
+          RELEASE_DATE=$(date +%Y-%m-%d)
+
+          # Format version for filename (e.g., 7.0.10 -> 710)
+          VERSION_NUMBER=$(echo "$VERSION" | tr -d '.')
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_date=$RELEASE_DATE" >> $GITHUB_OUTPUT
+          echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+
+          echo "Version: $VERSION"
+          echo "Release Date: $RELEASE_DATE"
+          echo "Version Number: $VERSION_NUMBER"
+
+      - name: Parse release notes from changelog
+        id: parse_release_notes
+        run: |
+          # Get release notes from the previous job
+          RELEASE_NOTES="${{ needs.create-release.outputs.release_notes }}"
+
+          # Extract Android and iOS versions if present in release notes
+          ANDROID_VERSION=$(echo "$RELEASE_NOTES" | grep -i "android agent" | sed 's/.*version \([0-9.]*\).*/\1/' || echo "")
+          IOS_VERSION=$(echo "$RELEASE_NOTES" | grep -i "ios agent" | sed 's/.*version \([0-9.]*\).*/\1/' || echo "")
+
+          # Format improvements section
+          IMPROVEMENTS=$(echo "$RELEASE_NOTES" | grep "^-" | sed 's/^- /- /')
+
+          echo "android_version=$ANDROID_VERSION" >> $GITHUB_OUTPUT
+          echo "ios_version=$IOS_VERSION" >> $GITHUB_OUTPUT
+          {
+            echo 'improvements<<EOF'
+            echo "$IMPROVEMENTS"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Create release notes file
+        run: |
+          VERSION="${{ steps.release_info.outputs.version }}"
+          RELEASE_DATE="${{ steps.release_info.outputs.release_date }}"
+          VERSION_NUMBER="${{ steps.release_info.outputs.version_number }}"
+
+          # Create directory if it doesn't exist
+          mkdir -p src/content/docs/release-notes/mobile-release-notes/cordova-release-notes
+
+          # Create the MDX file
+          cat > "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx" << 'MDXEOF'
+          ---
+          subject: Cordova agent
+          releaseDate: '${{ steps.release_info.outputs.release_date }}'
+          version: ${{ steps.release_info.outputs.version }}
+          downloadLink: 'https://github.com/newrelic/newrelic-cordova-plugin'
+          ---
+
+          ## Improvements
+
+          ${{ steps.parse_release_notes.outputs.improvements }}
+          MDXEOF
+
+          echo "Created release notes file: cordova-agent-${VERSION_NUMBER}.mdx"
+          cat "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx"
+
+      - name: Create branch and commit
+        run: |
+          VERSION="${{ steps.release_info.outputs.version }}"
+          BRANCH_NAME="cordova-agent-${VERSION}"
+
+          # Create new branch
+          git checkout -b "$BRANCH_NAME"
+
+          # Add the new file
+          git add src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/
+
+          # Commit
+          git commit -m "docs: Add Cordova agent v${VERSION} release notes
+
+          - Added release notes for Cordova agent v${VERSION}
+          - Android agent: ${{ steps.parse_release_notes.outputs.android_version }}
+          - iOS agent: ${{ steps.parse_release_notes.outputs.ios_version }}"
+
+          # Push branch to docs-website
+          git push origin "$BRANCH_NAME"
+
+          echo "Pushed branch: $BRANCH_NAME"
+
+      - name: Create Pull Request to docs-website
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_WORKFLOW_TOKEN }}
+        run: |
+          VERSION="${{ steps.release_info.outputs.version }}"
+          FORK_REPO="${{ vars.DOCS_FORK_REPO || 'ndesai-newrelic/docs-website' }}"
+          FORK_OWNER=$(echo "$FORK_REPO" | cut -d'/' -f1)
+
+          # Install gh CLI if not available
+          which gh || (curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+            sudo apt update && sudo apt install gh)
+
+          # Create PR using gh CLI
+          gh pr create \
+            --repo newrelic/docs-website \
+            --base develop \
+            --head ${FORK_OWNER}:cordova-agent-${VERSION} \
+            --title "docs: Add Cordova agent v${VERSION} release notes" \
+            --body "## Summary
+
+          This PR adds release notes for the New Relic Cordova agent v${VERSION}.
+
+          ## Changes
+
+          - Added release notes file: \`cordova-agent-$(echo "$VERSION" | tr -d '.').mdx\`
+
+          ## Agent Versions
+
+          - **Cordova Agent**: ${VERSION}
+          - **Android Agent**: ${{ steps.parse_release_notes.outputs.android_version }}
+          - **iOS Agent**: ${{ steps.parse_release_notes.outputs.ios_version }}
+
+          ## Release Notes
+
+          ${{ steps.parse_release_notes.outputs.improvements }}
+
+          ---
+
+          This PR was automatically created by the release workflow from [newrelic-cordova-plugin](https://github.com/newrelic/newrelic-cordova-plugin)." \
+            --label "documentation" \
+            --label "mobile"
+
+      - name: Summary
+        run: |
+          echo "## Documentation Updated Successfully! 📚" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Notes File:** cordova-agent-${{ steps.release_info.outputs.version_number }}.mdx" >> $GITHUB_STEP_SUMMARY
+          echo "**PR Created:** Check https://github.com/newrelic/docs-website/pulls" >> $GITHUB_STEP_SUMMARY
