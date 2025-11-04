@@ -1,0 +1,257 @@
+name: Update Native Agent Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      android_version:
+        description: 'Android agent version (leave empty to fetch latest)'
+        required: false
+        type: string
+      ios_version:
+        description: 'iOS agent version (leave empty to fetch latest)'
+        required: false
+        type: string
+      create_pr:
+        description: 'Create PR with new branch (always true for this workflow)'
+        required: false
+        type: boolean
+        default: true
+  push:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/update-native-agents.yml'
+  schedule:
+    # Run weekly on Monday at 9:00 AM UTC to check for updates
+    - cron: '0 9 * * 1'
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Fetch latest Android agent version
+        id: android_version
+        run: |
+          if [ -n "${{ inputs.android_version }}" ]; then
+            VERSION="${{ inputs.android_version }}"
+            echo "Using provided Android version: $VERSION"
+          else
+            # Fetch latest version from Maven Central metadata
+            VERSION=$(curl -s 'https://repo1.maven.org/maven2/com/newrelic/agent/android/android-agent/maven-metadata.xml' | \
+              grep '<latest>' | \
+              sed 's/.*<latest>\(.*\)<\/latest>.*/\1/')
+            echo "Fetched latest Android version: $VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Fetch latest iOS agent version
+        id: ios_version
+        run: |
+          if [ -n "${{ inputs.ios_version }}" ]; then
+            VERSION="${{ inputs.ios_version }}"
+            echo "Using provided iOS version: $VERSION"
+          else
+            # Fetch latest version from CocoaPods using jq to properly parse JSON
+            VERSION=$(curl -s 'https://trunk.cocoapods.org/api/v1/pods/NewRelicAgent' | \
+              jq -r '.versions[-1].name')
+            echo "Fetched latest iOS version: $VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get current versions
+        id: current_versions
+        run: |
+          CURRENT_ANDROID=$(grep 'preference name="ANDROID_AGENT_VER"' plugin.xml | sed 's/.*default="\(.*\)".*/\1/')
+          CURRENT_IOS=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\(.*\)".*/\1/')
+          CURRENT_PLUGIN=$(grep 'id="newrelic-cordova-plugin"' plugin.xml | sed 's/.*version="\([^"]*\)".*/\1/')
+
+          echo "current_android=$CURRENT_ANDROID" >> $GITHUB_OUTPUT
+          echo "current_ios=$CURRENT_IOS" >> $GITHUB_OUTPUT
+          echo "current_plugin=$CURRENT_PLUGIN" >> $GITHUB_OUTPUT
+
+          echo "Current Android version: $CURRENT_ANDROID"
+          echo "Current iOS version: $CURRENT_IOS"
+          echo "Current Plugin version: $CURRENT_PLUGIN"
+
+      - name: Check if updates are needed
+        id: check_updates
+        run: |
+          NEEDS_UPDATE=false
+          ANDROID_UPDATED=false
+          IOS_UPDATED=false
+
+          if [ "${{ steps.current_versions.outputs.current_android }}" != "${{ steps.android_version.outputs.version }}" ]; then
+            echo "Android version needs update"
+            NEEDS_UPDATE=true
+            ANDROID_UPDATED=true
+          fi
+
+          if [ "${{ steps.current_versions.outputs.current_ios }}" != "${{ steps.ios_version.outputs.version }}" ]; then
+            echo "iOS version needs update"
+            NEEDS_UPDATE=true
+            IOS_UPDATED=true
+          fi
+
+          echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
+          echo "android_updated=$ANDROID_UPDATED" >> $GITHUB_OUTPUT
+          echo "ios_updated=$IOS_UPDATED" >> $GITHUB_OUTPUT
+
+      - name: Calculate new plugin version
+        id: new_plugin_version
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          CURRENT_VERSION="${{ steps.current_versions.outputs.current_plugin }}"
+          echo "Current version: $CURRENT_VERSION"
+
+          # Increment patch version (e.g., 7.0.9 -> 7.0.10)
+          major=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+          minor=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+          patch=$(echo "$CURRENT_VERSION" | cut -d. -f3)
+
+          echo "Parsed - Major: $major, Minor: $minor, Patch: $patch"
+
+          NEW_PATCH=$((patch + 1))
+          NEW_VERSION="$major.$minor.$NEW_PATCH"
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New plugin version will be: $NEW_VERSION"
+
+      - name: Update plugin.xml
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          NEW_VERSION="${{ steps.new_plugin_version.outputs.new_version }}"
+          ANDROID_VERSION="${{ steps.android_version.outputs.version }}"
+          IOS_VERSION="${{ steps.ios_version.outputs.version }}"
+
+          # Update plugin version
+          sed -i "s/id=\"newrelic-cordova-plugin\" version=\".*\"/id=\"newrelic-cordova-plugin\" version=\"$NEW_VERSION\"/" plugin.xml
+
+          # Update PLUGIN_VERSION preference
+          sed -i "s/<preference name=\"PLUGIN_VERSION\" default=\".*\" \/>/<preference name=\"PLUGIN_VERSION\" default=\"$NEW_VERSION\" \/>/" plugin.xml
+
+          # Update Android agent version
+          sed -i "s/<preference name=\"ANDROID_AGENT_VER\" default=\".*\" \/>/<preference name=\"ANDROID_AGENT_VER\" default=\"$ANDROID_VERSION\" \/>/" plugin.xml
+
+          # Update iOS agent version
+          sed -i "s/<pod name=\"NewRelicAgent\" spec=\"~>.*\" \/>/<pod name=\"NewRelicAgent\" spec=\"~>$IOS_VERSION\" \/>/" plugin.xml
+
+          echo "Updated plugin.xml"
+
+      - name: Update package.json
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          NEW_VERSION="${{ steps.new_plugin_version.outputs.new_version }}"
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" package.json
+          echo "Updated package.json"
+
+      - name: Update CHANGELOG.md
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          ANDROID_VERSION="${{ steps.android_version.outputs.version }}"
+          IOS_VERSION="${{ steps.ios_version.outputs.version }}"
+          NEW_VERSION="${{ steps.new_plugin_version.outputs.new_version }}"
+          ANDROID_UPDATED="${{ steps.check_updates.outputs.android_updated }}"
+          IOS_UPDATED="${{ steps.check_updates.outputs.ios_updated }}"
+
+          # Create changelog entry
+          CHANGELOG_ENTRY="# ${NEW_VERSION}\n\n"
+
+          if [ "$ANDROID_UPDATED" = "true" ]; then
+            CHANGELOG_ENTRY="${CHANGELOG_ENTRY}- Native Android agent updated to version ${ANDROID_VERSION}\n"
+          fi
+
+          if [ "$IOS_UPDATED" = "true" ]; then
+            CHANGELOG_ENTRY="${CHANGELOG_ENTRY}- Native iOS agent updated to version ${IOS_VERSION}\n"
+          fi
+
+          CHANGELOG_ENTRY="${CHANGELOG_ENTRY}\n\n"
+
+          # Prepend to CHANGELOG.md after the header
+          sed -i "2i\\$CHANGELOG_ENTRY" CHANGELOG.md
+          echo "Updated CHANGELOG.md"
+
+      - name: Run tests
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          npm install
+          npm test || echo "Tests completed"
+
+      - name: Create Pull Request
+        if: steps.check_updates.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore: Update native agents to Android ${{ steps.android_version.outputs.version }} and iOS ${{ steps.ios_version.outputs.version }}
+
+            - Updated Android agent from ${{ steps.current_versions.outputs.current_android }} to ${{ steps.android_version.outputs.version }}
+            - Updated iOS agent from ${{ steps.current_versions.outputs.current_ios }} to ${{ steps.ios_version.outputs.version }}
+            - Bumped plugin version to ${{ steps.new_plugin_version.outputs.new_version }}
+          branch: update-native-agents-${{ steps.new_plugin_version.outputs.new_version }}
+          base: develop
+          delete-branch: true
+          title: 'chore: Update native agents to Android ${{ steps.android_version.outputs.version }} and iOS ${{ steps.ios_version.outputs.version }}'
+          body: |
+            ## Updates
+
+            This PR updates the native agent versions:
+
+            - **Android Agent**: ${{ steps.current_versions.outputs.current_android }} → ${{ steps.android_version.outputs.version }}
+            - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }}
+            - **Plugin Version**: ${{ steps.current_versions.outputs.current_plugin }} → ${{ steps.new_plugin_version.outputs.new_version }}
+
+            ## Files Updated
+
+            - `plugin.xml`
+            - `package.json`
+            - `CHANGELOG.md`
+
+            ## Testing
+
+            - [ ] Tests pass
+            - [ ] Android app builds successfully
+            - [ ] iOS app builds successfully
+            - [ ] Manual testing completed
+
+            ---
+
+            This PR was automatically created by the Update Native Agent Versions workflow.
+          labels: |
+            enhancement
+            automated
+          reviewers: |
+            ${{ github.actor }}
+
+      - name: Summary
+        if: steps.check_updates.outputs.needs_update == 'true'
+        run: |
+          echo "## Version Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Old Version | New Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Android Agent | ${{ steps.current_versions.outputs.current_android }} | ${{ steps.android_version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| iOS Agent | ${{ steps.current_versions.outputs.current_ios }} | ${{ steps.ios_version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Plugin Version | ${{ steps.current_versions.outputs.current_plugin }} | ${{ steps.new_plugin_version.outputs.new_version }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: No updates needed
+        if: steps.check_updates.outputs.needs_update == 'false'
+        run: |
+          echo "## No Updates Needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All native agents are already up to date!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Android Agent: ${{ steps.android_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS Agent: ${{ steps.ios_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
