@@ -1,10 +1,4 @@
 # Changelog
-# 7.0.11
-
-- Native Android agent updated to version 7.6.13
-
-
-
 # 7.0.10
 
 - Native Android agent updated to version 7.6.11
