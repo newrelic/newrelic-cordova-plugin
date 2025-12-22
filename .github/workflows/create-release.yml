@@ -1,5 +1,4 @@
 name: Create Release and Update Documentation
-
 on:
   pull_request:
     types: [closed]
@@ -132,175 +131,89 @@ jobs:
   update-documentation:
     needs: create-release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    env:
+      # --- CONFIG: Update these per repository ---
+      AGENT_NAME: "cordova"
+      AGENT_TITLE: "Cordova agent"
+      DOCS_PATH: "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes"
+      REPO_URL: "https://github.com/newrelic/newrelic-cordova-plugin"
+      # Define your specific download source here
+      DOWNLOAD_LINK: "https://github.com/newrelic/newrelic-cordova-plugin"
+      # --- SECRETS ---
+      BOT_PAT: ${{ secrets.BOT_PAT }}
+      BOT_EMAIL: ${{ secrets.BOT_EMAIL }} 
+
     steps:
-      - name: Checkout docs-website fork
+      - name: Checkout Agent Repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ vars.DOCS_FORK_REPO || 'ndesai-newrelic/docs-website' }}
+          path: agent-repo
+
+      - name: Checkout Docs-Website
+        uses: actions/checkout@v4
+        with:
+          repository: newrelic/docs-website
           ref: develop
-          token: ${{ secrets.DOCS_WORKFLOW_TOKEN }}
+          token: ${{ secrets.BOT_PAT }}
+          path: docs-website
           fetch-depth: 0
 
-      - name: Setup Git
+      - name: Generate Release Document
+        working-directory: agent-repo
+        env:
+          PASSED_VERSION: ${{ needs.create-release.outputs.version }}
+          GH_TOKEN: ${{ secrets.BOT_PAT }} # Required for 'gh' commands inside the script
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          chmod +x ./.github/scripts/generate-docs.sh
+          ./.github/scripts/generate-docs.sh
+          
+          if [ -f "release_info.env" ]; then
+            cat release_info.env >> $GITHUB_ENV
+          else
+            echo "::error::Agent script failed to create release_info.env at ./.github/scripts/"
+            exit 1
+          fi
 
-      - name: Sync fork with upstream
+      - name: Create branch, commit, and PR
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT }}
         run: |
-          # Add upstream remote if it doesn't exist
-          git remote add upstream https://github.com/newrelic/docs-website.git || true
+          cd docs-website
+          
+          # 1. Setup Version Variables
+          VERSION="${{ env.FINAL_VERSION }}"
+          
+          # Strip dots for the filename: 2.2.3 -> 223
+          VERSION_STRIPPED=$(echo "${VERSION}" | tr -d '.')
+          
+          # Define the final filename using the stripped version
+          FINAL_FILENAME="${{ env.AGENT_NAME }}-agent-${VERSION_STRIPPED}.mdx"
+          
+          # 2. Setup Naming 
+          # Branch name uses hyphens: 2.2.3 -> 2-2-3
+          BRANCH_NAME="${{ env.AGENT_NAME }}_release_notes_$(echo ${VERSION} | tr '.' '-')"
+          COMMIT_MSG="chore(${{ env.AGENT_NAME }} agent): add release notes v${VERSION}"
+          PR_TITLE="${{ env.AGENT_TITLE }} Release Notes v${VERSION}"
+          PR_BODY="This is an automated PR generated when the ${{ env.AGENT_TITLE }} is released. Please merge as soon as possible."
 
-          # Fetch upstream
-          git fetch upstream
-
-          # Merge upstream/develop into local develop
-          git merge upstream/develop --no-edit || echo "No changes to sync"
-
-          # Push to fork
-          git push origin develop
-
-      - name: Get release information
-        id: release_info
-        run: |
-          VERSION="${{ needs.create-release.outputs.version }}"
-
-          # Get current date in YYYY-MM-DD format
-          RELEASE_DATE=$(date +%Y-%m-%d)
-
-          # Format version for filename (e.g., 7.0.10 -> 710)
-          VERSION_NUMBER=$(echo "$VERSION" | tr -d '.')
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "release_date=$RELEASE_DATE" >> $GITHUB_OUTPUT
-          echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
-
-          echo "Version: $VERSION"
-          echo "Release Date: $RELEASE_DATE"
-          echo "Version Number: $VERSION_NUMBER"
-
-      - name: Parse release notes from changelog
-        id: parse_release_notes
-        run: |
-          # Get release notes from the previous job
-          RELEASE_NOTES="${{ needs.create-release.outputs.release_notes }}"
-
-          # Extract Android and iOS versions if present in release notes
-          ANDROID_VERSION=$(echo "$RELEASE_NOTES" | grep -i "android agent" | sed 's/.*version \([0-9.]*\).*/\1/' || echo "")
-          IOS_VERSION=$(echo "$RELEASE_NOTES" | grep -i "ios agent" | sed 's/.*version \([0-9.]*\).*/\1/' || echo "")
-
-          # Format improvements section
-          IMPROVEMENTS=$(echo "$RELEASE_NOTES" | grep "^-" | sed 's/^- /- /')
-
-          echo "android_version=$ANDROID_VERSION" >> $GITHUB_OUTPUT
-          echo "ios_version=$IOS_VERSION" >> $GITHUB_OUTPUT
-          {
-            echo 'improvements<<EOF'
-            echo "$IMPROVEMENTS"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
-      - name: Create release notes file
-        run: |
-          VERSION="${{ steps.release_info.outputs.version }}"
-          RELEASE_DATE="${{ steps.release_info.outputs.release_date }}"
-          VERSION_NUMBER="${{ steps.release_info.outputs.version_number }}"
-          IMPROVEMENTS="${{ steps.parse_release_notes.outputs.improvements }}"
-
-          # Create directory if it doesn't exist
-          mkdir -p src/content/docs/release-notes/mobile-release-notes/cordova-release-notes
-
-          # Create the MDX file (using EOF without quotes for variable expansion)
-          cat > "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx" << EOF
-          ---
-          subject: Cordova agent
-          releaseDate: '${RELEASE_DATE}'
-          version: ${VERSION}
-          downloadLink: 'https://github.com/newrelic/newrelic-cordova-plugin'
-          ---
-
-          ## Improvements
-
-          ${IMPROVEMENTS}
-          EOF
-
-          echo "Created release notes file: cordova-agent-${VERSION_NUMBER}.mdx"
-          echo "--- File contents ---"
-          cat "src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/cordova-agent-${VERSION_NUMBER}.mdx"
-          echo "--- End file contents ---"
-
-      - name: Create branch and commit
-        run: |
-          VERSION="${{ steps.release_info.outputs.version }}"
-          BRANCH_NAME="cordova-agent-${VERSION}"
-
-          # Create new branch
+          # 3. Git Operations
+          git config user.name "newrelic-mobile-agent-bot"
+          git config user.email "${{ env.BOT_EMAIL }}"
+          
           git checkout -b "$BRANCH_NAME"
-
-          # Add the new file
-          git add src/content/docs/release-notes/mobile-release-notes/cordova-release-notes/
-
-          # Commit
-          git commit -m "docs: Add Cordova agent v${VERSION} release notes
-
-          - Added release notes for Cordova agent v${VERSION}
-          - Android agent: ${{ steps.parse_release_notes.outputs.android_version }}
-          - iOS agent: ${{ steps.parse_release_notes.outputs.ios_version }}"
-
-          # Push branch to docs-website
+          
+          # Copy generic 'release-notes.mdx' from the agent-repo to the docs folder with the new name
+          cp ../agent-repo/release-notes.mdx "${{ env.DOCS_PATH }}/$FINAL_FILENAME"
+          
+          git add .
+          git commit -m "$COMMIT_MSG"
           git push origin "$BRANCH_NAME"
 
-          echo "Pushed branch: $BRANCH_NAME"
-
-      - name: Create Pull Request to docs-website
-        env:
-          GH_TOKEN: ${{ secrets.DOCS_WORKFLOW_TOKEN }}
-        run: |
-          VERSION="${{ steps.release_info.outputs.version }}"
-          FORK_REPO="${{ vars.DOCS_FORK_REPO || 'ndesai-newrelic/docs-website' }}"
-          FORK_OWNER=$(echo "$FORK_REPO" | cut -d'/' -f1)
-
-          # Install gh CLI if not available
-          which gh || (curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-            sudo apt update && sudo apt install gh)
-
-          # Create PR using gh CLI
+          # 4. Create PR
           gh pr create \
             --repo newrelic/docs-website \
             --base develop \
-            --head ${FORK_OWNER}:cordova-agent-${VERSION} \
-            --title "docs: Add Cordova agent v${VERSION} release notes" \
-            --body "## Summary
-
-          This PR adds release notes for the New Relic Cordova agent v${VERSION}.
-
-          ## Changes
-
-          - Added release notes file: \`cordova-agent-$(echo "$VERSION" | tr -d '.').mdx\`
-
-          ## Agent Versions
-
-          - **Cordova Agent**: ${VERSION}
-          - **Android Agent**: ${{ steps.parse_release_notes.outputs.android_version }}
-          - **iOS Agent**: ${{ steps.parse_release_notes.outputs.ios_version }}
-
-          ## Release Notes
-
-          ${{ steps.parse_release_notes.outputs.improvements }}
-
-          ---
-
-          This PR was automatically created by the release workflow from [newrelic-cordova-plugin](https://github.com/newrelic/newrelic-cordova-plugin)." \
-            --label "documentation" \
-            --label "mobile"
-
-      - name: Summary
-        run: |
-          echo "## Documentation Updated Successfully! 📚" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Release Notes File:** cordova-agent-${{ steps.release_info.outputs.version_number }}.mdx" >> $GITHUB_STEP_SUMMARY
-          echo "**PR Created:** Check https://github.com/newrelic/docs-website/pulls" >> $GITHUB_STEP_SUMMARY
+            --head "$BRANCH_NAME" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --label "documentation" 
