@@ -28,6 +28,13 @@ If you don't have a New Relic account, [create a free trial](https://newrelic.co
 
 Finally, copy the application tokens from your New Relic applications page, and have them ready for the next step. You only need to copy the application tokens of the platforms you are building on.
 
+### Current Support:
+- Android API 24+
+- iOS:
+    - iOS 10+ (for plugin versions below 7.0.10)
+    - iOS 16+ (starting from plugin version 7.0.10)
+- Depends on New Relic iOS/XCFramework and Android agents
+
 ## Adding the plugin
 Change to your Cordova project directory and add the plugin to your project using the Cordova command line tool. The `--variable` argument is used to pass application tokens to the plugin.
 ```
