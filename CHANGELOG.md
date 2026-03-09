@@ -1,5 +1,5 @@
 # Changelog
-# 7.0.14
+# 7.1.0
 
 - Native Android agent updated to version 7.7.0
 - Native iOS agent updated to version 7.6.3
