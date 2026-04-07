@@ -31,8 +31,13 @@ Finally, copy the application tokens from your New Relic applications page, and 
 ### Current Support:
 - Android API 24+
 - iOS:
-    - iOS 10+ (for plugin versions below 7.0.10)
-    - iOS 16+ (starting from plugin version 7.0.10)
+
+  | Agent Version | Minimum iOS Version |
+  | :--- | :--- |
+  | < 7.0.10 | iOS 10+ |
+  | 7.0.10 – 7.0.13 | iOS 16+ |
+  | >= 7.1.0 | iOS 15+ |
+
 - Depends on New Relic iOS/XCFramework and Android agents
 
 ## Adding the plugin
