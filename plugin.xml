@@ -79,7 +79,7 @@
         <source url="https://cdn.cocoapods.org/" />
       </config>
       <pods use-frameworks="true">
-        <pod name="NewRelicAgent" spec="~>7.6.3" />
+        <pod name="NewRelicAgent" spec="~>7.7.0" />
       </pods>
     </podspec>
 

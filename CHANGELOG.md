@@ -2,6 +2,7 @@
 # 7.1.1
 
 - Native Android agent updated to version 7.7.1
+- Native iOS agent updated to version 7.7.0
 
 
 
