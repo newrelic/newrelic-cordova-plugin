@@ -5,7 +5,7 @@
 
 var projectName = "newrelictest";
 var workingDirectory = "/tmp/" + projectName;
-var processDir = process.cwd().replace(/ /g, '\\ ');
+var processDir = process.cwd().replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 
 module.exports = {
 
