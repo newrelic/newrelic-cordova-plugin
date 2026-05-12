@@ -131,6 +131,8 @@ jobs:
   update-documentation:
     needs: create-release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       # --- CONFIG: Update these per repository ---
       AGENT_NAME: "cordova"
