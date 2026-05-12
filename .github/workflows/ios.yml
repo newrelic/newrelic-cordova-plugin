@@ -17,6 +17,9 @@
 
 name: iOS Testsuite
 
+permissions:
+  contents: read
+
 on:
   push:
     paths-ignore:
