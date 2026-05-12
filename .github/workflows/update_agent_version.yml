@@ -8,6 +8,9 @@ on:
       IS_ANDROID_AGENT:
         required: true
         type: boolean
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   update_agent_version:
     name: Update Native Agent version on Cordova
