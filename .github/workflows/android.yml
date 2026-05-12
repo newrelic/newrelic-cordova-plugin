@@ -29,6 +29,9 @@ on:
       - 'LICENSE'
       - '.eslint*'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Android ${{ matrix.versions.android }} Test
