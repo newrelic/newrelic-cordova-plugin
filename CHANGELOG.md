@@ -1,4 +1,10 @@
 # Changelog
+# 7.1.4
+
+- Native Android agent updated to version 7.7.5
+
+
+
 # 7.1.3
 
 - Native Android agent updated to version 7.7.4
