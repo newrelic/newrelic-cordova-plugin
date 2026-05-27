@@ -24,7 +24,7 @@
   <preference name="INTERACTION_TRACING_ENABLED" default="true" />
   <preference name="DEFAULT_INTERACTIONS_ENABLED" default="true" />
   <preference name="LOGGING_ENABLED" default="true" />
-  <preference name="LOG_LEVEL" default="default" />
+  <preference name="LOG_LEVEL" default="WARNING" />
   <preference name="WEB_VIEW_INSTRUMENTATION" default="true" />
   <preference name="COLLECTOR_ADDRESS" default="x" />
   <preference name="CRASH_COLLECTOR_ADDRESS" default="x" />
