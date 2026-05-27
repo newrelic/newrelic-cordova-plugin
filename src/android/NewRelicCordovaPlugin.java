@@ -90,23 +90,35 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 NewRelic.disableFeature(FeatureFlag.BackgroundReporting);
             }
 
-            Map<String, Integer> strToLogLevel = new HashMap<>();
-            strToLogLevel.put("ERROR", AgentLog.ERROR);
-            strToLogLevel.put("WARNING", AgentLog.WARN);
-            strToLogLevel.put("INFO", AgentLog.INFO);
-            strToLogLevel.put("VERBOSE", AgentLog.VERBOSE);
-            strToLogLevel.put("AUDIT", AgentLog.AUDIT);
+            Map<String, Integer> strToAgentLogLevel = new HashMap<>();
+            strToAgentLogLevel.put("ERROR", AgentLog.ERROR);
+            strToAgentLogLevel.put("WARNING", AgentLog.WARN);
+            strToAgentLogLevel.put("INFO", AgentLog.INFO);
+            strToAgentLogLevel.put("VERBOSE", AgentLog.VERBOSE);
+            strToAgentLogLevel.put("DEBUG", AgentLog.DEBUG);
+            strToAgentLogLevel.put("AUDIT", AgentLog.AUDIT);
 
-            int logLevel = AgentLog.INFO;
-            String configLogLevel = preferences.getString("loglevel", "INFO").toUpperCase();
-            if (strToLogLevel.containsKey(configLogLevel)) {
-                logLevel = strToLogLevel.get(configLogLevel);
+            Map<String, LogLevel> strToLogLevel = new HashMap<>();
+            strToLogLevel.put("ERROR", LogLevel.ERROR);
+            strToLogLevel.put("WARNING", LogLevel.WARN);
+            strToLogLevel.put("INFO", LogLevel.INFO);
+            strToLogLevel.put("VERBOSE", LogLevel.VERBOSE);
+            strToLogLevel.put("DEBUG", LogLevel.DEBUG);
+            // LogLevel enum has no AUDIT; fall back to DEBUG (deepest available).
+            strToLogLevel.put("AUDIT", LogLevel.DEBUG);
+
+            int logLevel = AgentLog.WARN;
+            LogLevel reportingLogLevel = LogLevel.WARN;
+            String configLogLevel = preferences.getString("loglevel", "WARNING").toUpperCase();
+            if (strToAgentLogLevel.containsKey(configLogLevel)) {
+                logLevel = strToAgentLogLevel.get(configLogLevel);
+                reportingLogLevel = strToLogLevel.get(configLogLevel);
             }
 
             String collectorAddress = preferences.getString("collector_address", null);
             String crashCollectorAddress = preferences.getString("crash_collector_address", null);
 
-            LogReporting.setLogLevel(LogLevel.VERBOSE);
+            LogReporting.setLogLevel(reportingLogLevel);
             NewRelic newRelic = NewRelic.withApplicationToken(appToken)
                     .withApplicationFramework(ApplicationFramework.Cordova, pluginVersion)
                     .withLoggingEnabled(preferences.getString("logging_enabled", "true").toLowerCase().equals("true"))
@@ -548,6 +560,8 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     strToLogLevel.put("WARNING", LogLevel.WARN);
                     strToLogLevel.put("INFO", LogLevel.INFO);
                     strToLogLevel.put("VERBOSE", LogLevel.VERBOSE);
+                    strToLogLevel.put("DEBUG", LogLevel.DEBUG);
+                    // LogLevel enum has no AUDIT; fall back to DEBUG (deepest available).
                     strToLogLevel.put("AUDIT", LogLevel.DEBUG);
 
                     LogLevel logLevel = strToLogLevel.get(level);

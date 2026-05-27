@@ -69,7 +69,7 @@ Currently, the plugin supports the following agent configuration options:
     * Possible values are `true` and `false`. Defaults to `true`.
 * `LOG_LEVEL`: Specifies the log level.
     * Possible values are `ERROR` (least verbose), `WARNING` `INFO`, `VERBOSE`, `DEBUG`, `AUDIT` (most verbose).
-    * Defaults to `INFO` on Android and `WARNING` on iOS.
+    * Defaults to `WARNING`.
 * `WEB_VIEW_INSTRUMENTATION` (iOS ONLY): Enable (default) or disable automatic WKWebView instrumentation.
     * Possible values are `true` and `false`. Defaults to `true`.
 * `COLLECTOR_ADDRESS`: Specifies the URI authority component of the harvest data upload endpoint.
@@ -304,7 +304,7 @@ NewRelic.logWarn("Warning message indicating a potential issue");
 NewRelic.logError("Error message indicating a failure");
 ```
 ## [log] (level: string, message: string): void;
-> Logs a message with a specified level. The level indicates the severity or importance of the message. Common levels include "info", "warn", "error", "debug", and "verbose".
+> Logs a message with a specified level. The level indicates the severity or importance of the message. Valid levels are `"ERROR"`, `"WARNING"`, `"INFO"`, `"VERBOSE"`, `"DEBUG"`, and `"AUDIT"`.
 ```js
 NewRelic.log("INFO", "User logged in successfully");
 ```

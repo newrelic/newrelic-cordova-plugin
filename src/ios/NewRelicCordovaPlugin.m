@@ -71,6 +71,7 @@
             @"WARNING": [NSNumber numberWithInt:NRLogLevelWarning],
             @"INFO": [NSNumber numberWithInt:NRLogLevelInfo],
             @"VERBOSE": [NSNumber numberWithInt:NRLogLevelVerbose],
+            @"DEBUG": [NSNumber numberWithInt:NRLogLevelDebug],
             @"AUDIT": [NSNumber numberWithInt:NRLogLevelAudit],
         };
         if ([logDict objectForKey:[config[@"log_level"] uppercaseString]]) {
@@ -540,6 +541,7 @@
         @"WARNING": [NSNumber numberWithInt:NRLogLevelWarning],
         @"INFO": [NSNumber numberWithInt:NRLogLevelInfo],
         @"VERBOSE": [NSNumber numberWithInt:NRLogLevelVerbose],
+        @"DEBUG": [NSNumber numberWithInt:NRLogLevelDebug],
         @"AUDIT": [NSNumber numberWithInt:NRLogLevelAudit],
     };
     if ([logDict objectForKey:[level uppercaseString]]) {
