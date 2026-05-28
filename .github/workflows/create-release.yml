@@ -51,19 +51,29 @@ jobs:
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
 
-          # Extract the section for this version from CHANGELOG.md
-          # Read from the version header until the next version header or end of file
-          RELEASE_NOTES=$(awk "/^# ${VERSION}/,/^# [0-9]/" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+          # Escape regex metacharacters (esp. dots in semver) so 7.1.5 doesn't
+          # also match 7X1Y5 etc. when the version is interpolated into a regex.
+          ESC_VERSION=$(printf '%s' "$VERSION" | sed 's/[][\\.*^$(){}+?|]/\\&/g')
 
-          # If empty, try to get the first entry
+          # Extract bullets between `# <VERSION>` and the next `# <digit>` header.
+          # The previous awk range pattern (`/^# ${VERSION}/,/^# [0-9]/`) failed
+          # because the end pattern matched the start line itself, collapsing the
+          # range to a single header line and producing empty notes (or, in the
+          # broken fallback, dumping every version header in the file).
+          RELEASE_NOTES=$(awk -v ver="$ESC_VERSION" '
+            $0 ~ "^# " ver "$" { in_section = 1; next }
+            in_section && /^# [0-9]/ { in_section = 0 }
+            in_section { print }
+          ' CHANGELOG.md | sed '/^[[:space:]]*$/d')
+
           if [ -z "$RELEASE_NOTES" ]; then
-            RELEASE_NOTES=$(awk '/^# [0-9]/,/^# [0-9]/' CHANGELOG.md | head -n -1 | sed '1d')
+            echo "::warning::No CHANGELOG.md section found for version $VERSION."
+            RELEASE_NOTES="See [CHANGELOG.md](./CHANGELOG.md) for details."
           fi
 
-          echo "Release notes:"
+          echo "Release notes for v$VERSION:"
           echo "$RELEASE_NOTES"
 
-          # Save to output using heredoc for multiline
           {
             echo 'release_notes<<EOF'
             echo "$RELEASE_NOTES"
