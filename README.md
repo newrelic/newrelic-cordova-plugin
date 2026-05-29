@@ -40,6 +40,34 @@ Finally, copy the application tokens from your New Relic applications page, and 
 
 - Depends on New Relic iOS/XCFramework and Android agents
 
+### iOS Setup: deployment target
+
+The New Relic iOS agent (and therefore this plugin) requires a minimum
+deployment target of **iOS 15.0**. Add the following to your app's
+`config.xml`:
+
+```xml
+<platform name="ios">
+    <preference name="deployment-target" value="15.0" />
+</platform>
+```
+
+Applies to both **SPM** (cordova-ios 8+) and **CocoaPods** (cordova-ios < 8).
+
+If you skip this step on cordova-ios 8, `cordova build ios` fails with an
+error that names `CordovaPlugins`, not New Relic, which makes the cause
+non-obvious:
+
+```text
+error: The package product 'newrelic-cordova-plugin' requires minimum
+platform version 15.0 for the iOS platform, but this target supports 13.0
+(in target 'CordovaPlugins' from project 'CordovaPlugins')
+```
+
+cordova-ios 8 generates the `CordovaPlugins` aggregator at `.iOS(.v13)` by
+default; setting `deployment-target` to `15.0` raises it to match this
+plugin's `Package.swift` requirement.
+
 ## Adding the plugin
 Change to your Cordova project directory and add the plugin to your project using the Cordova command line tool. The `--variable` argument is used to pass application tokens to the plugin.
 ```
