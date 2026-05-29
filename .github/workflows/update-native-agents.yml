@@ -145,10 +145,22 @@ jobs:
           # Update Android agent version
           sed -i "s/<preference name=\"ANDROID_AGENT_VER\" default=\".*\" \/>/<preference name=\"ANDROID_AGENT_VER\" default=\"$ANDROID_VERSION\" \/>/" plugin.xml
 
-          # Update iOS agent version
-          sed -i "s/<pod name=\"NewRelicAgent\" spec=\"~>.*\" \/>/<pod name=\"NewRelicAgent\" spec=\"~>$IOS_VERSION\" \/>/" plugin.xml
+          # Update iOS agent CocoaPods spec (preserves the nospm attribute used for SPM dual-mode)
+          sed -i "s/<pod name=\"NewRelicAgent\" spec=\"~>[^\"]*\"/<pod name=\"NewRelicAgent\" spec=\"~>$IOS_VERSION\"/" plugin.xml
 
           echo "Updated plugin.xml"
+
+      - name: Update Package.swift (SPM iOS agent pin)
+        if: steps.check_updates.outputs.needs_update == 'true' && steps.check_updates.outputs.ios_updated == 'true'
+        run: |
+          IOS_VERSION="${{ steps.ios_version.outputs.version }}"
+
+          # Update the exact pin on newrelic-ios-agent-spm. Anchored on the package URL so we
+          # only touch this dependency and never a future Swift package's "exact:" pin.
+          sed -i "s|\(newrelic-ios-agent-spm\"[^)]*exact:[[:space:]]*\"\)[^\"]*\"|\1$IOS_VERSION\"|" Package.swift
+
+          echo "Updated Package.swift"
+          grep "newrelic-ios-agent-spm" Package.swift
 
       - name: Update package.json
         if: steps.check_updates.outputs.needs_update == 'true'
@@ -201,7 +213,7 @@ jobs:
             - Updated iOS agent from ${{ steps.current_versions.outputs.current_ios }} to ${{ steps.ios_version.outputs.version }}
             - Bumped plugin version to ${{ steps.new_plugin_version.outputs.new_version }}
           branch: update-native-agents-${{ steps.new_plugin_version.outputs.new_version }}
-          base: develop
+          base: master
           delete-branch: true
           title: 'chore: Update native agents to Android ${{ steps.android_version.outputs.version }} and iOS ${{ steps.ios_version.outputs.version }}'
           body: |
@@ -210,12 +222,13 @@ jobs:
             This PR updates the native agent versions:
 
             - **Android Agent**: ${{ steps.current_versions.outputs.current_android }} → ${{ steps.android_version.outputs.version }}
-            - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }}
+            - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }} (CocoaPods spec **and** SPM `Package.swift` pin)
             - **Plugin Version**: ${{ steps.current_versions.outputs.current_plugin }} → ${{ steps.new_plugin_version.outputs.new_version }}
 
             ## Files Updated
 
             - `plugin.xml`
+            - `Package.swift`
             - `package.json`
             - `CHANGELOG.md`
 

@@ -42,3 +42,8 @@ typings/
 
 package-lock.json
 .vscode/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved

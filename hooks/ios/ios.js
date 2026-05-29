@@ -54,6 +54,11 @@ module.exports = {
    * @returns {string} - location of project's Xcode .pbxproj file
    */
   xcodePath: function (context) {
+
+    var appProjectPath = path.join("platforms", "ios", "App.xcodeproj", "project.pbxproj");
+    if (fs.existsSync(appProjectPath)) {
+      return appProjectPath;
+    }
     return path.join("platforms", "ios", newrelic.appName(context) + ".xcodeproj", "project.pbxproj");
   },
 
