@@ -1,4 +1,10 @@
 # Changelog
+# 7.1.6
+
+- Native Android agent updated to version 7.7.6
+
+
+
 # 7.1.5
 
 - Added Swift Package Manager support for cordova-ios 8+ (CocoaPods remains the install path on cordova-ios < 8)
