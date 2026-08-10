@@ -2,6 +2,8 @@
 # 7.1.8
 
 - Native Android agent updated to version 7.8.0
+- Native iOS agent updated to version 7.7.5
+
 
 
 
