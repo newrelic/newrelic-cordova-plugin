@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apache/cordova-ios.git", from: "8.0.0"),
-        .package(url: "https://github.com/newrelic/newrelic-ios-agent-spm", exact: "7.7.2")
+        .package(url: "https://github.com/newrelic/newrelic-ios-agent-spm", exact: "7.7.7")
     ],
     targets: [
         .target(
