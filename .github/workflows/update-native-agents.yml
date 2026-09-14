@@ -75,7 +75,7 @@ jobs:
         id: current_versions
         run: |
           CURRENT_ANDROID=$(grep 'preference name="ANDROID_AGENT_VER"' plugin.xml | sed 's/.*default="\(.*\)".*/\1/')
-          CURRENT_IOS=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\(.*\)".*/\1/')
+          CURRENT_IOS=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\([^"]*\)".*/\1/')
           CURRENT_PLUGIN=$(grep 'id="newrelic-cordova-plugin"' plugin.xml | sed 's/.*version="\([^"]*\)".*/\1/')
 
           echo "current_android=$CURRENT_ANDROID" >> $GITHUB_OUTPUT
