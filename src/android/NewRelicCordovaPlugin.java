@@ -139,8 +139,6 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                 newRelic.start(this.cordova.getActivity().getApplication());
             }
 
-            newRelic.start(this.cordova.getActivity().getApplication());
-
             NewRelic.setAttribute(AnalyticsAttribute.APPLICATION_PLATFORM_VERSION_ATTRIBUTE, pluginVersion);
         }
     }
@@ -320,8 +318,6 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                                 TraceContext traceContext = NewRelic.noticeDistributedTrace(null);
                                 TracePayload tracePayload = traceContext.getTracePayload();
 
-                                String headerName = tracePayload.getHeaderName();
-                                String headerValue = tracePayload.getHeaderValue();
                                 String spanId = tracePayload.getSpanId();
                                 String traceId = tracePayload.getTraceId();
                                 String parentId = traceContext.getParentId();
@@ -329,7 +325,9 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                                 String accountId = traceContext.getAccountId();
                                 String applicationId = traceContext.getApplicationId();
 
-                                dtHeaders.put(headerName, headerValue);
+                                // The proprietary "newrelic" header (tracePayload.getHeaderName()/
+                                // getHeaderValue()) is intentionally not included here -- Distributed
+                                // Tracing now only sends traceparent/tracestate.
                                 dtHeaders.put(NRTraceConstants.TRACE_PARENT, "00-" + traceId + "-" + parentId + "-00");
                                 dtHeaders.put(NRTraceConstants.TRACE_STATE, vendor + "=0-2-" + accountId + "-" + applicationId + "-" + parentId + "----" + System.currentTimeMillis());
                                 dtHeaders.put(NRTraceConstants.TRACE_ID, traceId);

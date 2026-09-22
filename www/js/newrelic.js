@@ -5,13 +5,8 @@
     
     var exec = require("cordova/exec");
 
-    var accountId = "";
-    var applicationId = "";
-    var trustAccountKey = "";
-    
-    
     var NewRelic = {
-    
+
         /**
          * 
          * @param {string} url The URL of the request.
@@ -506,37 +501,21 @@
         networkRequest.method = method;
         networkRequest.bytesSent = 0;
         networkRequest.startTime = Date.now();
-        try {
-            return originalXhrOpen.apply(this, arguments)
-            } catch (e) {
-                console.error(e);
-            } finally{
-                    var headers = generateTracePayload();
-                    console.debug(headers);
-                    if (headers !== null) {
-                      if (headers['newrelic']) {
-                          this.setRequestHeader("newrelic", headers['newrelic']);
-                      }
-                      if (headers['traceparent']) {
-                      this.setRequestHeader("traceparent", headers['traceparent']);
-                      }
-                      if (headers['tracestate']) {
-                      this.setRequestHeader("tracestate", headers['tracestate']);
-                      }
-                      networkRequest.params = headers;
-                  }
-                }
+        return originalXhrOpen.apply(this, arguments);
     }
 
 
     window.XMLHttpRequest.prototype.send = function (data) {
-    
+
         console.log(data);
-    
+
+        var xhr = this;
+        var sendArguments = arguments;
+
         if (this.addEventListener) {
             this.addEventListener(
                 'readystatechange', async () => {
-    
+
                     if (this.readyState === this.HEADERS_RECEIVED) {
                         const contentTypeString = this.getResponseHeader('Content-Type');
                         if (this.getAllResponseHeaders()) {
@@ -547,7 +526,7 @@
                                 const value = element.split(':')[1];
                                 responseHeadersDictionary[key] = value;
                             });
-    
+
                         }
                     }
                     if (this.readyState === this.DONE) {
@@ -575,10 +554,31 @@
                 },
                 false
             );
-    
+
         }
         console.log(Date.now());
-        return originalXHRSend.apply(this, arguments);
+
+        // Distributed Tracing headers are fetched from the native bridge
+        // asynchronously (there's no synchronous way to get a fresh trace
+        // context), so the real dispatch is deferred until that resolves.
+        // This mirrors the fetch() override below and avoids needing to
+        // locally reconstruct traceparent/tracestate -- or the now-removed
+        // proprietary "newrelic" header -- in JavaScript.
+        NewRelic.generateDistributedTracingHeaders().then(function (headers) {
+            if (headers) {
+                if (headers['traceparent']) {
+                    xhr.setRequestHeader('traceparent', headers['traceparent']);
+                }
+                if (headers['tracestate']) {
+                    xhr.setRequestHeader('tracestate', headers['tracestate']);
+                }
+                networkRequest.params = headers;
+            }
+            originalXHRSend.apply(xhr, sendArguments);
+        }).catch(function (err) {
+            console.error(err);
+            originalXHRSend.apply(xhr, sendArguments);
+        });
     }
     
     window.addEventListener("error", (event) => {
@@ -635,14 +635,13 @@
         }
       
         if(options && 'headers' in options) {
-          options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
           networkRequest.params = {};
           JSON.parse(trackingHeadersList["headersList"]).forEach((e) => {
             if(options.headers[e] !== undefined) {
               networkRequest.params[e] = options.headers[e];
-                
+
             }
           });
         } else {
@@ -650,7 +649,6 @@
                   options = {};
            }
           options['headers'] = {};
-          options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
           _arguments[1] = options;
@@ -702,94 +700,6 @@
 
         });
     }
-
-    function generateTracePayload () {
-     
-        if (!accountId || !applicationId) {
-          return null
-        }
-    
-        var guid = generateSpanId()
-        var traceId = generateTraceId()
-        var timestamp = Date.now()
-    
-        var payload = {
-          guid,
-          traceId
-        }
-        payload.id = guid;
-        payload['trace.id'] = payload.traceId;
-    
-          payload.traceparent = generateTraceContextParentHeader(guid, traceId)
-          payload.tracestate = generateTraceContextStateHeader(guid, timestamp,
-            accountId, applicationId, trustAccountKey)
-
-          payload.newrelic = generateTraceHeader(guid, traceId, timestamp, accountId,
-            applicationId, trustAccountKey)
-        
-    
-        return payload
-      }
-
-      function generateSpanId() {
-        return generateRandomHexString(16);
-      }
-
-      function generateTraceId() {
-        return generateRandomHexString(32);
-      }
-
-    function generateRandomHexString(length) {
-        const chars = '0123456789abcdef';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-            result += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return result;
-    }
-    
-      function generateTraceContextParentHeader (spanId, traceId) {
-        return '00-' + traceId + '-' + spanId + '-01'
-      }
-    
-      function generateTraceContextStateHeader (spanId, timestamp, accountId, appId, trustKey) {
-        var version = 0
-        var transactionId = ''
-        var parentType = 2
-        var sampled = ''
-        var priority = ''
-    
-        return trustKey + '@nr=' + version + '-' + parentType + '-' + accountId +
-          '-' + appId + '-' + spanId + '-' + transactionId + '-' + sampled + '-' + priority + '-' + timestamp
-      }
-    
-      function generateTraceHeader (spanId, traceId, timestamp, accountId, appId, trustKey) {
-    
-        var payload = {
-          v: [0, 2],
-          d: {
-            ty: 'Mobile',
-            ac: accountId,
-            ap: appId,
-            id: spanId,
-            tr: traceId,
-            ti: timestamp
-          }
-        }
-        if (trustKey && accountId !== trustKey) {
-          payload.d.tk = trustKey
-        }
-    
-        return btoa(JSON.stringify(payload))
-      }
-
-      document.addEventListener('deviceready', function () {
-        NewRelic.generateDistributedTracingHeaders().then((headers) => {
-            accountId = headers['account.id'];
-            applicationId = headers['application.id'];
-            trustAccountKey = headers['trust.account.key'];
-        });
-    });
 
     function isValidURL(url) {
         try {

@@ -294,7 +294,11 @@
         data = [body dataUsingEncoding:NSUTF8StringEncoding];
     }
     
-    [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:params];
+    // Match Flutter's and Capacitor's iOS bridges, which always pass nil for
+    // params here. Cordova's "params" carries tracked custom headers, which
+    // can duplicate the reserved traceparent/tracestate keys also carried in
+    // traceAttributes.
+    [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:nil];
 }
 
 - (void)crashNow:(CDVInvokedUrlCommand *)command {
@@ -466,32 +470,36 @@
     
     NSMutableDictionary *mutableDictionary = [headers mutableCopy];
 
-    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:headers[@"newrelic"] options:0];
-          
-    NSError *error = nil;
-    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:decodedData options:0 error:&error];
+    // The proprietary "newrelic" header is no longer sent for Distributed
+    // Tracing, so this enrichment (account/app id, trust key) is only
+    // possible when it's present. Guard against its absence rather than
+    // assuming it's always there.
+    if (headers[@"newrelic"] != nil) {
+        NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:headers[@"newrelic"] options:0];
 
-          if (error) {
-              NSLog(@"Error parsing JSON: %@", error);
-          } else {
-              NSLog(@"JSON Object: %@", jsonObject);
-              // Access individual values from the JSON object
-              NSDictionary *dDictionary = jsonObject[@"d"];
-              NSString *acNumber = dDictionary[@"ac"];
-              NSString *apNumber = dDictionary[@"ap"];
-              NSString *tkNumber = dDictionary[@"tk"];
+        NSError *error = nil;
+        NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:decodedData options:0 error:&error];
 
-              
-              
-              [mutableDictionary setObject:acNumber forKey:@"application.id"];
-              [mutableDictionary setObject:apNumber forKey:@"account.id"];
-              
-              if(tkNumber != nil) {
-                  [mutableDictionary setObject:tkNumber forKey:@"trust.account.key"];
-              } else {
-                  [mutableDictionary setObject:acNumber forKey:@"trust.account.key"];
-              }
-          }
+        if (error) {
+            NSLog(@"Error parsing JSON: %@", error);
+        } else {
+            NSLog(@"JSON Object: %@", jsonObject);
+            // Access individual values from the JSON object
+            NSDictionary *dDictionary = jsonObject[@"d"];
+            NSString *acNumber = dDictionary[@"ac"];
+            NSString *apNumber = dDictionary[@"ap"];
+            NSString *tkNumber = dDictionary[@"tk"];
+
+            [mutableDictionary setObject:acNumber forKey:@"application.id"];
+            [mutableDictionary setObject:apNumber forKey:@"account.id"];
+
+            if(tkNumber != nil) {
+                [mutableDictionary setObject:tkNumber forKey:@"trust.account.key"];
+            } else {
+                [mutableDictionary setObject:acNumber forKey:@"trust.account.key"];
+            }
+        }
+    }
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:mutableDictionary];
         
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
