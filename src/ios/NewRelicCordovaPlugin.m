@@ -294,11 +294,7 @@
         data = [body dataUsingEncoding:NSUTF8StringEncoding];
     }
     
-    // Match Flutter's and Capacitor's iOS bridges, which always pass nil for
-    // params here. Cordova's "params" carries tracked custom headers, which
-    // can duplicate the reserved traceparent/tracestate keys also carried in
-    // traceAttributes.
-    [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:nil];
+    [NewRelic noticeNetworkRequestForURL:nsurl httpMethod:method startTime:[startTime doubleValue] endTime:[endTime doubleValue] responseHeaders:nil statusCode:(long)[status integerValue] bytesSent:(long)[bytesSent integerValue] bytesReceived:(long)[bytesreceived integerValue] responseData:data traceHeaders:traceAttributes andParams:params];
 }
 
 - (void)crashNow:(CDVInvokedUrlCommand *)command {
