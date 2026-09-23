@@ -297,6 +297,12 @@ public class NewRelicCordovaPlugin extends CordovaPlugin {
                     if (traceAttributes instanceof JSONObject) {
                         traceHeadersMap = new Gson().fromJson(String.valueOf(traceAttributes), Map.class);
                     }
+                    // traceparent/tracestate are wire headers, not report-time metadata --
+                    // NetworkRequestEvent flattens every key here onto the resulting
+                    // MobileRequest event as a plain attribute, so leaving them in would
+                    // duplicate the same data already carried by trace.id/account.id/etc.
+                    traceHeadersMap.remove(NRTraceConstants.TRACE_PARENT);
+                    traceHeadersMap.remove(NRTraceConstants.TRACE_STATE);
 
                     Object params = args.get(8);
                     Map<String, String> paramsMap = new HashMap<>();
