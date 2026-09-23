@@ -5,6 +5,11 @@
     
     var exec = require("cordova/exec");
 
+    var accountId = "";
+    var applicationId = "";
+    var trustAccountKey = "";
+
+
     var NewRelic = {
 
         /**
@@ -501,16 +506,29 @@
         networkRequest.method = method;
         networkRequest.bytesSent = 0;
         networkRequest.startTime = Date.now();
-        return originalXhrOpen.apply(this, arguments);
+        try {
+            return originalXhrOpen.apply(this, arguments)
+            } catch (e) {
+                console.error(e);
+            } finally{
+                    var headers = generateTracePayload();
+                    console.debug(headers);
+                    if (headers !== null) {
+                      if (headers['traceparent']) {
+                      this.setRequestHeader("traceparent", headers['traceparent']);
+                      }
+                      if (headers['tracestate']) {
+                      this.setRequestHeader("tracestate", headers['tracestate']);
+                      }
+                      networkRequest.params = headers;
+                  }
+                }
     }
 
 
     window.XMLHttpRequest.prototype.send = function (data) {
 
         console.log(data);
-
-        var xhr = this;
-        var sendArguments = arguments;
 
         if (this.addEventListener) {
             this.addEventListener(
@@ -548,7 +566,12 @@
                         }
 
                         if(isValidURL(networkRequest.url)) {
-                        NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
+                        // networkRequest.params here is the DT trace payload (traceparent/
+                        // tracestate/trace.id/guid), not request params -- it belongs in the
+                        // traceAttributes argument (matching the fetch() override below), not
+                        // params, otherwise it gets flattened onto the event as duplicate
+                        // attributes instead of being used to build the event's trace payload.
+                        NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body, {}, networkRequest.params);
                         }
                        }
                 },
@@ -557,28 +580,7 @@
 
         }
         console.log(Date.now());
-
-        // Distributed Tracing headers are fetched from the native bridge
-        // asynchronously (there's no synchronous way to get a fresh trace
-        // context), so the real dispatch is deferred until that resolves.
-        // This mirrors the fetch() override below and avoids needing to
-        // locally reconstruct traceparent/tracestate -- or the now-removed
-        // proprietary "newrelic" header -- in JavaScript.
-        NewRelic.generateDistributedTracingHeaders().then(function (headers) {
-            if (headers) {
-                if (headers['traceparent']) {
-                    xhr.setRequestHeader('traceparent', headers['traceparent']);
-                }
-                if (headers['tracestate']) {
-                    xhr.setRequestHeader('tracestate', headers['tracestate']);
-                }
-                networkRequest.params = headers;
-            }
-            originalXHRSend.apply(xhr, sendArguments);
-        }).catch(function (err) {
-            console.error(err);
-            originalXHRSend.apply(xhr, sendArguments);
-        });
+        return originalXHRSend.apply(this, arguments);
     }
     
     window.addEventListener("error", (event) => {
@@ -700,6 +702,71 @@
 
         });
     }
+
+    function generateTracePayload () {
+
+        if (!accountId || !applicationId) {
+          return null
+        }
+
+        var guid = generateSpanId()
+        var traceId = generateTraceId()
+        var timestamp = Date.now()
+
+        var payload = {
+          guid,
+          traceId
+        }
+        payload.id = guid;
+        payload['trace.id'] = payload.traceId;
+
+          payload.traceparent = generateTraceContextParentHeader(guid, traceId)
+          payload.tracestate = generateTraceContextStateHeader(guid, timestamp,
+            accountId, applicationId, trustAccountKey)
+
+
+        return payload
+      }
+
+      function generateSpanId() {
+        return generateRandomHexString(16);
+      }
+
+      function generateTraceId() {
+        return generateRandomHexString(32);
+      }
+
+    function generateRandomHexString(length) {
+        const chars = '0123456789abcdef';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+      function generateTraceContextParentHeader (spanId, traceId) {
+        return '00-' + traceId + '-' + spanId + '-01'
+      }
+
+      function generateTraceContextStateHeader (spanId, timestamp, accountId, appId, trustKey) {
+        var version = 0
+        var transactionId = ''
+        var parentType = 2
+        var sampled = ''
+        var priority = ''
+
+        return trustKey + '@nr=' + version + '-' + parentType + '-' + accountId +
+          '-' + appId + '-' + spanId + '-' + transactionId + '-' + sampled + '-' + priority + '-' + timestamp
+      }
+
+      document.addEventListener('deviceready', function () {
+        NewRelic.generateDistributedTracingHeaders().then((headers) => {
+            accountId = headers['account.id'];
+            applicationId = headers['application.id'];
+            trustAccountKey = headers['trust.account.key'];
+        });
+    });
 
     function isValidURL(url) {
         try {

@@ -466,33 +466,25 @@
     
     NSMutableDictionary *mutableDictionary = [headers mutableCopy];
 
-    // The proprietary "newrelic" header is no longer sent for Distributed
-    // Tracing, so this enrichment (account/app id, trust key) is only
-    // possible when it's present. Guard against its absence rather than
-    // assuming it's always there.
-    if (headers[@"newrelic"] != nil) {
-        NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:headers[@"newrelic"] options:0];
+    // The proprietary "newrelic" header (and the account/app id, trust key it
+    // carried as a base64 JSON payload) is no longer sent for Distributed
+    // Tracing, so this enrichment is derived from tracestate instead:
+    // "<trustAccountKey>@nr=<version>-<parentType>-<accountId>-<applicationId>-<spanId>-...".
+    NSString *tracestate = headers[@"tracestate"];
+    if (tracestate != nil) {
+        NSRange nrRange = [tracestate rangeOfString:@"@nr="];
+        if (nrRange.location != NSNotFound) {
+            NSString *trustAccountKey = [tracestate substringToIndex:nrRange.location];
+            NSString *fieldsString = [tracestate substringFromIndex:NSMaxRange(nrRange)];
+            NSArray<NSString*> *fields = [fieldsString componentsSeparatedByString:@"-"];
 
-        NSError *error = nil;
-        NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:decodedData options:0 error:&error];
+            if (fields.count > 3) {
+                NSString *accountId = fields[2];
+                NSString *applicationId = fields[3];
 
-        if (error) {
-            NSLog(@"Error parsing JSON: %@", error);
-        } else {
-            NSLog(@"JSON Object: %@", jsonObject);
-            // Access individual values from the JSON object
-            NSDictionary *dDictionary = jsonObject[@"d"];
-            NSString *acNumber = dDictionary[@"ac"];
-            NSString *apNumber = dDictionary[@"ap"];
-            NSString *tkNumber = dDictionary[@"tk"];
-
-            [mutableDictionary setObject:acNumber forKey:@"application.id"];
-            [mutableDictionary setObject:apNumber forKey:@"account.id"];
-
-            if(tkNumber != nil) {
-                [mutableDictionary setObject:tkNumber forKey:@"trust.account.key"];
-            } else {
-                [mutableDictionary setObject:acNumber forKey:@"trust.account.key"];
+                [mutableDictionary setObject:accountId forKey:@"account.id"];
+                [mutableDictionary setObject:applicationId forKey:@"application.id"];
+                [mutableDictionary setObject:(trustAccountKey.length > 0 ? trustAccountKey : accountId) forKey:@"trust.account.key"];
             }
         }
     }
