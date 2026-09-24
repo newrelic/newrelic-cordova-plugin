@@ -8,10 +8,10 @@
     var accountId = "";
     var applicationId = "";
     var trustAccountKey = "";
-    
-    
+
+
     var NewRelic = {
-    
+
         /**
          * 
          * @param {string} url The URL of the request.
@@ -514,9 +514,6 @@
                     var headers = generateTracePayload();
                     console.debug(headers);
                     if (headers !== null) {
-                      if (headers['newrelic']) {
-                          this.setRequestHeader("newrelic", headers['newrelic']);
-                      }
                       if (headers['traceparent']) {
                       this.setRequestHeader("traceparent", headers['traceparent']);
                       }
@@ -530,13 +527,13 @@
 
 
     window.XMLHttpRequest.prototype.send = function (data) {
-    
+
         console.log(data);
-    
+
         if (this.addEventListener) {
             this.addEventListener(
                 'readystatechange', async () => {
-    
+
                     if (this.readyState === this.HEADERS_RECEIVED) {
                         const contentTypeString = this.getResponseHeader('Content-Type');
                         if (this.getAllResponseHeaders()) {
@@ -547,7 +544,7 @@
                                 const value = element.split(':')[1];
                                 responseHeadersDictionary[key] = value;
                             });
-    
+
                         }
                     }
                     if (this.readyState === this.DONE) {
@@ -569,13 +566,18 @@
                         }
 
                         if(isValidURL(networkRequest.url)) {
-                        NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body,networkRequest.params);
+                        // networkRequest.params here is the DT trace payload (traceparent/
+                        // tracestate/trace.id/guid), not request params -- it belongs in the
+                        // traceAttributes argument (matching the fetch() override below), not
+                        // params, otherwise it gets flattened onto the event as duplicate
+                        // attributes instead of being used to build the event's trace payload.
+                        NewRelic.noticeHttpTransaction(networkRequest.url, networkRequest.method, networkRequest.status, networkRequest.startTime, networkRequest.endTime, networkRequest.bytesSent, networkRequest.bytesreceived, networkRequest.body, {}, networkRequest.params);
                         }
                        }
                 },
                 false
             );
-    
+
         }
         console.log(Date.now());
         return originalXHRSend.apply(this, arguments);
@@ -635,14 +637,13 @@
         }
       
         if(options && 'headers' in options) {
-          options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
           networkRequest.params = {};
           JSON.parse(trackingHeadersList["headersList"]).forEach((e) => {
             if(options.headers[e] !== undefined) {
               networkRequest.params[e] = options.headers[e];
-                
+
             }
           });
         } else {
@@ -650,7 +651,6 @@
                   options = {};
            }
           options['headers'] = {};
-          options.headers['newrelic'] = headers['newrelic'];
           options.headers['traceparent'] = headers['traceparent'];
           options.headers['tracestate'] = headers['tracestate'];
           _arguments[1] = options;
@@ -704,30 +704,27 @@
     }
 
     function generateTracePayload () {
-     
+
         if (!accountId || !applicationId) {
           return null
         }
-    
+
         var guid = generateSpanId()
         var traceId = generateTraceId()
         var timestamp = Date.now()
-    
+
         var payload = {
           guid,
           traceId
         }
         payload.id = guid;
         payload['trace.id'] = payload.traceId;
-    
+
           payload.traceparent = generateTraceContextParentHeader(guid, traceId)
           payload.tracestate = generateTraceContextStateHeader(guid, timestamp,
             accountId, applicationId, trustAccountKey)
 
-          payload.newrelic = generateTraceHeader(guid, traceId, timestamp, accountId,
-            applicationId, trustAccountKey)
-        
-    
+
         return payload
       }
 
@@ -747,40 +744,20 @@
         }
         return result;
     }
-    
+
       function generateTraceContextParentHeader (spanId, traceId) {
         return '00-' + traceId + '-' + spanId + '-01'
       }
-    
+
       function generateTraceContextStateHeader (spanId, timestamp, accountId, appId, trustKey) {
         var version = 0
         var transactionId = ''
         var parentType = 2
         var sampled = ''
         var priority = ''
-    
+
         return trustKey + '@nr=' + version + '-' + parentType + '-' + accountId +
           '-' + appId + '-' + spanId + '-' + transactionId + '-' + sampled + '-' + priority + '-' + timestamp
-      }
-    
-      function generateTraceHeader (spanId, traceId, timestamp, accountId, appId, trustKey) {
-    
-        var payload = {
-          v: [0, 2],
-          d: {
-            ty: 'Mobile',
-            ac: accountId,
-            ap: appId,
-            id: spanId,
-            tr: traceId,
-            ti: timestamp
-          }
-        }
-        if (trustKey && accountId !== trustKey) {
-          payload.d.tk = trustKey
-        }
-    
-        return btoa(JSON.stringify(payload))
       }
 
       document.addEventListener('deviceready', function () {

@@ -466,32 +466,28 @@
     
     NSMutableDictionary *mutableDictionary = [headers mutableCopy];
 
-    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:headers[@"newrelic"] options:0];
-          
-    NSError *error = nil;
-    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:decodedData options:0 error:&error];
+    // The proprietary "newrelic" header (and the account/app id, trust key it
+    // carried as a base64 JSON payload) is no longer sent for Distributed
+    // Tracing, so this enrichment is derived from tracestate instead:
+    // "<trustAccountKey>@nr=<version>-<parentType>-<accountId>-<applicationId>-<spanId>-...".
+    NSString *tracestate = headers[@"tracestate"];
+    if (tracestate != nil) {
+        NSRange nrRange = [tracestate rangeOfString:@"@nr="];
+        if (nrRange.location != NSNotFound) {
+            NSString *trustAccountKey = [tracestate substringToIndex:nrRange.location];
+            NSString *fieldsString = [tracestate substringFromIndex:NSMaxRange(nrRange)];
+            NSArray<NSString*> *fields = [fieldsString componentsSeparatedByString:@"-"];
 
-          if (error) {
-              NSLog(@"Error parsing JSON: %@", error);
-          } else {
-              NSLog(@"JSON Object: %@", jsonObject);
-              // Access individual values from the JSON object
-              NSDictionary *dDictionary = jsonObject[@"d"];
-              NSString *acNumber = dDictionary[@"ac"];
-              NSString *apNumber = dDictionary[@"ap"];
-              NSString *tkNumber = dDictionary[@"tk"];
+            if (fields.count > 3) {
+                NSString *accountId = fields[2];
+                NSString *applicationId = fields[3];
 
-              
-              
-              [mutableDictionary setObject:acNumber forKey:@"application.id"];
-              [mutableDictionary setObject:apNumber forKey:@"account.id"];
-              
-              if(tkNumber != nil) {
-                  [mutableDictionary setObject:tkNumber forKey:@"trust.account.key"];
-              } else {
-                  [mutableDictionary setObject:acNumber forKey:@"trust.account.key"];
-              }
-          }
+                [mutableDictionary setObject:accountId forKey:@"account.id"];
+                [mutableDictionary setObject:applicationId forKey:@"application.id"];
+                [mutableDictionary setObject:(trustAccountKey.length > 0 ? trustAccountKey : accountId) forKey:@"trust.account.key"];
+            }
+        }
+    }
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:mutableDictionary];
         
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
