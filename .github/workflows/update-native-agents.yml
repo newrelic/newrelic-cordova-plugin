@@ -16,9 +16,11 @@ on:
         required: false
         type: boolean
         default: true
+  # Only on master: a run from a feature branch would build the bump on that branch and push
+  # update-native-agents-<version> (the open bump PR's branch) from it. Test a change with a manual run.
   push:
     branches:
-      - '**'
+      - master
     paths:
       - '.github/workflows/update-native-agents.yml'
   schedule:
@@ -170,6 +172,7 @@ jobs:
           echo "Updated package.json"
 
       - name: Update CHANGELOG.md
+        id: changelog
         if: steps.check_updates.outputs.needs_update == 'true'
         run: |
           ANDROID_VERSION="${{ steps.android_version.outputs.version }}"
@@ -194,6 +197,13 @@ jobs:
           # Prepend to CHANGELOG.md after the header
           sed -i "2i\\$CHANGELOG_ENTRY" CHANGELOG.md
           echo "Updated CHANGELOG.md"
+
+          # The PR's docs-website release note: the CHANGELOG lines above, word for word, so the
+          # release lists each update once.
+          RELEASE_NOTE=""
+          [ "$ANDROID_UPDATED" != "true" ] || RELEASE_NOTE="Native Android agent updated to version ${ANDROID_VERSION}."
+          [ "$IOS_UPDATED" != "true" ] || RELEASE_NOTE="${RELEASE_NOTE:+$RELEASE_NOTE }Native iOS agent updated to version ${IOS_VERSION}."
+          echo "release_note=$RELEASE_NOTE" >> "$GITHUB_OUTPUT"
 
       - name: Run tests
         if: steps.check_updates.outputs.needs_update == 'true'
@@ -225,6 +235,10 @@ jobs:
             - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }} (CocoaPods spec **and** SPM `Package.swift` pin)
             - **Plugin Version**: ${{ steps.current_versions.outputs.current_plugin }} → ${{ steps.new_plugin_version.outputs.new_version }}
 
+            ## Release note
+
+            ${{ steps.changelog.outputs.release_note }}
+
             ## Files Updated
 
             - `plugin.xml`
@@ -245,6 +259,7 @@ jobs:
           labels: |
             enhancement
             automated
+            release-note:enhancement
           reviewers: |
             ${{ github.actor }}
 
