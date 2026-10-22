@@ -43,7 +43,7 @@ jobs:
       # Storing a copy of the repo
       repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
-      node-version: 16
+      node-version: 22.23.4
 
       # These are the default Java configurations used by most tests.
       # To customize these options, add "java-distro" or "java-version" to the strategy matrix with its overriding value.

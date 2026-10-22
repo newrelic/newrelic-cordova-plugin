@@ -43,7 +43,7 @@ jobs:
       # Storing a copy of the repo
       repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
-      node-version: 18
+      node-version: 22.23.4
 
       # > Starting April 26, 2021, all iOS and iPadOS apps submitted to the App Store must be built with Xcode 12 and the iOS 14 SDK.
       # Because of Apple's requirement, listed above, We will only be using the latest Xcode release for testing.
