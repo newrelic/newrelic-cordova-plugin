@@ -15,8 +15,8 @@ Automatically checks for and updates native Android and iOS agent versions.
 
 **What it does:**
 1. Fetches latest Android agent version from Maven Central
-2. Fetches latest iOS agent version from the latest GitHub release of `newrelic/newrelic-ios-agent-spm`
-3. Updates `plugin.xml` with new versions
+2. Fetches latest iOS agent version from the highest `X.Y.Z` tag of `newrelic/newrelic-ios-agent-spm`
+3. Updates `plugin.xml` and `Package.swift` with new versions (the `NewRelicAgent` CocoaPods spec in `plugin.xml` only moves when that version is on CocoaPods)
 4. Updates `package.json` version (auto-increments patch)
 5. Updates `CHANGELOG.md` with release notes
 6. Creates a PR to the `develop` branch
@@ -141,7 +141,8 @@ Instead of a PAT, you can create a GitHub App with appropriate permissions:
 **Issue**: Workflow doesn't detect new versions
 - Check that the version APIs are accessible:
   - Android: https://repo1.maven.org/maven2/com/newrelic/agent/android/android-agent/maven-metadata.xml
-  - iOS: https://api.github.com/repos/newrelic/newrelic-ios-agent-spm/releases/latest (`tag_name`)
+  - iOS: https://api.github.com/repos/newrelic/newrelic-ios-agent-spm/tags (highest `X.Y.Z` tag)
+  - iOS pod availability: https://cdn.cocoapods.org/Specs/1/a/2/NewRelicAgent/X.Y.Z/NewRelicAgent.podspec.json (404 until that version is on CocoaPods)
 
 **Issue**: Version increment is wrong
 - Verify the plugin.xml version is correctly formatted (X.Y.Z)
