@@ -68,6 +68,12 @@ cordova-ios 8 generates the `CordovaPlugins` aggregator at `.iOS(.v13)` by
 default; setting `deployment-target` to `15.0` raises it to match this
 plugin's `Package.swift` requirement.
 
+### iOS Setup: CocoaPods trunk is becoming read-only
+
+> [CocoaPods plans to make its trunk read-only on December 2, 2026](https://blog.cocoapods.org/CocoaPods-Specs-Repo/). Builds that use already-published pod versions keep working, but no new pod versions, including new releases of the `NewRelicAgent` pod, can be published after that date.
+
+Use **cordova-ios 8 or later**, which installs this plugin and the New Relic iOS agent through Swift Package Manager (the plugin's `Package.swift`). On cordova-ios < 8 the plugin uses CocoaPods and stays at the last iOS agent version published to trunk.
+
 ## Adding the plugin
 Change to your Cordova project directory and add the plugin to your project using the Cordova command line tool. The `--variable` argument is used to pass application tokens to the plugin.
 ```
