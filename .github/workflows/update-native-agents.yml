@@ -68,29 +68,45 @@ jobs:
             VERSION="${{ inputs.ios_version }}"
             echo "Using provided iOS version: $VERSION"
           else
-            # Fetch latest version from the newest non-prerelease GitHub release of the iOS agent SPM repo
-            VERSION=$(gh api repos/newrelic/newrelic-ios-agent-spm/releases/latest -q .tag_name | sed 's/^v//')
-            if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-              echo "::error::Could not determine the latest iOS agent version (got '$VERSION')"
-              exit 1
-            fi
+            # Highest X.Y.Z tag on the iOS agent SPM repo. Every production build pushes a tag there, but
+            # GitHub Releases are created by hand and some versions (e.g. 7.7.8) never got one.
+            VERSION=$(gh api --paginate 'repos/newrelic/newrelic-ios-agent-spm/tags?per_page=100' -q '.[].name' | \
+              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
             echo "Fetched latest iOS version: $VERSION"
           fi
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Could not determine the iOS agent version (got '$VERSION')"
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Only move the NewRelicAgent pod pin to versions that are on CocoaPods. The SPM tag can land before
+          # the pod, and once CocoaPods trunk is read-only new versions won't be published as pods at all; pinning
+          # a pod that doesn't exist breaks `pod install`. 1/a/2 is the CocoaPods CDN shard for NewRelicAgent.
+          if curl -sfL --retry 3 --max-time 30 -o /dev/null "https://cdn.cocoapods.org/Specs/1/a/2/NewRelicAgent/$VERSION/NewRelicAgent.podspec.json"; then
+            echo "pod_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "::notice::NewRelicAgent $VERSION is not on CocoaPods; leaving the CocoaPods pin unchanged"
+            echo "pod_available=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get current versions
         id: current_versions
         run: |
           CURRENT_ANDROID=$(grep 'preference name="ANDROID_AGENT_VER"' plugin.xml | sed 's/.*default="\(.*\)".*/\1/')
-          CURRENT_IOS=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\([^"]*\)".*/\1/')
+          # The SPM pin tracks the latest iOS agent; the CocoaPods spec only moves when the pod exists, so it can lag.
+          CURRENT_IOS=$(grep 'newrelic-ios-agent-spm".*exact:' Package.swift | sed 's/.*exact:[[:space:]]*"\([^"]*\)".*/\1/')
+          CURRENT_IOS_POD=$(grep 'pod name="NewRelicAgent"' plugin.xml | sed 's/.*spec="~>\([^"]*\)".*/\1/')
           CURRENT_PLUGIN=$(grep 'id="newrelic-cordova-plugin"' plugin.xml | sed 's/.*version="\([^"]*\)".*/\1/')
 
           echo "current_android=$CURRENT_ANDROID" >> $GITHUB_OUTPUT
           echo "current_ios=$CURRENT_IOS" >> $GITHUB_OUTPUT
+          echo "current_ios_pod=$CURRENT_IOS_POD" >> $GITHUB_OUTPUT
           echo "current_plugin=$CURRENT_PLUGIN" >> $GITHUB_OUTPUT
 
           echo "Current Android version: $CURRENT_ANDROID"
           echo "Current iOS version: $CURRENT_IOS"
+          echo "Current iOS version (CocoaPods): $CURRENT_IOS_POD"
           echo "Current Plugin version: $CURRENT_PLUGIN"
 
       - name: Check if updates are needed
@@ -152,8 +168,11 @@ jobs:
           # Update Android agent version
           sed -i "s/<preference name=\"ANDROID_AGENT_VER\" default=\".*\" \/>/<preference name=\"ANDROID_AGENT_VER\" default=\"$ANDROID_VERSION\" \/>/" plugin.xml
 
-          # Update iOS agent CocoaPods spec (preserves the nospm attribute used for SPM dual-mode)
-          sed -i "s/<pod name=\"NewRelicAgent\" spec=\"~>[^\"]*\"/<pod name=\"NewRelicAgent\" spec=\"~>$IOS_VERSION\"/" plugin.xml
+          # Update iOS agent CocoaPods spec (preserves the nospm attribute used for SPM dual-mode),
+          # only if that version of the pod is on CocoaPods
+          if [ "${{ steps.ios_version.outputs.pod_available }}" = "true" ]; then
+            sed -i "s/<pod name=\"NewRelicAgent\" spec=\"~>[^\"]*\"/<pod name=\"NewRelicAgent\" spec=\"~>$IOS_VERSION\"/" plugin.xml
+          fi
 
           echo "Updated plugin.xml"
 
@@ -185,6 +204,17 @@ jobs:
           NEW_VERSION="${{ steps.new_plugin_version.outputs.new_version }}"
           ANDROID_UPDATED="${{ steps.check_updates.outputs.android_updated }}"
           IOS_UPDATED="${{ steps.check_updates.outputs.ios_updated }}"
+          POD_AVAILABLE="${{ steps.ios_version.outputs.pod_available }}"
+          CURRENT_IOS_POD="${{ steps.current_versions.outputs.current_ios_pod }}"
+
+          if [ "$POD_AVAILABLE" = "true" ]; then
+            IOS_NOTE="Native iOS agent updated to version ${IOS_VERSION}"
+            IOS_PINS='CocoaPods spec **and** SPM `Package.swift` pin'
+          else
+            IOS_NOTE="Native iOS agent updated to version ${IOS_VERSION} for Swift Package Manager (cordova-ios 8+). CocoaPods installs stay on ${CURRENT_IOS_POD} because ${IOS_VERSION} is not available on CocoaPods"
+            IOS_PINS="SPM \`Package.swift\` pin only; \`NewRelicAgent\` ${IOS_VERSION} is not on CocoaPods, so the CocoaPods spec stays at \`~>${CURRENT_IOS_POD}\`"
+          fi
+          echo "ios_pins=$IOS_PINS" >> "$GITHUB_OUTPUT"
 
           # Create changelog entry
           CHANGELOG_ENTRY="# ${NEW_VERSION}\n\n"
@@ -194,7 +224,7 @@ jobs:
           fi
 
           if [ "$IOS_UPDATED" = "true" ]; then
-            CHANGELOG_ENTRY="${CHANGELOG_ENTRY}- Native iOS agent updated to version ${IOS_VERSION}\n"
+            CHANGELOG_ENTRY="${CHANGELOG_ENTRY}- ${IOS_NOTE}\n"
           fi
 
           CHANGELOG_ENTRY="${CHANGELOG_ENTRY}\n\n"
@@ -207,7 +237,7 @@ jobs:
           # release lists each update once.
           RELEASE_NOTE=""
           [ "$ANDROID_UPDATED" != "true" ] || RELEASE_NOTE="Native Android agent updated to version ${ANDROID_VERSION}."
-          [ "$IOS_UPDATED" != "true" ] || RELEASE_NOTE="${RELEASE_NOTE:+$RELEASE_NOTE }Native iOS agent updated to version ${IOS_VERSION}."
+          [ "$IOS_UPDATED" != "true" ] || RELEASE_NOTE="${RELEASE_NOTE:+$RELEASE_NOTE }${IOS_NOTE}."
           echo "release_note=$RELEASE_NOTE" >> "$GITHUB_OUTPUT"
 
       - name: Run tests
@@ -237,7 +267,7 @@ jobs:
             This PR updates the native agent versions:
 
             - **Android Agent**: ${{ steps.current_versions.outputs.current_android }} → ${{ steps.android_version.outputs.version }}
-            - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }} (CocoaPods spec **and** SPM `Package.swift` pin)
+            - **iOS Agent**: ${{ steps.current_versions.outputs.current_ios }} → ${{ steps.ios_version.outputs.version }} (${{ steps.changelog.outputs.ios_pins }})
             - **Plugin Version**: ${{ steps.current_versions.outputs.current_plugin }} → ${{ steps.new_plugin_version.outputs.new_version }}
 
             ## Release note
