@@ -1,4 +1,11 @@
 # Changelog
+# 7.1.14
+
+- Native Android agent updated to version 7.8.5
+- Native iOS agent updated to version 7.7.10 for Swift Package Manager (cordova-ios 8+). CocoaPods installs stay on 7.7.9 because 7.7.10 is not available on CocoaPods
+
+
+
 # 7.1.13
 
 - Native Android agent updated to version 7.8.4
