@@ -129,6 +129,12 @@
     <source-file src="src/android/NewRelicCordovaException.java"
       target-dir="src/com/newrelic/cordova/plugin" />
 
+    <!-- The framework this plugin declares to the New Relic Android agent, and the rule that keeps it in minified builds -->
+    <resource-file src="src/android/res/values/com_newrelic_application_framework.xml"
+      target="res/values/com_newrelic_application_framework.xml" />
+    <resource-file src="src/android/res/raw/newrelic_cordova_keep.xml"
+      target="res/raw/newrelic_cordova_keep.xml" />
+
     <hook type="before_plugin_uninstall" src="hooks/android/before_plugin_uninstall.js" />
     <hook type="after_plugin_install" src="hooks/android/after_plugin_install.js" />
   </platform>
