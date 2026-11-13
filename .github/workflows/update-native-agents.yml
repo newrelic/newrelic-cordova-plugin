@@ -233,12 +233,15 @@ jobs:
           sed -i "2i\\$CHANGELOG_ENTRY" CHANGELOG.md
           echo "Updated CHANGELOG.md"
 
-          # The PR's docs-website release note: the CHANGELOG lines above, word for word, so the
-          # release lists each update once.
-          RELEASE_NOTE=""
-          [ "$ANDROID_UPDATED" != "true" ] || RELEASE_NOTE="Native Android agent updated to version ${ANDROID_VERSION}."
-          [ "$IOS_UPDATED" != "true" ] || RELEASE_NOTE="${RELEASE_NOTE:+$RELEASE_NOTE }${IOS_NOTE}."
-          echo "release_note=$RELEASE_NOTE" >> "$GITHUB_OUTPUT"
+          # The PR's docs-website release note: one list line per updated agent, each its own
+          # bullet, with the CHANGELOG lines above word for word, so the release lists each update
+          # once. A multi-line step output needs the delimiter form.
+          {
+            echo "release_note<<RELEASE_NOTE_EOF"
+            [ "$ANDROID_UPDATED" != "true" ] || echo "- Native Android agent updated to version ${ANDROID_VERSION}."
+            [ "$IOS_UPDATED" != "true" ] || echo "- ${IOS_NOTE}."
+            echo "RELEASE_NOTE_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Run tests
         if: steps.check_updates.outputs.needs_update == 'true'
