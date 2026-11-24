@@ -1,0 +1,20 @@
+# Changes to CI, build, packaging and publishing files need a review from the
+# Mobile Agents release owners. The last matching pattern wins, so keep this
+# file's own entry at the bottom.
+
+# CI: workflows, scripts and dependency update config
+/.github/               @newrelic/mobagent
+
+# npm package: dependencies and published files
+/package.json           @newrelic/mobagent
+/.npmignore             @newrelic/mobagent
+
+# Plugin manifest: native agent dependencies, build config and hook registration
+/plugin.xml             @newrelic/mobagent
+/Package.swift          @newrelic/mobagent
+
+# Hooks that modify customer Android and Xcode projects at install time
+/hooks/                 @newrelic/mobagent
+
+# This file
+/.github/CODEOWNERS     @newrelic/mobagent
